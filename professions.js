@@ -1,7 +1,7 @@
-export let minerExp = 0;
-export let lumberjackExp = 0;
-export let minerLevel = 1;
-export let lumberjackLevel = 1;
+let minerExp = 0;
+let lumberjackExp = 0;
+let minerLevel = 1;
+let lumberjackLevel = 1;
 
 export const minerInventory = {};
 export const lumberjackInventory = {};
@@ -12,6 +12,38 @@ let lumberjackResources = [];
 export function setResources(minerRes, lumberjackRes) {
     minerResources = minerRes;
     lumberjackResources = lumberjackRes;
+}
+
+export function getMinerExp() {
+    return minerExp;
+}
+
+export function setMinerExp(value) {
+    minerExp = value;
+}
+
+export function getLumberjackExp() {
+    return lumberjackExp;
+}
+
+export function setLumberjackExp(value) {
+    lumberjackExp = value;
+}
+
+export function getMinerLevel() {
+    return minerLevel;
+}
+
+export function setMinerLevel(value) {
+    minerLevel = value;
+}
+
+export function getLumberjackLevel() {
+    return lumberjackLevel;
+}
+
+export function setLumberjackLevel(value) {
+    lumberjackLevel = value;
 }
 
 export function updateMinerExpDisplay() {
