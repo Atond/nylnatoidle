@@ -26,22 +26,36 @@ function initializeGame() {
         }
     });
 
-    // Reste du code d'initialisation...
+    document.getElementById('change-name').addEventListener('click', () => {
+        document.getElementById('character-name-input').style.display = 'inline';
+        document.getElementById('save-name').style.display = 'inline';
+        document.getElementById('change-name').style.display = 'none';
+    });
+
+    document.getElementById('save-name').addEventListener('click', () => {
+        const name = document.getElementById('character-name-input').value;
+        if (name) {
+            document.getElementById('character-name').innerText = name;
+            document.getElementById('character-name-input').style.display = 'none';
+            document.getElementById('save-name').style.display = 'none';
+            document.getElementById('change-name').style.display = 'inline';
+        }
+    });
+
+    // Appeler la fonction de chargement au démarrage du jeu
+    loadGame();
+
+    // Sauvegarder automatiquement toutes les 30 secondes
+    setInterval(saveGame, 30000);
 
     // Generate points every second
     setInterval(autoGeneratePoints, 1000);
 
-    // Initialiser les affichages
-    updateMinerExpDisplay();
-    updateLumberjackExpDisplay();
-    updateMinerLevelDisplay();
-    updateLumberjackLevelDisplay();
-    updateMinerInventoryDisplay();
-    updateLumberjackInventoryDisplay();
+    // Auto-increment experience for the selected profession every second
+    autoIncrementInterval = setInterval(() => {
+        const selectedProfession = document.getElementById('auto-increment-select').value;
+        if (selectedProfession !== 'none') {
+            autoIncrement(selectedProfession);
+        }
+    }, 1000);
 }
-
-// Appeler la fonction de chargement au démarrage du jeu
-loadGame();
-
-// Sauvegarder automatiquement toutes les 30 secondes
-setInterval(saveGame, 30000);
