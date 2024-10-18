@@ -7,6 +7,14 @@ let autoIncrementInterval;
 const minerInventory = {};
 const lumberjackInventory = {};
 
+let minerResources = [];
+let lumberjackResources = [];
+
+export function setResources(minerRes, lumberjackRes) {
+    minerResources = minerRes;
+    lumberjackResources = lumberjackRes;
+}
+
 export function updateMinerExpDisplay() {
     document.getElementById('miner-exp').innerText = minerExp;
 }

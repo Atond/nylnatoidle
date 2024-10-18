@@ -1,6 +1,6 @@
 import { loadGame, saveGame } from './saveLoad.js';
 import { autoGeneratePoints, updatePointsDisplay } from './character.js';
-import { autoIncrement, updateMinerExpDisplay, updateLumberjackExpDisplay, updateMinerLevelDisplay, updateLumberjackLevelDisplay, updateMinerInventoryDisplay, updateLumberjackInventoryDisplay } from './professions.js';
+import { autoIncrement, setResources } from './professions.js';
 
 let minerResources = [];
 let lumberjackResources = [];
@@ -15,6 +15,7 @@ fetch('data.json')
         lumberjackResources = data.lumberjackResources;
         worlds = data.worlds;
         zones = data.zones;
+        setResources(minerResources, lumberjackResources); // Pass resources to professions.js
         initializeGame();
     });
 
