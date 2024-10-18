@@ -1,11 +1,10 @@
-let minerExp = 0;
-let lumberjackExp = 0;
-let minerLevel = 1;
-let lumberjackLevel = 1;
-let autoIncrementInterval;
+export let minerExp = 0;
+export let lumberjackExp = 0;
+export let minerLevel = 1;
+export let lumberjackLevel = 1;
 
-const minerInventory = {};
-const lumberjackInventory = {};
+export const minerInventory = {};
+export const lumberjackInventory = {};
 
 let minerResources = [];
 let lumberjackResources = [];

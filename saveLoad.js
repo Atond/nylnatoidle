@@ -1,5 +1,5 @@
-import { updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
-import { updateMinerExpDisplay, updateLumberjackExpDisplay, updateMinerLevelDisplay, updateLumberjackLevelDisplay, updateMinerInventoryDisplay, updateLumberjackInventoryDisplay } from './professions.js';
+import { points, characterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
+import { minerExp, lumberjackExp, minerLevel, lumberjackLevel, minerInventory, lumberjackInventory, updateMinerExpDisplay, updateLumberjackExpDisplay, updateMinerLevelDisplay, updateLumberjackLevelDisplay, updateMinerInventoryDisplay, updateLumberjackInventoryDisplay } from './professions.js';
 
 // Sauvegarder la progression
 export function saveGame() {

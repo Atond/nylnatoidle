@@ -1,5 +1,5 @@
-let points = 0;
-let characterLevel = 1;
+export let points = 0;
+export let characterLevel = 1;
 
 export function updatePointsDisplay() {
     document.getElementById('points').innerText = `Points: ${points}`;
