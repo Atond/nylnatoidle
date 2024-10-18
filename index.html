@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Idle Game</h1>
+    <div id="points">Points: 0</div>
+    <button id="generate">Generate Points</button>
+
+    <h2>Character</h2>
+    <div id="character">
+        Name: <span id="character-name">Unknown</span>
+        <input type="text" id="character-name-input" placeholder="Enter name" style="display:none;">
+        <button id="change-name">Change Name</button>
+        <button id="save-name" style="display:none;">Save Name</button>
+        <div>Level: <span id="character-level">1</span></div>
+    </div>
+
+    <h2>Professions</h2>
+    <div id="professions">
+        <div id="miner">
+            <h3>Miner</h3>
+            <div>Experience: <span id="miner-exp">0</span></div>
+            <div>Level: <span id="miner-level">1</span></div>
+            <div>Resources: <span id="miner-resources">None</span></div>
+        </div>
+        <div id="lumberjack">
+            <h3>Lumberjack</h3>
+            <div>Experience: <span id="lumberjack-exp">0</span></div>
+            <div>Level: <span id="lumberjack-level">1</span></div>
+            <div>Resources: <span id="lumberjack-resources">None</span></div>
+        </div>
+    </div>
+
+    <h2>Auto-Increment</h2>
+    <select id="auto-increment-select">
+        <option value="none">None</option>
+        <option value="miner">Miner</option>
+        <option value="lumberjack">Lumberjack</option>
+    </select>
+
+    <h2>Inventory</h2>
+    <div id="inventory">
+        <div id="miner-inventory">
+            <h3>Miner Inventory</h3>
+            <ul id="miner-items"></ul>
+        </div>
+        <div id="lumberjack-inventory">
+            <h3>Lumberjack Inventory</h3>
+            <ul id="lumberjack-items"></ul>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

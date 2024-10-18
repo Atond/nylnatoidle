@@ -1,0 +1,6 @@
+{
+    "minerResources": ["Fer", "Bronze", "Argent", "Or", "Platine", "Minerai 6", "Minerai 7", "Minerai 8", "Minerai 9", "Minerai 10"],
+    "lumberjackResources": ["Bois 1", "Bois 2", "Bois 3", "Bois 4", "Bois 5", "Bois 6", "Bois 7", "Bois 8", "Bois 9", "Bois 10"],
+    "worlds": ["Monde 1", "Monde 2", "Monde 3"],
+    "zones": ["Zone 1", "Zone 2", "Zone 3"]
+}
