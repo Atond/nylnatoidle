@@ -2,6 +2,13 @@ body {
     font-family: Arial, sans-serif;
     text-align: center;
     margin-top: 50px;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
 }
 
 #points {
@@ -13,14 +20,48 @@ button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
 }
 
-#character, #professions, #inventory {
+button:hover {
+    background-color: #0056b3;
+}
+
+#character {
     margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-#professions div, #inventory div {
-    margin-bottom: 20px;
+#character img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+#professions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.profession {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+}
+
+.profession h3 {
+    margin-top: 0;
 }
 
 #auto-increment-select {
@@ -29,7 +70,22 @@ button {
     font-size: 16px;
 }
 
+#inventory {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
 #inventory ul {
     list-style-type: none;
     padding: 0;
+}
+
+#inventory div {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
 }
