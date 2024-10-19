@@ -1,17 +1,17 @@
 import { getPoints, setPoints, getCharacterLevel, setCharacterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
-import { getMinerExp, setMinerExp, getLumberjackExp, setLumberjackExp, getMinerLevel, setMinerLevel, getLumberjackLevel, setLumberjackLevel, minerInventory, lumberjackInventory, updateMinerExpDisplay, updateLumberjackExpDisplay, updateMinerLevelDisplay, updateLumberjackLevelDisplay, updateMinerInventoryDisplay, updateLumberjackInventoryDisplay } from './professions.js';
+import { miner, lumberjack } from './main.js';
 
 // Sauvegarder la progression
 export function saveGame() {
     const gameState = {
         points: getPoints(),
         characterLevel: getCharacterLevel(),
-        minerExp: getMinerExp(),
-        lumberjackExp: getLumberjackExp(),
-        minerLevel: getMinerLevel(),
-        lumberjackLevel: getLumberjackLevel(),
-        minerInventory,
-        lumberjackInventory,
+        minerExp: miner.exp,
+        minerLevel: miner.level,
+        minerInventory: miner.inventory,
+        lumberjackExp: lumberjack.exp,
+        lumberjackLevel: lumberjack.level,
+        lumberjackInventory: lumberjack.inventory,
         characterName: document.getElementById('character-name').innerText
     };
     localStorage.setItem('idleRPGSave', JSON.stringify(gameState));
@@ -24,20 +24,23 @@ export function loadGame() {
         const gameState = JSON.parse(savedGame);
         setPoints(gameState.points);
         setCharacterLevel(gameState.characterLevel);
-        setMinerExp(gameState.minerExp);
-        setLumberjackExp(gameState.lumberjackExp);
-        setMinerLevel(gameState.minerLevel);
-        setLumberjackLevel(gameState.lumberjackLevel);
-        Object.assign(minerInventory, gameState.minerInventory);
-        Object.assign(lumberjackInventory, gameState.lumberjackInventory);
+        miner.setExp(gameState.minerExp);
+        miner.setLevel(gameState.minerLevel);
+        Object.assign(miner.inventory, gameState.minerInventory);
+        lumberjack.setExp(gameState.lumberjackExp);
+        lumberjack.setLevel(gameState.lumberjackLevel);
+        Object.assign(lumberjack.inventory, gameState.lumberjackInventory);
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
         updatePointsDisplay();
-        updateMinerExpDisplay();
-        updateLumberjackExpDisplay();
-        updateMinerLevelDisplay();
-        updateLumberjackLevelDisplay();
-        updateMinerInventoryDisplay();
-        updateLumberjackInventoryDisplay();
+        updateCharacterLevelDisplay();
+        miner.updateExpDisplay();
+        miner.updateLevelDisplay();
+        miner.updateResourcesDisplay();
+        miner.updateInventoryDisplay();
+        lumberjack.updateExpDisplay();
+        lumberjack.updateLevelDisplay();
+        lumberjack.updateResourcesDisplay();
+        lumberjack.updateInventoryDisplay();
     }
 }
 

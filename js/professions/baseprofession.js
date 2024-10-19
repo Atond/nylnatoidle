@@ -35,14 +35,16 @@ export class BaseProfession {
         inventoryElement.innerHTML = '';
         for (const [resource, count] of Object.entries(this.inventory)) {
             const resourceData = this.resources.find(res => res.name === resource);
-            const slot = document.createElement('div');
-            slot.className = 'inventory-slot';
-            slot.innerHTML = `
-                <img src="${resourceData.image}" alt="${resource}">
-                <div class="item-count">${count}</div>
-                <div class="tooltip">${resource}</div>
-            `;
-            inventoryElement.appendChild(slot);
+            if (resourceData) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.innerHTML = `
+                    <img src="${resourceData.image}" alt="${resource}">
+                    <div class="item-count">${count}</div>
+                    <div class="tooltip">${resource}</div>
+                `;
+                inventoryElement.appendChild(slot);
+            }
         }
     }
 
