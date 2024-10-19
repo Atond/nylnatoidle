@@ -58,11 +58,16 @@ export class BaseProfession {
 
     collectResource() {
         const resource = this.getRandomResource();
-        this.inventory[resource.name] = (this.inventory[resource.name] || 0) + 1;
-        this.updateInventoryDisplay();
+        if (resource) {
+            this.inventory[resource.name] = (this.inventory[resource.name] || 0) + 1;
+            this.updateInventoryDisplay();
+        }
     }
 
     getRandomResource() {
+        if (this.resources.length === 0) {
+            return null;
+        }
         const weightedResources = [];
         for (let i = 0; i < this.level; i++) {
             for (let j = 0; j < this.level - i; j++) {
