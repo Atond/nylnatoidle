@@ -1,27 +1,27 @@
 {
     "minerResources": [
-        {"name": "Fer", "image": "images/resources/minerai.png"},
-        {"name": "Bronze", "image": "images/resources/minerai.png"},
-        {"name": "Cuivre", "image": "images/resources/minerai.png"},
-        {"name": "Argent", "image": "images/resources/minerai.png"},
-        {"name": "Or", "image": "images/resources/minerai.png"},
-        {"name": "Nickel", "image": "images/resources/minerai.png"},
-        {"name": "Etain", "image": "images/resources/minerai.png"},
-        {"name": "Platine", "image": "images/resources/minerai.png"},
-        {"name": "Emeraude", "image": "images/resources/minerai.png"},
-        {"name": "Diamant", "image": "images/resources/minerai.png"}
+        {"id": "minerai111", "image": "images/resources/minerai.png"},
+        {"id": "minerai112", "image": "images/resources/minerai.png"},
+        {"id": "minerai113", "image": "images/resources/minerai.png"},
+        {"id": "minerai114", "image": "images/resources/minerai.png"},
+        {"id": "minerai115", "image": "images/resources/minerai.png"},
+        {"id": "minerai116", "image": "images/resources/minerai.png"},
+        {"id": "minerai117", "image": "images/resources/minerai.png"},
+        {"id": "minerai118", "image": "images/resources/minerai.png"},
+        {"id": "minerai119", "image": "images/resources/minerai.png"},
+        {"id": "minerai1110", "image": "images/resources/minerai.png"}
     ],
     "lumberjackResources": [
-        {"name": "Bois 1", "image": "images/resources/minerai.png"},
-        {"name": "Bois 2", "image": "images/resources/minerai.png"},
-        {"name": "Bois 3", "image": "images/resources/minerai.png"},
-        {"name": "Bois 4", "image": "images/resources/minerai.png"},
-        {"name": "Bois 5", "image": "images/resources/minerai.png"},
-        {"name": "Bois 6", "image": "images/resources/minerai.png"},
-        {"name": "Bois 7", "image": "images/resources/minerai.png"},
-        {"name": "Bois 8", "image": "images/resources/minerai.png"},
-        {"name": "Bois 9", "image": "images/resources/minerai.png"},
-        {"name": "Bois 10", "image": "images/resources/minerai.png"}
+        {"id": "bois111", "image": "images/resources/minerai.png"},
+        {"id": "bois112", "image": "images/resources/minerai.png"},
+        {"id": "bois113", "image": "images/resources/minerai.png"},
+        {"id": "bois114", "image": "images/resources/minerai.png"},
+        {"id": "bois115", "image": "images/resources/minerai.png"},
+        {"id": "bois116", "image": "images/resources/minerai.png"},
+        {"id": "bois117", "image": "images/resources/minerai.png"},
+        {"id": "bois118", "image": "images/resources/minerai.png"},
+        {"id": "bois119", "image": "images/resources/minerai.png"},
+        {"id": "bois1110", "image": "images/resources/minerai.png"}
     ],
     "worlds": ["Monde 1", "Monde 2", "Monde 3"],
     "zones": ["Zone 1", "Zone 2", "Zone 3"]
