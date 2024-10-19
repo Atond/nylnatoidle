@@ -88,6 +88,10 @@ function loadTranslations(language) {
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
             document.querySelector('.tab-button:nth-child(1)').innerText = translations.professionResources;
             document.querySelector('.tab-button:nth-child(2)').innerText = translations.combatResources;
+
+            // Update inventory display with translations
+            miner.updateInventoryDisplay(translations);
+            lumberjack.updateInventoryDisplay(translations);
         });
 }
 

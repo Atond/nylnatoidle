@@ -26,22 +26,22 @@ export class BaseProfession {
     }
 
     updateResourcesDisplay() {
-        const resources = this.resources.slice(0, this.level).map(res => res.name).join(", ") || "None";
+        const resources = this.resources.slice(0, this.level).map(res => res.id).join(", ") || "None";
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
-    updateInventoryDisplay() {
+    updateInventoryDisplay(translations) {
         const inventoryElement = document.getElementById('profession-inventory');
         inventoryElement.innerHTML = '';
-        for (const [resource, count] of Object.entries(this.inventory)) {
-            const resourceData = this.resources.find(res => res.name === resource);
+        for (const [resourceId, count] of Object.entries(this.inventory)) {
+            const resourceData = this.resources.find(res => res.id === resourceId);
             if (resourceData) {
                 const slot = document.createElement('div');
                 slot.className = 'inventory-slot';
                 slot.innerHTML = `
-                    <img src="${resourceData.image}" alt="${resource}">
+                    <img src="${resourceData.image}" alt="${translations.resources[resourceId]}">
                     <div class="item-count">${count}</div>
-                    <div class="tooltip">${resource}</div>
+                    <div class="tooltip">${translations.resources[resourceId]}</div>
                 `;
                 inventoryElement.appendChild(slot);
             }
@@ -59,7 +59,7 @@ export class BaseProfession {
     collectResource() {
         const resource = this.getRandomResource();
         if (resource) {
-            this.inventory[resource.name] = (this.inventory[resource.name] || 0) + 1;
+            this.inventory[resource.id] = (this.inventory[resource.id] || 0) + 1;
             this.updateInventoryDisplay();
         }
     }
