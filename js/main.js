@@ -1,12 +1,16 @@
 import { loadGame, saveGame } from './saveLoad.js';
 import { autoGeneratePoints, updatePointsDisplay } from './character.js';
-import { autoIncrement, setResources } from './professions.js';
+import { Miner } from './professions/miner.js';
+import { Lumberjack } from './professions/lumberjack.js';
 
 let minerResources = [];
 let lumberjackResources = [];
 let worlds = [];
 let zones = [];
 let autoIncrementInterval;
+
+let miner;
+let lumberjack;
 
 fetch('data.json')
     .then(response => response.json())
@@ -15,15 +19,18 @@ fetch('data.json')
         lumberjackResources = data.lumberjackResources;
         worlds = data.worlds;
         zones = data.zones;
-        setResources(minerResources, lumberjackResources); // Pass resources to professions.js
+        miner = new Miner(minerResources);
+        lumberjack = new Lumberjack(lumberjackResources);
         initializeGame();
     });
 
 function initializeGame() {
     document.getElementById('auto-increment-select').addEventListener('change', (event) => {
         clearInterval(autoIncrementInterval);
-        if (event.target.value !== 'none') {
-            autoIncrementInterval = setInterval(() => autoIncrement(event.target.value), 1000);
+        if (event.target.value === 'miner') {
+            autoIncrementInterval = setInterval(() => miner.autoIncrement(), 1000);
+        } else if (event.target.value === 'lumberjack') {
+            autoIncrementInterval = setInterval(() => lumberjack.autoIncrement(), 1000);
         }
     });
 
@@ -55,14 +62,6 @@ function initializeGame() {
 
     // Generate points every second
     setInterval(autoGeneratePoints, 1000);
-
-    // Auto-increment experience for the selected profession every second
-    autoIncrementInterval = setInterval(() => {
-        const selectedProfession = document.getElementById('auto-increment-select').value;
-        if (selectedProfession !== 'none') {
-            autoIncrement(selectedProfession);
-        }
-    }, 1000);
 }
 
 function loadTranslations(language) {
