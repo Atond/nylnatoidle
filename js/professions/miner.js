@@ -1,4 +1,4 @@
-import { BaseProfession } from './baseProfession.js';
+import { BaseProfession } from './baseprofession.js';
 
 export class Miner extends BaseProfession {
     constructor(resources) {
