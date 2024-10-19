@@ -1,0 +1,22 @@
+{
+    "title": "Idle Game",
+    "generate": "Generate Points",
+    "characterTitle": "Character",
+    "characterNameLabel": "Name:",
+    "changeName": "Change Name",
+    "saveName": "Save Name",
+    "characterLevelLabel": "Level:",
+    "professionsTitle": "Professions",
+    "minerTitle": "Miner",
+    "minerExpLabel": "Experience:",
+    "minerLevelLabel": "Level:",
+    "minerResourcesLabel": "Resources:",
+    "lumberjackTitle": "Lumberjack",
+    "lumberjackExpLabel": "Experience:",
+    "lumberjackLevelLabel": "Level:",
+    "lumberjackResourcesLabel": "Resources:",
+    "autoIncrementTitle": "Auto-Increment",
+    "inventoryTitle": "Inventory",
+    "professionResources": "Profession Resources",
+    "combatResources": "Combat Resources"
+}

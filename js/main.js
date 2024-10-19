@@ -43,6 +43,10 @@ function initializeGame() {
         }
     });
 
+    document.getElementById('language-select').addEventListener('change', (event) => {
+        loadTranslations(event.target.value);
+    });
+
     // Appeler la fonction de chargement au démarrage du jeu
     loadGame();
 
@@ -59,6 +63,33 @@ function initializeGame() {
             autoIncrement(selectedProfession);
         }
     }, 1000);
+}
+
+function loadTranslations(language) {
+    fetch(`translations/${language}.json`)
+        .then(response => response.json())
+        .then(translations => {
+            document.getElementById('title').innerText = translations.title;
+            document.getElementById('generate').innerText = translations.generate;
+            document.getElementById('character-title').innerText = translations.characterTitle;
+            document.getElementById('character-name-label').innerText = translations.characterNameLabel;
+            document.getElementById('change-name').innerText = translations.changeName;
+            document.getElementById('save-name').innerText = translations.saveName;
+            document.getElementById('character-level-label').innerText = translations.characterLevelLabel;
+            document.getElementById('professions-title').innerText = translations.professionsTitle;
+            document.getElementById('miner-title').innerText = translations.minerTitle;
+            document.getElementById('miner-exp-label').innerText = translations.minerExpLabel;
+            document.getElementById('miner-level-label').innerText = translations.minerLevelLabel;
+            document.getElementById('miner-resources-label').innerText = translations.minerResourcesLabel;
+            document.getElementById('lumberjack-title').innerText = translations.lumberjackTitle;
+            document.getElementById('lumberjack-exp-label').innerText = translations.lumberjackExpLabel;
+            document.getElementById('lumberjack-level-label').innerText = translations.lumberjackLevelLabel;
+            document.getElementById('lumberjack-resources-label').innerText = translations.lumberjackResourcesLabel;
+            document.getElementById('auto-increment-title').innerText = translations.autoIncrementTitle;
+            document.getElementById('inventory-title').innerText = translations.inventoryTitle;
+            document.querySelector('.tab-button:nth-child(1)').innerText = translations.professionResources;
+            document.querySelector('.tab-button:nth-child(2)').innerText = translations.combatResources;
+        });
 }
 
 window.showTab = function(tabId) {

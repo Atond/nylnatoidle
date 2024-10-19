@@ -7,46 +7,46 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Idle Game</h1>
+    <h1 id="title">Idle Game</h1>
     <div id="points">Points: 0</div>
     <button id="generate">Generate Points</button>
 
-    <h2>Character</h2>
+    <h2 id="character-title">Character</h2>
     <div id="character">
         <img id="character-image" src="/images/sprites/Char_fighting.gif" alt="Character Image">
         <div>
-            Name: <span id="character-name">Unknown</span>
+            <span id="character-name-label">Name:</span> <span id="character-name">Unknown</span>
             <input type="text" id="character-name-input" placeholder="Enter name" style="display:none;">
             <button id="change-name">Change Name</button>
             <button id="save-name" style="display:none;">Save Name</button>
         </div>
-        <div>Level: <span id="character-level">1</span></div>
+        <div><span id="character-level-label">Level:</span> <span id="character-level">1</span></div>
     </div>
 
-    <h2>Professions</h2>
+    <h2 id="professions-title">Professions</h2>
     <div id="professions">
         <div class="profession" id="miner">
-            <h3>Miner</h3>
-            <div>Experience: <span id="miner-exp">0</span></div>
-            <div>Level: <span id="miner-level">1</span></div>
-            <div>Resources: <span id="miner-resources">None</span></div>
+            <h3 id="miner-title">Miner</h3>
+            <div><span id="miner-exp-label">Experience:</span> <span id="miner-exp">0</span></div>
+            <div><span id="miner-level-label">Level:</span> <span id="miner-level">1</span></div>
+            <div><span id="miner-resources-label">Resources:</span> <span id="miner-resources">None</span></div>
         </div>
         <div class="profession" id="lumberjack">
-            <h3>Lumberjack</h3>
-            <div>Experience: <span id="lumberjack-exp">0</span></div>
-            <div>Level: <span id="lumberjack-level">1</span></div>
-            <div>Resources: <span id="lumberjack-resources">None</span></div>
+            <h3 id="lumberjack-title">Lumberjack</h3>
+            <div><span id="lumberjack-exp-label">Experience:</span> <span id="lumberjack-exp">0</span></div>
+            <div><span id="lumberjack-level-label">Level:</span> <span id="lumberjack-level">1</span></div>
+            <div><span id="lumberjack-resources-label">Resources:</span> <span id="lumberjack-resources">None</span></div>
         </div>
     </div>
 
-    <h2>Auto-Increment</h2>
+    <h2 id="auto-increment-title">Auto-Increment</h2>
     <select id="auto-increment-select">
         <option value="none">None</option>
         <option value="miner">Miner</option>
         <option value="lumberjack">Lumberjack</option>
     </select>
 
-    <h2>Inventory</h2>
+    <h2 id="inventory-title">Inventory</h2>
     <div id="inventory">
         <div class="tabs">
             <button class="tab-button" onclick="showTab('profession-resources')">Profession Resources</button>
@@ -65,6 +65,11 @@
             </div>
         </div>
     </div>
+
+    <select id="language-select">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+    </select>
 
     <script type="module" src="js/main.js"></script>
 </body>

@@ -1,0 +1,22 @@
+{
+    "title": "Jeu Idle",
+    "generate": "Générer des Points",
+    "characterTitle": "Personnage",
+    "characterNameLabel": "Nom:",
+    "changeName": "Changer le Nom",
+    "saveName": "Enregistrer le Nom",
+    "characterLevelLabel": "Niveau:",
+    "professionsTitle": "Métiers",
+    "minerTitle": "Mineur",
+    "minerExpLabel": "Expérience:",
+    "minerLevelLabel": "Niveau:",
+    "minerResourcesLabel": "Ressources:",
+    "lumberjackTitle": "Bûcheron",
+    "lumberjackExpLabel": "Expérience:",
+    "lumberjackLevelLabel": "Niveau:",
+    "lumberjackResourcesLabel": "Ressources:",
+    "autoIncrementTitle": "Auto-Incrément",
+    "inventoryTitle": "Inventaire",
+    "professionResources": "Ressources de Métier",
+    "combatResources": "Ressources de Combat"
+}
