@@ -1,6 +1,28 @@
 {
-    "minerResources": ["Fer", "Bronze", "Argent", "Or", "Platine", "Minerai 6", "Minerai 7", "Minerai 8", "Minerai 9", "Minerai 10"],
-    "lumberjackResources": ["Bois 1", "Bois 2", "Bois 3", "Bois 4", "Bois 5", "Bois 6", "Bois 7", "Bois 8", "Bois 9", "Bois 10"],
+    "minerResources": [
+        {"name": "Fer", "image": "images/resources/minerai.png"},
+        {"name": "Bronze", "image": "images/resources/minerai.png"},
+        {"name": "Argent", "image": "images/resources/minerai.png"},
+        {"name": "Or", "image": "images/resources/minerai.png"},
+        {"name": "Platine", "image": "images/resources/minerai.png"},
+        {"name": "Minerai 6", "image": "images/resources/minerai.png"},
+        {"name": "Minerai 7", "image": "images/resources/minerai.png"},
+        {"name": "Minerai 8", "image": "images/resources/minerai.png"},
+        {"name": "Minerai 9", "image": "images/resources/minerai.png"},
+        {"name": "Minerai 10", "image": "images/resources/minerai.png"}
+    ],
+    "lumberjackResources": [
+        {"name": "Bois 1", "image": "images/resources/minerai.png"},
+        {"name": "Bois 2", "image": "images/resources/minerai.png"},
+        {"name": "Bois 3", "image": "images/resources/minerai.png"},
+        {"name": "Bois 4", "image": "images/resources/minerai.png"},
+        {"name": "Bois 5", "image": "images/resources/minerai.png"},
+        {"name": "Bois 6", "image": "images/resources/minerai.png"},
+        {"name": "Bois 7", "image": "images/resources/minerai.png"},
+        {"name": "Bois 8", "image": "images/resources/minerai.png"},
+        {"name": "Bois 9", "image": "images/resources/minerai.png"},
+        {"name": "Bois 10", "image": "images/resources/minerai.png"}
+    ],
     "worlds": ["Monde 1", "Monde 2", "Monde 3"],
     "zones": ["Zone 1", "Zone 2", "Zone 3"]
 }

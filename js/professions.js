@@ -63,32 +63,44 @@ export function updateLumberjackLevelDisplay() {
 }
 
 export function updateMinerResourcesDisplay() {
-    const resources = minerResources.slice(0, minerLevel).join(", ") || "None";
+    const resources = minerResources.slice(0, minerLevel).map(res => res.name).join(", ") || "None";
     document.getElementById('miner-resources').innerText = resources;
 }
 
 export function updateLumberjackResourcesDisplay() {
-    const resources = lumberjackResources.slice(0, lumberjackLevel).join(", ") || "None";
+    const resources = lumberjackResources.slice(0, lumberjackLevel).map(res => res.name).join(", ") || "None";
     document.getElementById('lumberjack-resources').innerText = resources;
 }
 
 export function updateMinerInventoryDisplay() {
-    const minerItems = document.getElementById('miner-items');
+    const minerItems = document.getElementById('profession-inventory');
     minerItems.innerHTML = '';
     for (const [resource, count] of Object.entries(minerInventory)) {
-        const li = document.createElement('li');
-        li.innerText = `${resource}: ${count}`;
-        minerItems.appendChild(li);
+        const resourceData = minerResources.find(res => res.name === resource);
+        const slot = document.createElement('div');
+        slot.className = 'inventory-slot';
+        slot.innerHTML = `
+            <img src="${resourceData.image}" alt="${resource}">
+            <div class="item-count">${count}</div>
+            <div class="tooltip">${resource}</div>
+        `;
+        minerItems.appendChild(slot);
     }
 }
 
 export function updateLumberjackInventoryDisplay() {
-    const lumberjackItems = document.getElementById('lumberjack-items');
+    const lumberjackItems = document.getElementById('profession-inventory');
     lumberjackItems.innerHTML = '';
     for (const [resource, count] of Object.entries(lumberjackInventory)) {
-        const li = document.createElement('li');
-        li.innerText = `${resource}: ${count}`;
-        lumberjackItems.appendChild(li);
+        const resourceData = lumberjackResources.find(res => res.name === resource);
+        const slot = document.createElement('div');
+        slot.className = 'inventory-slot';
+        slot.innerHTML = `
+            <img src="${resourceData.image}" alt="${resource}">
+            <div class="item-count">${count}</div>
+            <div class="tooltip">${resource}</div>
+        `;
+        lumberjackItems.appendChild(slot);
     }
 }
 
@@ -121,11 +133,11 @@ function checkLevelUp(profession) {
 function collectResource(profession) {
     if (profession === 'miner') {
         const resource = getRandomResource(minerResources, minerLevel);
-        minerInventory[resource] = (minerInventory[resource] || 0) + 1;
+        minerInventory[resource.name] = (minerInventory[resource.name] || 0) + 1;
         updateMinerInventoryDisplay();
     } else if (profession === 'lumberjack') {
         const resource = getRandomResource(lumberjackResources, lumberjackLevel);
-        lumberjackInventory[resource] = (lumberjackInventory[resource] || 0) + 1;
+        lumberjackInventory[resource.name] = (lumberjackInventory[resource.name] || 0) + 1;
         updateLumberjackInventoryDisplay();
     }
 }
