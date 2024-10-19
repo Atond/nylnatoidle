@@ -1,20 +1,21 @@
 let points = 0;
 let characterLevel = 1;
 
-export function updatePointsDisplay() {
-    document.getElementById('points').innerText = `Points: ${points}`;
+export function getPoints() {
+    return points;
 }
 
-export function updateCharacterLevelDisplay() {
-    document.getElementById('character-level').innerText = characterLevel;
+export function setPoints(value) {
+    points = value;
 }
 
-// Function to auto-generate points
-export function autoGeneratePoints() {
-    points += 1;
-    updatePointsDisplay();
-}    characterLevel = value;
+export function getCharacterLevel() {
+    return characterLevel;
+}
 
+export function setCharacterLevel(value) {
+    characterLevel = value;
+}
 
 export function updatePointsDisplay() {
     document.getElementById('points').innerText = `Points: ${points}`;
