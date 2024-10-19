@@ -2,14 +2,14 @@
     "minerResources": [
         {"name": "Fer", "image": "images/resources/minerai.png"},
         {"name": "Bronze", "image": "images/resources/minerai.png"},
+        {"name": "Cuivre", "image": "images/resources/minerai.png"},
         {"name": "Argent", "image": "images/resources/minerai.png"},
         {"name": "Or", "image": "images/resources/minerai.png"},
+        {"name": "Nickel", "image": "images/resources/minerai.png"},
+        {"name": "Etain", "image": "images/resources/minerai.png"},
         {"name": "Platine", "image": "images/resources/minerai.png"},
-        {"name": "Diamant", "image": "images/resources/minerai.png"},
-        {"name": "Minerai 7", "image": "images/resources/minerai.png"},
-        {"name": "Minerai 8", "image": "images/resources/minerai.png"},
-        {"name": "Minerai 9", "image": "images/resources/minerai.png"},
-        {"name": "Minerai 10", "image": "images/resources/minerai.png"}
+        {"name": "Emeraude", "image": "images/resources/minerai.png"},
+        {"name": "Diamant", "image": "images/resources/minerai.png"}
     ],
     "lumberjackResources": [
         {"name": "Bois 1", "image": "images/resources/minerai.png"},
