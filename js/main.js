@@ -9,8 +9,8 @@ let worlds = [];
 let zones = [];
 let autoIncrementInterval;
 
-let miner;
-let lumberjack;
+export let miner;
+export let lumberjack;
 
 fetch('data.json')
     .then(response => response.json())
