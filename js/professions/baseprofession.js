@@ -25,8 +25,8 @@ export class BaseProfession {
         document.getElementById(`${this.name}-level`).innerText = this.level;
     }
 
-    updateResourcesDisplay() {
-        const resources = this.resources.slice(0, this.level).map(res => res.id).join(", ") || "None";
+    updateResourcesDisplay(translations) {
+        const resources = this.resources.slice(0, this.level).map(res => translations.resources[res.id]).join(", ") || "None";
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
