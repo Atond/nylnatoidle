@@ -48,13 +48,21 @@
 
     <h2>Inventory</h2>
     <div id="inventory">
-        <div id="miner-inventory">
-            <h3>Miner Inventory</h3>
-            <ul id="miner-items"></ul>
+        <div class="tabs">
+            <button class="tab-button" onclick="showTab('profession-resources')">Profession Resources</button>
+            <button class="tab-button" onclick="showTab('combat-resources')">Combat Resources</button>
         </div>
-        <div id="lumberjack-inventory">
-            <h3>Lumberjack Inventory</h3>
-            <ul id="lumberjack-items"></ul>
+        <div id="profession-resources" class="tab-content">
+            <div class="inventory-grid" id="profession-inventory">
+                <!-- 20 slots for profession resources -->
+                ${Array(20).fill('<div class="inventory-slot"></div>').join('')}
+            </div>
+        </div>
+        <div id="combat-resources" class="tab-content" style="display:none;">
+            <div class="inventory-grid" id="combat-inventory">
+                <!-- 20 slots for combat resources -->
+                ${Array(20).fill('<div class="inventory-slot"></div>').join('')}
+            </div>
         </div>
     </div>
 
