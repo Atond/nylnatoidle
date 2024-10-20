@@ -15,6 +15,8 @@ const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
 const experienceToNextLevel = 100;
+let currentPage = 1;
+const itemsPerPage = 10;
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
@@ -98,6 +100,47 @@ function addLoot(loot) {
     // Implémenter la logique pour ajouter le butin à l'inventaire du joueur
 }
 
+function updateInventoryDisplay(translations) {
+    const inventoryElement = document.getElementById('profession-inventory');
+    const combinedInventory = { ...miner.inventory, ...lumberjack.inventory };
+    const resourceData = [...miner.resources, ...lumberjack.resources];
+    const totalItems = Object.keys(combinedInventory).length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    inventoryElement.innerHTML = '';
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const itemsToDisplay = Object.entries(combinedInventory).slice(startIndex, endIndex);
+
+    for (const [resourceId, count] of itemsToDisplay) {
+        const resource = resourceData.find(res => res.id === resourceId);
+        if (resource) {
+            const slot = document.createElement('div');
+            slot.className = 'inventory-slot';
+            slot.innerHTML = `
+                <img src="${resource.image}" alt="${translations.resources[resourceId]}">
+                <div class="item-count">${count}</div>
+                <div class="tooltip">${translations.resources[resourceId]}</div>
+            `;
+            inventoryElement.appendChild(slot);
+        }
+    }
+
+    const paginationElement = document.getElementById('pagination');
+    paginationElement.innerHTML = '';
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.innerText = i;
+        pageButton.addEventListener('click', () => {
+            currentPage = i;
+            updateInventoryDisplay(translations);
+        });
+        paginationElement.appendChild(pageButton);
+    }
+}
+
 export function loadTranslations(language) {
     return fetch(`translations/${language}.json`)
         .then(response => response.json())
@@ -122,10 +165,7 @@ export function loadTranslations(language) {
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
             document.getElementById('attack-monster').innerText = translations.attack;
 
-            miner.updateInventoryDisplay(translations);
-            miner.updateResourcesDisplay(translations);
-            lumberjack.updateInventoryDisplay(translations);
-            lumberjack.updateResourcesDisplay(translations);
+            updateInventoryDisplay(translations);
         });
 }
 

@@ -31,9 +31,8 @@ export class BaseProfession {
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
-    updateInventoryDisplay(translations) {
+    updateInventoryDisplay(translations, inventoryElement) {
         if (!translations) return;
-        const inventoryElement = document.getElementById('profession-inventory');
         inventoryElement.innerHTML = '';
         for (const [resourceId, count] of Object.entries(this.inventory)) {
             const resourceData = this.resources.find(res => res.id === resourceId);
