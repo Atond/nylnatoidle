@@ -120,7 +120,7 @@ export function loadTranslations(language) {
             document.getElementById('lumberjack-resources-label').innerText = translations.lumberjackResourcesLabel;
             document.getElementById('auto-increment-title').innerText = translations.autoIncrementTitle;
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
-            document.getElementById('attack-monster').innerText = translations.attackMonster;
+            document.getElementById('attack-monster').innerText = translations.attack;
 
             miner.updateInventoryDisplay(translations);
             miner.updateResourcesDisplay(translations);

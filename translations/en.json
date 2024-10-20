@@ -18,6 +18,7 @@
     "inventoryTitle": "Inventory",
     "professionResources": "Profession Resources",
     "combatResources": "Combat Resources",
+    "attack": "Attack",
     "resources": {
         "minerai111": "Iron",
         "minerai112": "Bronze",
