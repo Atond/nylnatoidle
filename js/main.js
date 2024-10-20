@@ -1,7 +1,7 @@
-import { loadGame, saveGame } from 'js/saveLoad.js';
-import { Miner } from 'js/professions/miner.js';
-import { Lumberjack } from 'js/professions/lumberjack.js';
-import { MonsterManager } from 'js/monster.js';
+import { loadGame, saveGame } from './saveLoad.js';
+import { Miner } from './professions/miner.js';
+import { Lumberjack } from './professions/lumberjack.js';
+import { MonsterManager } from './enemies/monster.js';
 
 let minerResources = [];
 let lumberjackResources = [];
