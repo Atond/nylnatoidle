@@ -1,4 +1,4 @@
-import { getPoints, setPoints, getCharacterLevel, setCharacterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
+import { getPoints, setPoints, getCharacterLevel, setCharacterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from 'js/character.js';
 import { miner, lumberjack, loadTranslations } from './main.js'; // Import the loadTranslations function
 
 // Sauvegarder la progression
