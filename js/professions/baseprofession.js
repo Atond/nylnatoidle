@@ -4,7 +4,6 @@ export class BaseProfession {
         this.exp = 0;
         this.level = 1;
         this.resources = resources;
-        this.inventory = {};
     }
 
     setExp(value) {
@@ -60,8 +59,8 @@ export class BaseProfession {
     collectResource() {
         const resource = this.getRandomResource();
         if (resource) {
-            this.inventory[resource.id] = (this.inventory[resource.id] || 0) + 1;
-            this.updateInventoryDisplay();
+            playerInventory.addItem(resource.id, 1);
+            updateInventoryDisplay(currentTranslations); // Assurez-vous d'avoir une variable currentTranslations
         }
     }
 

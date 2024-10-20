@@ -2,6 +2,7 @@ import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
+import { Inventory } from './inventory.js';
 
 let minerResources = [];
 let lumberjackResources = [];
@@ -11,6 +12,7 @@ let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
+export const playerInventory = new Inventory();
 const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
@@ -97,24 +99,26 @@ function updateExperienceBar() {
 }
 
 function addLoot(loot) {
-    // Implémenter la logique pour ajouter le butin à l'inventaire du joueur
+    for (const item of loot) {
+        playerInventory.addItem(item, 1); // Supposons que chaque élément de butin est ajouté en quantité de 1
+    }
+    updateInventoryDisplay(currentTranslations);
 }
 
 function updateInventoryDisplay(translations) {
     const inventoryElement = document.getElementById('profession-inventory');
-    const combinedInventory = { ...miner.inventory, ...lumberjack.inventory };
-    const resourceData = [...miner.resources, ...lumberjack.resources];
-    const totalItems = Object.keys(combinedInventory).length;
+    const allItems = playerInventory.getAllItems();
+    const totalItems = Object.keys(allItems).length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     inventoryElement.innerHTML = '';
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalItems); // Ensure endIndex does not exceed totalItems
-    const itemsToDisplay = Object.entries(combinedInventory).slice(startIndex, endIndex);
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const itemsToDisplay = Object.entries(allItems).slice(startIndex, endIndex);
 
     for (const [resourceId, count] of itemsToDisplay) {
-        const resource = resourceData.find(res => res.id === resourceId);
+        const resource = getResourceData(resourceId);
         if (resource) {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
