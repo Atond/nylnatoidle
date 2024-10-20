@@ -32,6 +32,7 @@ export class BaseProfession {
     }
 
     updateInventoryDisplay(translations) {
+        if (!translations) return;
         const inventoryElement = document.getElementById('profession-inventory');
         inventoryElement.innerHTML = '';
         for (const [resourceId, count] of Object.entries(this.inventory)) {
