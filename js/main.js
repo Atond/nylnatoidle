@@ -2,6 +2,7 @@ import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
+import { Inventory } from './inventory.js'; // Import the Inventory class
 
 let minerResources = [];
 let lumberjackResources = [];
