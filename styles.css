@@ -154,3 +154,20 @@ button:hover {
 .inventory-slot:hover .tooltip {
     display: block;
 }
+
+#monster {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+#attack-monster {
+    margin-top: 10px;
+    background-color: #dc3545;
+}
+
+#attack-monster:hover {
+    background-color: #c82333;
+}

@@ -57,6 +57,9 @@ function initializeGame() {
     // Appeler la fonction de chargement au démarrage du jeu
     loadGame();
 
+    // Charger les traductions françaises par défaut
+    loadTranslations('fr');
+
     // Sauvegarder automatiquement toutes les 30 secondes
     setInterval(saveGame, 30000);
 
