@@ -1,5 +1,6 @@
 import { getPoints, setPoints, getCharacterLevel, setCharacterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
 import { miner, lumberjack } from './main.js';
+import { loadTranslations } from './main.js'; // Import the loadTranslations function
 
 // Sauvegarder la progression
 export function saveGame() {
