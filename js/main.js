@@ -2,7 +2,9 @@ import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
-import { Inventory } from './inventory.js'; // Import the Inventory class
+import { Inventory } from './inventory.js'; 
+import { updateInventoryDisplay } from './inventoryDisplay.js';
+import { ResourceManager } from './resourceManager.js';
 
 let minerResources = [];
 let lumberjackResources = [];
@@ -12,27 +14,23 @@ let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
-export const playerInventory = new Inventory(); // Assurez-vous que la classe Inventory est définie et importée correctement
+export const playerInventory = new Inventory(); 
+export const resourceManager = new ResourceManager();
 const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
 const experienceToNextLevel = 100;
-let currentPage = 1;
-const itemsPerPage = 10;
-let currentTranslations = {}; // Add this line to store current translations
+export let currentTranslations = {}; 
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-            minerResources = data.minerResources;
-            lumberjackResources = data.lumberjackResources;
-            worlds = data.worlds;
-            zones = data.zones;
-            miner = new Miner(minerResources);
-            lumberjack = new Lumberjack(lumberjackResources);
-            initializeGame();
-        });
+    .then(response => response.json())
+    .then(data => {
+        data.minerResources.forEach(resource => resourceManager.addResource(resource));
+        data.lumberjackResources.forEach(resource => resourceManager.addResource(resource));
+        // Ajoutez ici d'autres types de ressources au fur et à mesure que vous ajoutez des métiers
+        initializeGame();
+    });
 });
 
 function initializeGame() {
@@ -101,9 +99,13 @@ function updateExperienceBar() {
 
 function addLoot(loot) {
     for (const item of loot) {
-        playerInventory.addItem(item, 1); // Supposons que chaque élément de butin est ajouté en quantité de 1
+        playerInventory.addItem(item, 1);
     }
     updateInventoryDisplay(currentTranslations);
+}
+
+function getResourceData(resourceId) {
+    return resourceManager.getResource(resourceId);
 }
 
 export function updateInventoryDisplay(translations) {
@@ -150,7 +152,7 @@ export function loadTranslations(language) {
     return fetch(`translations/${language}.json`)
         .then(response => response.json())
         .then(translations => {
-            currentTranslations = translations; // Store the current translations
+            currentTranslations = translations;
             // Mettre à jour tous les éléments de l'interface utilisateur avec les nouvelles traductions
             document.getElementById('title').innerText = translations.title;
             document.getElementById('character-title').innerText = translations.characterTitle;
@@ -170,7 +172,6 @@ export function loadTranslations(language) {
             document.getElementById('auto-increment-title').innerText = translations.autoIncrementTitle;
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
             document.getElementById('attack-monster').innerText = translations.attack;
-
             updateInventoryDisplay(translations);
         });
 }

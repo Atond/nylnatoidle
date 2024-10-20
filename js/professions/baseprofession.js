@@ -1,11 +1,26 @@
 export class BaseProfession {
-    constructor(name, resources) {
+    constructor(name, resourceIds) {
         this.name = name;
+        this.resourceIds = resourceIds;
         this.exp = 0;
         this.level = 1;
         this.resources = resources;
     }
 
+    getRandomResource() {
+        if (this.resourceIds.length === 0) {
+            return null;
+        }
+        const weightedResources = [];
+        for (let i = 0; i < this.level; i++) {
+            for (let j = 0; j < this.level - i; j++) {
+                weightedResources.push(this.resourceIds[i]);
+            }
+        }
+        const randomResourceId = weightedResources[Math.floor(Math.random() * weightedResources.length)];
+        return resourceManager.getResource(randomResourceId);
+    }
+    
     setExp(value) {
         this.exp = value;
         this.updateExpDisplay();
