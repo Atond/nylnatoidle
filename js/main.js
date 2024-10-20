@@ -110,7 +110,7 @@ function updateInventoryDisplay(translations) {
     inventoryElement.innerHTML = '';
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems); // Ensure endIndex does not exceed totalItems
     const itemsToDisplay = Object.entries(combinedInventory).slice(startIndex, endIndex);
 
     for (const [resourceId, count] of itemsToDisplay) {
