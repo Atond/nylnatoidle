@@ -9,7 +9,6 @@ export function setCharacterLevel(value) {
     updateCharacterLevelDisplay();
 }
 
-
 export function updateCharacterLevelDisplay() {
     const levelElement = document.getElementById('character-level');
     if (levelElement) {
