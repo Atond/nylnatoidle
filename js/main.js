@@ -2,7 +2,6 @@ import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
-import { Inventory } from './inventory.js';
 
 let minerResources = [];
 let lumberjackResources = [];
@@ -12,13 +11,14 @@ let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
-export const playerInventory = new Inventory();
+export const playerInventory = new Inventory(); // Assurez-vous que la classe Inventory est définie et importée correctement
 const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
 const experienceToNextLevel = 100;
 let currentPage = 1;
 const itemsPerPage = 10;
+let currentTranslations = {}; // Add this line to store current translations
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
@@ -149,6 +149,7 @@ export function loadTranslations(language) {
     return fetch(`translations/${language}.json`)
         .then(response => response.json())
         .then(translations => {
+            currentTranslations = translations; // Store the current translations
             // Mettre à jour tous les éléments de l'interface utilisateur avec les nouvelles traductions
             document.getElementById('title').innerText = translations.title;
             document.getElementById('character-title').innerText = translations.characterTitle;

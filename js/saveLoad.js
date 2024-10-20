@@ -1,7 +1,6 @@
 import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
-import { miner, lumberjack, loadTranslations, playerInventory } from './main.js';// Sauvegarder la progression
+import { miner, lumberjack, loadTranslations, updateInventoryDisplay } from './main.js'; // Import the necessary functions and variables
 
-// Sauvegarder la progression
 export function saveGame() {
     const gameState = {
         characterLevel: getCharacterLevel(),
@@ -27,7 +26,7 @@ export function loadGame() {
         lumberjack.setLevel(gameState.lumberjackLevel);
         
         // Charger l'inventaire
-        const inventory = gameState.inventory;
+        const inventory = gameState.inventory || {}; // Ensure inventory is an object
         for (const [itemId, quantity] of Object.entries(inventory)) {
             playerInventory.addItem(itemId, quantity);
         }
