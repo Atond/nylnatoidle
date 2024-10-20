@@ -1,10 +1,9 @@
-import { getPoints, setPoints, getCharacterLevel, setCharacterLevel, updatePointsDisplay, updateCharacterLevelDisplay } from './character.js';
+import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
 import { miner, lumberjack, loadTranslations } from './main.js'; // Import the loadTranslations function
 
 // Sauvegarder la progression
 export function saveGame() {
     const gameState = {
-        points: getPoints(),
         characterLevel: getCharacterLevel(),
         minerExp: miner.exp,
         minerLevel: miner.level,
@@ -22,7 +21,6 @@ export function loadGame() {
     const savedGame = localStorage.getItem('idleRPGSave');
     if (savedGame) {
         const gameState = JSON.parse(savedGame);
-        setPoints(gameState.points);
         setCharacterLevel(gameState.characterLevel);
         miner.setExp(gameState.minerExp);
         miner.setLevel(gameState.minerLevel);
@@ -31,7 +29,6 @@ export function loadGame() {
         lumberjack.setLevel(gameState.lumberjackLevel);
         Object.assign(lumberjack.inventory, gameState.lumberjackInventory);
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
-        updatePointsDisplay();
         updateCharacterLevelDisplay();
         loadTranslations('fr').then(translations => {
             miner.updateExpDisplay();
