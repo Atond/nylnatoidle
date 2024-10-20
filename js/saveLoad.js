@@ -1,5 +1,5 @@
-import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js'; // Import updateCharacterLevelDisplay
-import { miner, lumberjack, loadTranslations } from './main.js'; // Import the loadTranslations function
+import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
+import { miner, lumberjack, loadTranslations, playerInventory } from './main.js';// Sauvegarder la progression
 
 // Sauvegarder la progression
 export function saveGame() {
@@ -7,10 +7,9 @@ export function saveGame() {
         characterLevel: getCharacterLevel(),
         minerExp: miner.exp,
         minerLevel: miner.level,
-        minerInventory: miner.inventory,
         lumberjackExp: lumberjack.exp,
         lumberjackLevel: lumberjack.level,
-        lumberjackInventory: lumberjack.inventory,
+        inventory: playerInventory.getAllItems(),
         characterName: document.getElementById('character-name').innerText
     };
     localStorage.setItem('idleRPGSave', JSON.stringify(gameState));
@@ -24,21 +23,25 @@ export function loadGame() {
         setCharacterLevel(gameState.characterLevel);
         miner.setExp(gameState.minerExp);
         miner.setLevel(gameState.minerLevel);
-        Object.assign(miner.inventory, gameState.minerInventory);
         lumberjack.setExp(gameState.lumberjackExp);
         lumberjack.setLevel(gameState.lumberjackLevel);
-        Object.assign(lumberjack.inventory, gameState.lumberjackInventory);
+        
+        // Charger l'inventaire
+        const inventory = gameState.inventory;
+        for (const [itemId, quantity] of Object.entries(inventory)) {
+            playerInventory.addItem(itemId, quantity);
+        }
+        
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
         updateCharacterLevelDisplay();
         loadTranslations('fr').then(translations => {
             miner.updateExpDisplay();
             miner.updateLevelDisplay();
             miner.updateResourcesDisplay(translations);
-            miner.updateInventoryDisplay(translations);
             lumberjack.updateExpDisplay();
             lumberjack.updateLevelDisplay();
             lumberjack.updateResourcesDisplay(translations);
-            lumberjack.updateInventoryDisplay(translations);
+            updateInventoryDisplay(translations);
         });
     }
 }
