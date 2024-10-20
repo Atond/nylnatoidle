@@ -67,8 +67,8 @@ function initializeGame() {
     setInterval(autoGeneratePoints, 1000);
 }
 
-function loadTranslations(language) {
-    fetch(`translations/${language}.json`)
+export function loadTranslations(language) {
+    return fetch(`translations/${language}.json`)
         .then(response => response.json())
         .then(translations => {
             document.getElementById('title').innerText = translations.title;
