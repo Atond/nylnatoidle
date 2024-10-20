@@ -106,7 +106,7 @@ function addLoot(loot) {
     updateInventoryDisplay(currentTranslations);
 }
 
-function updateInventoryDisplay(translations) {
+export function updateInventoryDisplay(translations) {
     const inventoryElement = document.getElementById('profession-inventory');
     const allItems = playerInventory.getAllItems();
     const totalItems = Object.keys(allItems).length;
