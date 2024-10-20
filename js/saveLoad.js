@@ -1,5 +1,5 @@
 import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
-import { miner, lumberjack, loadTranslations, playerInventory  } from './main.js'; // Import the necessary functions and variables
+import { miner, lumberjack, loadTranslations, playerInventory, updateInventoryDisplay } from './main.js'; // Import the necessary functions and variables
 
 export function saveGame() {
     const gameState = {
