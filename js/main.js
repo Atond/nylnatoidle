@@ -1,7 +1,7 @@
 import { loadGame, saveGame } from './saveLoad.js';
-import { autoGeneratePoints, updatePointsDisplay } from './character.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
+import { MonsterManager } from './monster.js';
 
 let minerResources = [];
 let lumberjackResources = [];
@@ -11,6 +11,10 @@ let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
+const monsterManager = new MonsterManager();
+
+let playerExperience = 0;
+const experienceToNextLevel = 100;
 
 fetch('data.json')
     .then(response => response.json())
@@ -54,25 +58,50 @@ function initializeGame() {
         loadTranslations(event.target.value);
     });
 
-    // Appeler la fonction de chargement au démarrage du jeu
+    monsterManager.setWorld("Forest");
+    monsterManager.setZone("Dark Woods");
+    monsterManager.spawnMonster();
+
+    document.getElementById('attack-monster').addEventListener('click', () => {
+        const { expGained, loot } = monsterManager.attackMonster(1);
+        if (expGained > 0) {
+            addExperience(expGained);
+            addLoot(loot);
+        }
+    });
+
+    updateExperienceBar();
     loadGame();
-
-    // Charger les traductions françaises par défaut
     loadTranslations('fr');
-
-    // Sauvegarder automatiquement toutes les 30 secondes
     setInterval(saveGame, 30000);
+}
 
-    // Generate points every second
-    setInterval(autoGeneratePoints, 1000);
+function addExperience(amount) {
+    playerExperience += amount;
+    if (playerExperience >= experienceToNextLevel) {
+        playerExperience -= experienceToNextLevel;
+        // Gérer le passage au niveau supérieur ici
+    }
+    updateExperienceBar();
+}
+
+function updateExperienceBar() {
+    const expBar = document.getElementById('experience-bar');
+    const expPercentage = (playerExperience / experienceToNextLevel) * 100;
+    expBar.style.width = `${expPercentage}%`;
+    document.getElementById('experience-text').textContent = `${playerExperience} / ${experienceToNextLevel} XP`;
+}
+
+function addLoot(loot) {
+    // Implémenter la logique pour ajouter le butin à l'inventaire du joueur
 }
 
 export function loadTranslations(language) {
     return fetch(`translations/${language}.json`)
         .then(response => response.json())
         .then(translations => {
+            // Mettre à jour tous les éléments de l'interface utilisateur avec les nouvelles traductions
             document.getElementById('title').innerText = translations.title;
-            document.getElementById('generate').innerText = translations.generate;
             document.getElementById('character-title').innerText = translations.characterTitle;
             document.getElementById('character-name-label').innerText = translations.characterNameLabel;
             document.getElementById('change-name').innerText = translations.changeName;
@@ -89,10 +118,8 @@ export function loadTranslations(language) {
             document.getElementById('lumberjack-resources-label').innerText = translations.lumberjackResourcesLabel;
             document.getElementById('auto-increment-title').innerText = translations.autoIncrementTitle;
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
-            document.querySelector('.tab-button:nth-child(1)').innerText = translations.professionResources;
-            document.querySelector('.tab-button:nth-child(2)').innerText = translations.combatResources;
-
-            // Update inventory and resources display with translations
+            document.getElementById('attack-monster').innerText = translations.attackMonster;
+            
             miner.updateInventoryDisplay(translations);
             miner.updateResourcesDisplay(translations);
             lumberjack.updateInventoryDisplay(translations);
