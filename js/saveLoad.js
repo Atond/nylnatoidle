@@ -33,14 +33,16 @@ export function loadGame() {
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
         updatePointsDisplay();
         updateCharacterLevelDisplay();
-        miner.updateExpDisplay();
-        miner.updateLevelDisplay();
-        miner.updateResourcesDisplay();
-        miner.updateInventoryDisplay();
-        lumberjack.updateExpDisplay();
-        lumberjack.updateLevelDisplay();
-        lumberjack.updateResourcesDisplay();
-        lumberjack.updateInventoryDisplay();
+        loadTranslations('fr').then(translations => {
+            miner.updateExpDisplay();
+            miner.updateLevelDisplay();
+            miner.updateResourcesDisplay(translations);
+            miner.updateInventoryDisplay(translations);
+            lumberjack.updateExpDisplay();
+            lumberjack.updateLevelDisplay();
+            lumberjack.updateResourcesDisplay(translations);
+            lumberjack.updateInventoryDisplay(translations);
+        });
     }
 }
 

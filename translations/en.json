@@ -18,5 +18,27 @@
     "autoIncrementTitle": "Auto-Increment",
     "inventoryTitle": "Inventory",
     "professionResources": "Profession Resources",
-    "combatResources": "Combat Resources"
+    "combatResources": "Combat Resources",
+    "resources": {
+        "minerai111": "Iron",
+        "minerai112": "Bronze",
+        "minerai113": "Copper",
+        "minerai114": "Silver",
+        "minerai115": "Gold",
+        "minerai116": "Nickel",
+        "minerai117": "Etain",
+        "minerai118": "Platine",
+        "minerai119": "Emeraude",
+        "minerai1110": "Diamant",
+        "bois111": "Oak",
+        "bois112": "Oak1",
+        "bois113": "Oak2",
+        "bois114": "Oak3",
+        "bois115": "Oak4",
+        "bois116": "Hêtre",
+        "bois117": "Erable",
+        "bois118": "Noyer",
+        "bois119": "Acacia",
+        "bois1110": "Orme"
+    }
 }

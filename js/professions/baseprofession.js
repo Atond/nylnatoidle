@@ -26,11 +26,13 @@ export class BaseProfession {
     }
 
     updateResourcesDisplay(translations) {
+        if (!translations) return;
         const resources = this.resources.slice(0, this.level).map(res => translations.resources[res.id]).join(", ") || "None";
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
     updateInventoryDisplay(translations) {
+        if (!translations) return;
         const inventoryElement = document.getElementById('profession-inventory');
         inventoryElement.innerHTML = '';
         for (const [resourceId, count] of Object.entries(this.inventory)) {
