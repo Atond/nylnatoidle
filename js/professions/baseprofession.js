@@ -70,7 +70,7 @@ export class BaseProfession {
         if (this.exp >= this.level * 100) {
             this.level += 1;
             this.updateLevelDisplay();
-            this.updateResourcesDisplay(translations);
+            this.updateResourcesDisplay();
         }
     }
 
