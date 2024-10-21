@@ -1,4 +1,5 @@
-import { playerInventory, resourceManager, currentTranslations } from './main.js'; // Import resourceManager from main.js
+import { getResourceData } from './resourceManager.js';
+import { playerInventory, currentTranslations } from './main.js';
 
 let currentPage = 1;
 const itemsPerPage = 10;
