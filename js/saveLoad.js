@@ -35,13 +35,11 @@ export function loadGame() {
         
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
         updateCharacterLevelDisplay();
+        
+        // Charger les traductions avant de mettre à jour l'affichage
         loadTranslations('fr').then(translations => {
-            miner.updateExpDisplay();
-            miner.updateLevelDisplay();
-            miner.updateResourcesDisplay(translations);
-            lumberjack.updateExpDisplay();
-            lumberjack.updateLevelDisplay();
-            lumberjack.updateResourcesDisplay(translations);
+            miner.updateDisplay(translations);
+            lumberjack.updateDisplay(translations);
             updateInventoryDisplay(translations);
         });
     }

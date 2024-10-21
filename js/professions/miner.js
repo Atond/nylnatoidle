@@ -45,6 +45,14 @@ export class Miner extends BaseProfession {
         return 0;
     }
 
+    autoMine(translations) {
+        let totalMined = 0;
+        for (let i = 0; i < this.autoMinerCount; i++) {
+            totalMined += this.mine(translations);
+        }
+        return totalMined;
+    }
+
     getRandomResource(availableResources) {
         if (availableResources.length === 0) {
             return null;
@@ -118,6 +126,7 @@ export class Miner extends BaseProfession {
     }
 
     updateResourcesDisplay(translations) {
+        if (!translations || !translations.miner) return;
         const minerTranslations = translations.miner;
         const currentProgression = this.getCurrentProgression();
         const resourcesElement = document.getElementById('miner-resources');

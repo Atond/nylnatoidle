@@ -84,10 +84,12 @@ function initializeGame() {
 
     // Démarrer l'auto-minage
     setInterval(() => {
-        const autoMinedAmount = miner.autoMine(currentTranslations);
-        if (autoMinedAmount > 0) {
-            console.log(`Auto-mined ${autoMinedAmount} ore`);
-            miner.updateDisplay(currentTranslations);
+        if (miner.autoMinerCount > 0) {
+            const autoMinedAmount = miner.autoMine(currentTranslations);
+            if (autoMinedAmount > 0) {
+                console.log(`Auto-mined ${autoMinedAmount} ore`);
+                miner.updateDisplay(currentTranslations);
+            }
         }
     }, 1000);  // Vérifier toutes les secondes
 
