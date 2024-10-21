@@ -16,7 +16,6 @@ export function saveGame() {
     localStorage.setItem('idleRPGSave', JSON.stringify(gameState));
 }
 
-// Charger la progression
 export function loadGame() {
     const savedGame = localStorage.getItem('idleRPGSave');
     if (savedGame) {
@@ -36,11 +35,18 @@ export function loadGame() {
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
         updateCharacterLevelDisplay();
         
-        // Charger les traductions avant de mettre à jour l'affichage
-        loadTranslations('fr').then(translations => {
-            miner.updateDisplay(translations);
-            lumberjack.updateDisplay(translations);
-            updateInventoryDisplay(translations);
-        });
+        // Vérifier si les traductions sont déjà chargées
+        if (currentTranslations && Object.keys(currentTranslations).length > 0) {
+            updateDisplays(currentTranslations);
+        } else {
+            // Si les traductions ne sont pas encore chargées, attendez qu'elles le soient
+            loadTranslations('fr').then(updateDisplays);
+        }
     }
+}
+
+function updateDisplays(translations) {
+    miner.updateDisplay(translations);
+    lumberjack.updateDisplay(translations);
+    updateInventoryDisplay(translations);
 }

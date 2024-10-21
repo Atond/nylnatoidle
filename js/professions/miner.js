@@ -94,6 +94,11 @@ export class Miner extends BaseProfession {
     }
 
     updateDisplay(translations) {
+        if (!translations || !translations.miner) {
+            console.log("Traductions non disponibles, mise à jour de l'affichage reportée.");
+            return;
+        }
+
         super.updateExpDisplay();
         super.updateLevelDisplay();
         
