@@ -30,6 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
         miner = new Miner(minerResourceIds);
         lumberjack = new Lumberjack(lumberjackResourceIds);
+        
+        // Charger les traductions avant d'initialiser le jeu
+        return loadTranslations('fr');
+    })
+    .then(() => {
         initializeGame();
     });
 });
@@ -149,6 +154,8 @@ export function loadTranslations(language) {
             document.getElementById('attack-monster').innerText = translations.attack;
             updateInventoryDisplay(translations);
             miner.updateDisplay(translations);
+            lumberjack.updateDisplay(translations);
+            return translations;
         });
 }
 
