@@ -1,7 +1,7 @@
 import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
-import { MonsterManager } from './enemies/monster.js';
+//import { MonsterManager } from './enemies/monster.js';
 import { globalInventory } from './inventory.js'; 
 import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { globalResourceManager } from './resourceManager.js';
