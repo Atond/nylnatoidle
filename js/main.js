@@ -13,7 +13,6 @@ let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
-const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
 const experienceToNextLevel = 100;
