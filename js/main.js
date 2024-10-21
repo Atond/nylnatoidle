@@ -154,7 +154,7 @@ export function loadTranslations(language) {
             document.getElementById('attack-monster').innerText = translations.attack;
             updateInventoryDisplay(translations);
             miner.updateDisplay(translations);
-            lumberjack.updateDisplay(translations);
+            //lumberjack.updateDisplay(translations);
             return translations;
         });
 }
