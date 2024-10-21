@@ -21,9 +21,9 @@ export function updateInventoryDisplay(translations) {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
             slot.innerHTML = `
-                <img src="${resource.image}" alt="${translations.resources[resource.id]}">
+                <img src="${resource.image}" alt="${translations && translations.resources ? translations.resources[resource.id] : resource.id}">
                 <div class="item-count">${quantity}</div>
-                <div class="tooltip">${translations.resources[resource.id]}</div>
+                <div class="tooltip">${translations && translations.resources ? translations.resources[resource.id] : resource.id}</div>
             `;
             inventoryElement.appendChild(slot);
         }

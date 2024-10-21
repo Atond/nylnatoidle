@@ -38,9 +38,9 @@ function initializeGame() {
     document.getElementById('auto-increment-select').addEventListener('change', (event) => {
         clearInterval(autoIncrementInterval);
         if (event.target.value === 'miner') {
-            autoIncrementInterval = setInterval(() => miner.autoIncrement(), 1000);
+            autoIncrementInterval = setInterval(() => miner.autoIncrement(currentTranslations), 1000);
         } else if (event.target.value === 'lumberjack') {
-            autoIncrementInterval = setInterval(() => lumberjack.autoIncrement(), 1000);
+            autoIncrementInterval = setInterval(() => lumberjack.autoIncrement(currentTranslations), 1000);
         }
     });
 
