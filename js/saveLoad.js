@@ -38,7 +38,7 @@ export function loadGame() {
         // Charger les traductions et mettre à jour l'affichage une fois qu'elles sont prêtes
         loadTranslations('fr').then(translations => {
             miner.updateDisplay(translations);
-            lumberjack.updateDisplay(translations);
+            //lumberjack.updateDisplay(translations);
             updateInventoryDisplay(translations);
         });
     }
