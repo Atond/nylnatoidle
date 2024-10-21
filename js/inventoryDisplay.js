@@ -2,6 +2,14 @@
 
 import { playerInventory, resourceManager } from './main.js';
 
+let playerInventory;
+let resourceManager;
+
+export function initializeInventoryDisplay(inventory, resources) {
+    playerInventory = inventory;
+    resourceManager = resources;
+}
+
 let currentPage = 1;
 const itemsPerPage = 10;
 
