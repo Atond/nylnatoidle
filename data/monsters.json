@@ -1,0 +1,54 @@
+{
+  "monsters": [
+    {
+      "id": "goblin",
+      "defaultName": "Goblin",
+      "image": "path/to/goblin.png",
+      "baseStats": {
+        "hp": 50,
+        "attack": 5,
+        "defense": 3
+      },
+      "baseExperience": 20,
+      "loot": [
+        {
+          "resourceId": "goblin_ear",
+          "chance": 0.7,
+          "minQuantity": 1,
+          "maxQuantity": 2
+        },
+        {
+          "resourceId": "goblin_tooth",
+          "chance": 0.3,
+          "minQuantity": 1,
+          "maxQuantity": 1
+        }
+      ]
+    },
+    {
+      "id": "dragon",
+      "defaultName": "Dragon",
+      "image": "path/to/dragon.png",
+      "baseStats": {
+        "hp": 1000,
+        "attack": 50,
+        "defense": 30
+      },
+      "baseExperience": 500,
+      "loot": [
+        {
+          "resourceId": "dragon_scale",
+          "chance": 0.8,
+          "minQuantity": 2,
+          "maxQuantity": 5
+        },
+        {
+          "resourceId": "dragon_heart",
+          "chance": 0.1,
+          "minQuantity": 1,
+          "maxQuantity": 1
+        }
+      ]
+    }
+  ]
+}

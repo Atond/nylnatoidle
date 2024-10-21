@@ -1,7 +1,8 @@
 import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
-import { miner, lumberjack, loadTranslations } from './main.js';
+import { miner, lumberjack } from './main.js';
 import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { globalInventory } from './inventory.js';
+import { globalTranslationManager } from './translations/translationManager.js';
 
 export function saveGame() {
     const gameState = {
@@ -32,20 +33,16 @@ export function loadGame() {
             globalInventory.addItem(itemId, quantity);
         }
         
-        document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
+        document.getElementById('character-name').innerText = gameState.characterName || globalTranslationManager.translate('ui.unknownCharacter');
         updateCharacterLevelDisplay();
         
-        // Charger les traductions et mettre à jour l'affichage une fois qu'elles sont prêtes
-        loadTranslations('fr').then(translations => {
-            miner.updateDisplay(translations);
-            //lumberjack.updateDisplay(translations);
-            updateInventoryDisplay(translations);
-        });
+        // Mettre à jour l'affichage
+        updateDisplays();
     }
 }
 
-function updateDisplays(translations) {
-    miner.updateDisplay(translations);
-    lumberjack.updateDisplay(translations);
-    updateInventoryDisplay(translations);
+function updateDisplays() {
+    miner.updateDisplay();
+    lumberjack.updateDisplay();
+    updateInventoryDisplay();
 }

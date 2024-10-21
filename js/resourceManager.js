@@ -1,20 +1,19 @@
-export class ResourceManager {
+class ResourceManager {
     constructor() {
         this.resources = new Map();
     }
 
-    addResource(resource) {
-        this.resources.set(resource.id, resource);
+    addResource(id, category, defaultName, image) {
+        this.resources.set(id, { id, category, defaultName, image });
     }
 
-    getResource(resourceId) {
-        return this.resources.get(resourceId);
+    getResource(id) {
+        return this.resources.get(id);
     }
 
-    getAllResources() {
-        return Array.from(this.resources.values());
+    getResourcesByCategory(category) {
+        return Array.from(this.resources.values()).filter(r => r.category === category);
     }
 }
 
-// Créer une instance globale
 export const globalResourceManager = new ResourceManager();

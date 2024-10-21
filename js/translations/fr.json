@@ -1,0 +1,73 @@
+{
+    "ui": {
+        "title": "Jeu Idle",
+        "characterTitle": "Personnage",
+        "characterNameLabel": "Nom:",
+        "changeName": "Changer le Nom",
+        "saveName": "Enregistrer le Nom",
+        "characterLevelLabel": "Niveau:",
+        "professionsTitle": "Métiers",
+        "autoIncrementTitle": "Auto-Incrément",
+        "inventoryTitle": "Inventaire",
+        "professionResources": "Ressources de Métier",
+        "combatResources": "Ressources de Combat",
+        "attack": "Attaquer"
+    },
+    "professions": {
+        "miner": {
+            "title": "Mineur",
+            "expLabel": "Expérience:",
+            "expRequired": "Expérience requise pour le niveau suivant:",
+            "levelLabel": "Niveau:",
+            "resourcesLabel": "Ressources:",
+            "miningPower": "Puissance de Minage",
+            "autoMiners": "Mineurs Automatiques",
+            "mineButton": "Miner",
+            "upgrades": {
+                "betterPickaxe1": "Meilleure Pioche I",
+                "betterPickaxe2": "Meilleure Pioche II",
+                "autoMiner1": "Mineur Automatique I"
+            }
+        },
+        "lumberjack": {
+            "title": "Bûcheron",
+            "expLabel": "Expérience:",
+            "expRequired": "Expérience requise pour le niveau suivant:",
+            "levelLabel": "Niveau:",
+            "resourcesLabel": "Ressources:"
+        }
+    },
+    "resources": {
+        "professions": {
+            "miner": {
+                "iron_ore": "Minerai de fer",
+                "copper_ore": "Minerai de cuivre",
+                "gold_ore": "Minerai d'or"
+            },
+            "lumberjack": {
+                "oak_wood": "Bois de chêne",
+                "pine_wood": "Bois de pin",
+                "mahogany_wood": "Bois d'acajou"
+            }
+        },
+        "monsters": {
+            "goblin_ear": "Oreille de gobelin",
+            "wolf_fang": "Croc de loup",
+            "dragon_scale": "Écaille de dragon"
+        }
+    },
+    "worlds": {
+        "green_fields": "Champs Verdoyants",
+        "fiery_mountains": "Montagnes Ardentes"
+    },
+    "zones": {
+        "peaceful_meadow": "Prairie Paisible",
+        "dark_forest": "Forêt Sombre",
+        "dragon_peak": "Pic du Dragon"
+    },
+    "monsters": {
+        "goblin": "Gobelin",
+        "wolf": "Loup",
+        "dragon": "Dragon"
+    }
+}

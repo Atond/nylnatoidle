@@ -2,6 +2,7 @@
 import { globalResourceManager } from '../resourceManager.js';
 import { globalInventory } from '../inventory.js';
 import { updateInventoryDisplay } from '../inventoryDisplay.js';
+import { globalTranslationManager } from '../translations/translationManager.js';
 
 export class BaseProfession {
     constructor(name, resourceIds) {
@@ -25,14 +26,14 @@ export class BaseProfession {
         return globalResourceManager.getResource(randomResourceId);
     }
 
-    collectResource(translations) {
+    collectResource() {
         const resource = this.getRandomResource();
         if (resource) {
             globalInventory.addItem(resource.id, 1);
             this.exp += 1;
             this.checkLevelUp();
-            this.updateResourcesDisplay(translations);
-            updateInventoryDisplay(translations);
+            this.updateResourcesDisplay();
+            updateInventoryDisplay();
         }
     }
     
@@ -58,11 +59,10 @@ export class BaseProfession {
         document.getElementById(`${this.name}-level`).innerText = this.level;
     }
 
-    updateResourcesDisplay(translations) {
-        if (!translations) return;
+    updateResourcesDisplay() {
         const resources = this.resourceIds.slice(0, this.level)
-            .map(id => translations.resources ? translations.resources[id] : id)
-            .join(", ") || "None";
+            .map(id => globalTranslationManager.translate(`resources.${id}`))
+            .join(", ") || globalTranslationManager.translate('ui.none');
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
@@ -74,10 +74,10 @@ export class BaseProfession {
         }
     }
 
-    autoIncrement(translations) {
+    autoIncrement() {
         this.exp += 1;
         this.updateExpDisplay();
         this.checkLevelUp();
-        this.collectResource(translations);
+        this.collectResource();
     }
 }

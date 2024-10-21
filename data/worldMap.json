@@ -1,0 +1,59 @@
+{
+  "worlds": [
+    {
+      "id": "green_fields",
+      "defaultName": "Green Fields",
+      "image": "path/to/green_fields.png",
+      "zones": [
+        {
+          "id": "peaceful_meadow",
+          "defaultName": "Peaceful Meadow",
+          "monsters": [
+            {
+              "id": "goblin",
+              "spawnRate": 0.7,
+              "levelRange": [1, 5]
+            }
+          ],
+          "resources": ["herb", "flower"]
+        },
+        {
+          "id": "dark_forest",
+          "defaultName": "Dark Forest",
+          "monsters": [
+            {
+              "id": "goblin",
+              "spawnRate": 0.5,
+              "levelRange": [3, 7]
+            },
+            {
+              "id": "wolf",
+              "spawnRate": 0.3,
+              "levelRange": [5, 10]
+            }
+          ],
+          "resources": ["oak_wood", "mushroom"]
+        }
+      ]
+    },
+    {
+      "id": "fiery_mountains",
+      "defaultName": "Fiery Mountains",
+      "image": "path/to/fiery_mountains.png",
+      "zones": [
+        {
+          "id": "dragon_peak",
+          "defaultName": "Dragon Peak",
+          "monsters": [
+            {
+              "id": "dragon",
+              "spawnRate": 0.1,
+              "levelRange": [30, 50]
+            }
+          ],
+          "resources": ["obsidian", "fire_crystal"]
+        }
+      ]
+    }
+  ]
+}

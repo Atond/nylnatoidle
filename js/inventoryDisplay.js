@@ -1,11 +1,12 @@
 import { globalInventory } from './inventory.js';
 import { globalResourceManager } from './resourceManager.js';
+import { globalTranslationManager } from './translations/translationManager.js';
 
 let currentPage = 1;
 const itemsPerPage = 10;
-const rowSize = 5; // Nombre d'éléments par ligne
+const rowSize = 5;
 
-export function updateInventoryDisplay(translations) {
+export function updateInventoryDisplay() {
     const inventoryElement = document.getElementById('profession-inventory');
     const allItems = globalInventory.getAllItems();
     const totalItems = allItems.length;
@@ -17,14 +18,12 @@ export function updateInventoryDisplay(translations) {
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
     const itemsToDisplay = allItems.slice(startIndex, endIndex);
 
-    // Créer une grille de 2x5
     const grid = document.createElement('div');
     grid.className = 'inventory-grid';
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = `repeat(${rowSize}, 1fr)`;
     grid.style.gap = '10px';
 
-    // Remplir la grille avec des emplacements (vides ou avec des ressources)
     for (let i = 0; i < itemsPerPage; i++) {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
@@ -32,13 +31,13 @@ export function updateInventoryDisplay(translations) {
         if (i < itemsToDisplay.length) {
             const { resource, quantity } = itemsToDisplay[i];
             if (resource) {
-                const resourceName = translations && translations.resources ? translations.resources[resource.id] : resource.id;
+                const resourceName = globalTranslationManager.translate(`resources.${resource.id}`);
                 slot.innerHTML = `
                     <img src="${resource.image}" alt="${resourceName}">
                     <div class="item-count">${quantity}</div>
                     <div class="tooltip">${resourceName}</div>
                 `;
-                slot.title = resourceName; // Ajout d'un titre pour l'infobulle native du navigateur
+                slot.title = resourceName;
             }
         } else {
             slot.innerHTML = '<div class="empty-slot"></div>';
@@ -49,7 +48,6 @@ export function updateInventoryDisplay(translations) {
 
     inventoryElement.appendChild(grid);
 
-    // Mise à jour de la pagination
     const paginationElement = document.getElementById('pagination');
     paginationElement.innerHTML = '';
 
@@ -58,7 +56,7 @@ export function updateInventoryDisplay(translations) {
         pageButton.innerText = i;
         pageButton.addEventListener('click', () => {
             currentPage = i;
-            updateInventoryDisplay(translations);
+            updateInventoryDisplay();
         });
         paginationElement.appendChild(pageButton);
     }

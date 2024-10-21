@@ -1,0 +1,32 @@
+{
+  "resources": [
+    {
+      "id": "goblin_ear",
+      "defaultName": "Goblin Ear",
+      "image": "path/to/goblin_ear.png",
+      "rarity": "common",
+      "value": 5
+    },
+    {
+      "id": "goblin_tooth",
+      "defaultName": "Goblin Tooth",
+      "image": "path/to/goblin_tooth.png",
+      "rarity": "uncommon",
+      "value": 10
+    },
+    {
+      "id": "dragon_scale",
+      "defaultName": "Dragon Scale",
+      "image": "path/to/dragon_scale.png",
+      "rarity": "rare",
+      "value": 100
+    },
+    {
+      "id": "dragon_heart",
+      "defaultName": "Dragon Heart",
+      "image": "path/to/dragon_heart.png",
+      "rarity": "epic",
+      "value": 500
+    }
+  ]
+}

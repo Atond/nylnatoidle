@@ -1,0 +1,42 @@
+{
+  "miner": [
+    {
+      "id": "iron_ore",
+      "defaultName": "Iron Ore",
+      "image": "images/resources/minerai.png",
+      "tier": 1
+    },
+    {
+      "id": "copper_ore",
+      "defaultName": "Copper Ore",
+      "image": "images/resources/minerai.png",
+      "tier": 1
+    },
+    {
+      "id": "gold_ore",
+      "defaultName": "Gold Ore",
+      "image": "images/resources/minerai.png",
+      "tier": 2
+    }
+  ],
+  "lumberjack": [
+    {
+      "id": "oak_wood",
+      "defaultName": "Oak Wood",
+      "image": "images/resources/minerai.png",
+      "tier": 1
+    },
+    {
+      "id": "pine_wood",
+      "defaultName": "Pine Wood",
+      "image": "images/resources/minerai.png",
+      "tier": 1
+    },
+    {
+      "id": "mahogany_wood",
+      "defaultName": "Mahogany Wood",
+      "image": "images/resources/minerai.png",
+      "tier": 2
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import { BaseProfession } from './baseprofession.js';
 import { globalInventory } from '../inventory.js';
 import { updateInventoryDisplay } from '../inventoryDisplay.js';
+import { globalTranslationManager } from '../translations/translationManager.js';
 
 export class Miner extends BaseProfession {
     constructor(resourceIds) {
@@ -30,7 +31,7 @@ export class Miner extends BaseProfession {
         this.unlockedUpgrades = new Set();
     }
 
-    mine(translations) {
+    mine() {
         const currentProgression = this.getCurrentProgression();
         const resource = this.getRandomResource(currentProgression.resources);
         if (resource) {
@@ -38,17 +39,17 @@ export class Miner extends BaseProfession {
             globalInventory.addItem(resource, amount);
             this.exp += amount;
             this.checkLevelUp();
-            this.updateResourcesDisplay(translations);
-            updateInventoryDisplay(translations);
+            this.updateResourcesDisplay();
+            updateInventoryDisplay();
             return amount;
         }
         return 0;
     }
 
-    autoMine(translations) {
+    autoMine() {
         let totalMined = 0;
         for (let i = 0; i < this.autoMinerCount; i++) {
-            totalMined += this.mine(translations);
+            totalMined += this.mine();
         }
         return totalMined;
     }
@@ -93,58 +94,43 @@ export class Miner extends BaseProfession {
         return false;
     }
 
-    updateDisplay(translations) {
-        if (!translations || !translations.miner) {
-            console.log("Traductions non disponibles, mise à jour de l'affichage reportée.");
-            return;
-        }
 
-        const minerTranslations = translations.miner;
-
+    updateDisplay() {
         super.updateExpDisplay();
         super.updateLevelDisplay();
         
-        // Update mining power display
         const miningPowerElement = document.getElementById('miner-mining-power');
         if (miningPowerElement) {
-            miningPowerElement.textContent = `${minerTranslations.miningPower}: ${this.miningPower.toFixed(1)}`;
+            miningPowerElement.textContent = `${globalTranslationManager.translate('professions.miner.miningPower')}: ${this.miningPower.toFixed(1)}`;
         }
 
-        // Update auto miner count display
         const autoMinerElement = document.getElementById('miner-auto-miners');
         if (autoMinerElement) {
-            autoMinerElement.textContent = `${minerTranslations.autoMiners}: ${this.autoMinerCount}`;
+            autoMinerElement.textContent = `${globalTranslationManager.translate('professions.miner.autoMiners')}: ${this.autoMinerCount}`;
         }
 
-        // Update experience and level display
         const expElement = document.getElementById('miner-exp');
         const nextLevel = this.getNextLevelProgression();
         if (expElement && nextLevel) {
             expElement.textContent = `${this.exp} / ${nextLevel.expRequired}`;
         }
 
-        // Update resources display
-        this.updateResourcesDisplay(translations);
-
-        // Update available upgrades
-        this.updateUpgradesDisplay(translations);
+        this.updateResourcesDisplay();
+        this.updateUpgradesDisplay();
     }
 
-    updateResourcesDisplay(translations) {
-        if (!translations || !translations.miner) return;
-        const minerTranslations = translations.miner;
+    updateResourcesDisplay() {
         const currentProgression = this.getCurrentProgression();
         const resourcesElement = document.getElementById('miner-resources');
         if (resourcesElement) {
             const resourceNames = currentProgression.resources
-                .map(id => minerTranslations.resources[id])
+                .map(id => globalTranslationManager.translate(`resources.${id}`))
                 .join(", ");
-            resourcesElement.textContent = resourceNames || "None";
+            resourcesElement.textContent = resourceNames || globalTranslationManager.translate('ui.none');
         }
     }
 
-    updateUpgradesDisplay(translations) {
-        const minerTranslations = translations.miner;
+    updateUpgradesDisplay() {
         const upgradesContainer = document.getElementById('miner-upgrades');
         if (upgradesContainer) {
             upgradesContainer.innerHTML = '';
@@ -152,15 +138,15 @@ export class Miner extends BaseProfession {
             availableUpgrades.forEach(upgrade => {
                 const upgradeButton = document.createElement('button');
                 const costText = Object.entries(upgrade.cost)
-                    .map(([resourceId, cost]) => `${minerTranslations.resources[resourceId]}: ${cost}`)
+                    .map(([resourceId, cost]) => `${globalTranslationManager.translate(`resources.${resourceId}`)}: ${cost}`)
                     .join(', ');
-                upgradeButton.textContent = `${minerTranslations.upgrades[upgrade.id]} (${costText})`;
+                upgradeButton.textContent = `${globalTranslationManager.translate(`professions.miner.upgrades.${upgrade.id}`)} (${costText})`;
                 upgradeButton.onclick = () => {
                     if (this.buyUpgrade(upgrade.id)) {
-                        this.updateDisplay(translations);
-                        updateInventoryDisplay(translations);
+                        this.updateDisplay();
+                        updateInventoryDisplay();
                     } else {
-                        console.log("Not enough resources");
+                        console.log(globalTranslationManager.translate('ui.notEnoughResources'));
                     }
                 };
                 upgradesContainer.appendChild(upgradeButton);
