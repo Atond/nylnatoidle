@@ -52,18 +52,27 @@ export class BaseProfession {
     }
 
     updateExpDisplay() {
-        document.getElementById(`${this.name}-exp`).innerText = this.exp;
+        const expElement = document.getElementById(`${this.name}-exp`);
+        if (expElement) {
+            expElement.innerText = this.exp;
+        }
     }
 
     updateLevelDisplay() {
-        document.getElementById(`${this.name}-level`).innerText = this.level;
+        const levelElement = document.getElementById(`${this.name}-level`);
+        if (levelElement) {
+            levelElement.innerText = this.level;
+        }
     }
 
     updateResourcesDisplay() {
-        const resources = this.resourceIds.slice(0, this.level)
-            .map(id => globalTranslationManager.translate(`resources.${id}`))
-            .join(", ") || globalTranslationManager.translate('ui.none');
-        document.getElementById(`${this.name}-resources`).innerText = resources;
+        const resourcesElement = document.getElementById(`${this.name}-resources`);
+        if (resourcesElement) {
+            const resources = this.resourceIds.slice(0, this.level)
+                .map(id => globalTranslationManager.translate(`resources.${id}`))
+                .join(", ") || globalTranslationManager.translate('ui.none');
+            resourcesElement.innerText = resources;
+        }
     }
 
     checkLevelUp() {

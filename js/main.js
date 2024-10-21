@@ -151,28 +151,40 @@ function selectProfession(professionName) {
 }
 
 function updateUITranslations() {
-    document.getElementById('title').innerText = globalTranslationManager.translate('ui.title');
-    document.getElementById('character-title').innerText = globalTranslationManager.translate('ui.characterTitle');
-    document.getElementById('character-name-label').innerText = globalTranslationManager.translate('ui.characterNameLabel');
-    document.getElementById('change-name').innerText = globalTranslationManager.translate('ui.changeName');
-    document.getElementById('save-name').innerText = globalTranslationManager.translate('ui.saveName');
-    document.getElementById('character-level-label').innerText = globalTranslationManager.translate('ui.characterLevelLabel');
-    document.getElementById('professions-title').innerText = globalTranslationManager.translate('ui.professionsTitle');
-    document.getElementById('miner-title').innerText = globalTranslationManager.translate('professions.miner.title');
-    document.getElementById('miner-exp-label').innerText = globalTranslationManager.translate('professions.miner.expLabel');
-    document.getElementById('miner-level-label').innerText = globalTranslationManager.translate('professions.miner.levelLabel');
-    document.getElementById('miner-resources-label').innerText = globalTranslationManager.translate('professions.miner.resourcesLabel');
-    document.getElementById('lumberjack-title').innerText = globalTranslationManager.translate('professions.lumberjack.title');
-    document.getElementById('lumberjack-exp-label').innerText = globalTranslationManager.translate('professions.lumberjack.expLabel');
-    document.getElementById('lumberjack-level-label').innerText = globalTranslationManager.translate('professions.lumberjack.levelLabel');
-    document.getElementById('lumberjack-resources-label').innerText = globalTranslationManager.translate('professions.lumberjack.resourcesLabel');
-    document.getElementById('auto-increment-title').innerText = globalTranslationManager.translate('ui.autoIncrementTitle');
-    document.getElementById('inventory-title').innerText = globalTranslationManager.translate('ui.inventoryTitle');
-    document.getElementById('attack-monster').innerText = globalTranslationManager.translate('ui.attack');
-    
+    const elements = {
+        'title': 'ui.title',
+        'character-title': 'ui.characterTitle',
+        'character-name-label': 'ui.characterNameLabel',
+        'change-name': 'ui.changeName',
+        'save-name': 'ui.saveName',
+        'character-level-label': 'ui.characterLevelLabel',
+        'professions-title': 'ui.professionsTitle',
+        'miner-title': 'professions.miner.title',
+        'miner-exp-label': 'professions.miner.expLabel',
+        'miner-level-label': 'professions.miner.levelLabel',
+        'miner-resources-label': 'professions.miner.resourcesLabel',
+        'lumberjack-title': 'professions.lumberjack.title',
+        'lumberjack-exp-label': 'professions.lumberjack.expLabel',
+        'lumberjack-level-label': 'professions.lumberjack.levelLabel',
+        'lumberjack-resources-label': 'professions.lumberjack.resourcesLabel',
+        'auto-increment-title': 'ui.autoIncrementTitle',
+        'inventory-title': 'ui.inventoryTitle',
+        'attack-monster': 'ui.attack'
+    };
+
+    for (const [id, translationKey] of Object.entries(elements)) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerText = globalTranslationManager.translate(translationKey);
+        }
+    }
+
     updateInventoryDisplay();
-    professions.miner.updateDisplay();
-    professions.lumberjack.updateDisplay();
+    for (const profession of Object.values(professions)) {
+        if (typeof profession.updateDisplay === 'function') {
+            profession.updateDisplay();
+        }
+    }
 }
 
 window.showTab = function (tabId) {
