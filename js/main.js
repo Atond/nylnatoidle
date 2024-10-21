@@ -3,7 +3,7 @@ import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
 import { Inventory } from './inventory.js'; 
-import { initializeInventoryDisplay, updateInventoryDisplay } from './inventoryDisplay.js';
+import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { ResourceManager } from './resourceManager.js';
 
 let minerResources = [];
@@ -74,8 +74,6 @@ function initializeGame() {
             addLoot(loot);
         }
     });
-
-    initializeInventoryDisplay(playerInventory, resourceManager);
 
     updateExperienceBar();
     loadGame();
