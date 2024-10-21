@@ -1,6 +1,6 @@
 // baseprofession.js
-import { globalResourceManager } from './resourceManager.js';
-import { globalInventory } from './inventory.js';
+import { globalResourceManager } from '../resourceManager.js';
+import { globalInventory } from '../inventory.js';
 
 export class BaseProfession {
     constructor(name, resourceIds) {
