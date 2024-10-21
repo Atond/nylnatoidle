@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
     .then(response => response.json())
     .then(data => {
+        minerResources = data.minerResources;
+        lumberjackResources = data.lumberjackResources;
+        worlds = data.worlds;
+        zones = data.zones;
+        miner = new Miner(minerResources); // Initialize miner
+        lumberjack = new Lumberjack(lumberjackResources); // Initialize lumberjack
         data.minerResources.forEach(resource => resourceManager.addResource(resource));
         data.lumberjackResources.forEach(resource => resourceManager.addResource(resource));
         // Ajoutez ici d'autres types de ressources au fur et à mesure que vous ajoutez des métiers
