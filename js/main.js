@@ -11,8 +11,7 @@ let worlds = [];
 let zones = [];
 let autoIncrementInterval;
 
-export let miner;
-export let lumberjack;
+export let professions = {};
 
 let playerExperience = 0;
 const experienceToNextLevel = 100;
@@ -28,8 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         zones = data.zones;
         const minerResourceIds = data.minerResources.map(resource => resource.id);
         const lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
-        miner = new Miner(minerResourceIds);
-        lumberjack = new Lumberjack(lumberjackResourceIds);
+
+        professions = {
+            miner: new Miner(minerResourceIds),
+            lumberjack: new Lumberjack(lumberjackResourceIds),
+        };
         
         // Charger les traductions avant d'initialiser le jeu
         await globalTranslationManager.loadTranslations('fr');
@@ -39,19 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-export const professions = {
-    miner: new Miner(minerResourceIds),
-    lumberjack: new Lumberjack(lumberjackResourceIds),
-    // Ajoutez d'autres métiers ici à l'avenir
-};
-
 function initializeGame() {
     document.getElementById('auto-increment-select').addEventListener('change', (event) => {
         clearInterval(autoIncrementInterval);
         if (event.target.value === 'miner') {
-            autoIncrementInterval = setInterval(() => miner.autoIncrement(), 1000);
+            autoIncrementInterval = setInterval(() => professions.miner.autoIncrement(), 1000);
         } else if (event.target.value === 'lumberjack') {
-            autoIncrementInterval = setInterval(() => lumberjack.autoIncrement(), 1000);
+            autoIncrementInterval = setInterval(() => professions.lumberjack.autoIncrement(), 1000);
         }
     });
 
@@ -76,33 +72,21 @@ function initializeGame() {
         updateUITranslations();
     });
 
-    monsterManager.setWorld("Forest");
-    monsterManager.setZone("Dark Woods");
-    monsterManager.spawnMonster();
-
-    document.getElementById('attack-monster').addEventListener('click', () => {
-        const { expGained, loot } = monsterManager.attackMonster(1);
-        if (expGained > 0) {
-            addExperience(expGained);
-            addLoot(loot);
-        }
-    });
-
     document.getElementById('mine-button').addEventListener('click', () => {
-        const minedAmount = miner.mine();
+        const minedAmount = professions.miner.mine();
         console.log(`Mined ${minedAmount} ore`);
-        miner.updateDisplay();
+        professions.miner.updateDisplay();
     });
 
     displayProfessionsList();
 
     // Démarrer l'auto-minage
     setInterval(() => {
-        if (miner.autoMinerCount > 0) {
-            const autoMinedAmount = miner.autoMine();
+        if (professions.miner.autoMinerCount > 0) {
+            const autoMinedAmount = professions.miner.autoMine();
             if (autoMinedAmount > 0) {
                 console.log(`Auto-mined ${autoMinedAmount} ore`);
-                miner.updateDisplay();
+                professions.miner.updateDisplay();
             }
         }
     }, 1000);  // Vérifier toutes les secondes
@@ -187,8 +171,8 @@ function updateUITranslations() {
     document.getElementById('attack-monster').innerText = globalTranslationManager.translate('ui.attack');
     
     updateInventoryDisplay();
-    miner.updateDisplay();
-    lumberjack.updateDisplay();
+    professions.miner.updateDisplay();
+    professions.lumberjack.updateDisplay();
 }
 
 window.showTab = function (tabId) {

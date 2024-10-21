@@ -6,7 +6,7 @@ class TranslationManager {
 
     async loadTranslations(language) {
         try {
-            const response = await fetch(`/translations/${language}.json`);
+            const response = await fetch(`/${language}.json`);
             const translations = await response.json();
             this.translations.set(language, translations);
             this.currentLanguage = language;
