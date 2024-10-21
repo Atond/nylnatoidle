@@ -15,3 +15,6 @@ export class ResourceManager {
         return Array.from(this.resources.values());
     }
 }
+
+// Créer une instance globale
+export const globalResourceManager = new ResourceManager();

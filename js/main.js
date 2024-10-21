@@ -2,20 +2,16 @@ import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
 import { MonsterManager } from './enemies/monster.js';
-import { Inventory } from './inventory.js'; 
+import { globalInventory  } from './inventory.js'; 
 import { updateInventoryDisplay } from './inventoryDisplay.js';
-import { ResourceManager } from './resourceManager.js';
+import { globalResourceManager  } from './resourceManager.js';
 
-let minerResourceIds = [];
-let lumberjackResourceIds = [];
 let worlds = [];
 let zones = [];
 let autoIncrementInterval;
 
 export let miner;
 export let lumberjack;
-export const playerInventory = new Inventory(); 
-export const resourceManager = new ResourceManager();
 const monsterManager = new MonsterManager();
 
 let playerExperience = 0;
@@ -26,17 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
     .then(response => response.json())
     .then(data => {
-        minerResourceIds = data.minerResources.map(resource => resource.id);
-        lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
+        data.minerResources.forEach(resource => globalResourceManager.addResource(resource));
+        data.lumberjackResources.forEach(resource => globalResourceManager.addResource(resource));
         worlds = data.worlds;
         zones = data.zones;
-        miner = new Miner(minerResourceIds); // Initialize miner with resource IDs
-        lumberjack = new Lumberjack(lumberjackResourceIds); // Initialize lumberjack with resource IDs
-        miner.setResources(data.minerResources); // Set actual resources for miner
-        lumberjack.setResources(data.lumberjackResources); // Set actual resources for lumberjack
-        data.minerResources.forEach(resource => resourceManager.addResource(resource));
-        data.lumberjackResources.forEach(resource => resourceManager.addResource(resource));
-        // Ajoutez ici d'autres types de ressources au fur et à mesure que vous ajoutez des métiers
+        const minerResourceIds = data.minerResources.map(resource => resource.id);
+        const lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
+        miner = new Miner(minerResourceIds);
+        lumberjack = new Lumberjack(lumberjackResourceIds);
         initializeGame();
     });
 });
@@ -82,7 +75,7 @@ function initializeGame() {
             addLoot(loot);
         }
     });
-
+    updateInventoryDisplay(currentTranslations);
     updateExperienceBar();
     loadGame();
     loadTranslations('fr');
@@ -107,7 +100,7 @@ function updateExperienceBar() {
 
 function addLoot(loot) {
     for (const item of loot) {
-        playerInventory.addItem(item, 1);
+        globalInventory.addItem(item, 1);
     }
     updateInventoryDisplay(currentTranslations);
 }

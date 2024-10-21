@@ -1,10 +1,13 @@
+// baseprofession.js
+import { globalResourceManager } from './resourceManager.js';
+import { globalInventory } from './inventory.js';
+
 export class BaseProfession {
-    constructor(name, Resources) {
+    constructor(name, resourceIds) {
         this.name = name;
         this.resourceIds = resourceIds;
         this.exp = 0;
         this.level = 1;
-        this.resources = resources;
     }
 
     getRandomResource() {
@@ -18,7 +21,16 @@ export class BaseProfession {
             }
         }
         const randomResourceId = weightedResources[Math.floor(Math.random() * weightedResources.length)];
-        return resourceManager.getResource(randomResourceId);
+        return globalResourceManager.getResource(randomResourceId);
+    }
+
+    collectResource() {
+        const resource = this.getRandomResource();
+        if (resource) {
+            globalInventory.addItem(resource.id, 1);
+            this.exp += 1;
+            this.checkLevelUp();
+        }
     }
     
     setExp(value) {
@@ -29,6 +41,10 @@ export class BaseProfession {
     setLevel(value) {
         this.level = value;
         this.updateLevelDisplay();
+    }
+
+    setResources(resources) {
+        this.resources = resources;
     }
 
     updateExpDisplay() {
@@ -69,27 +85,6 @@ export class BaseProfession {
             this.updateLevelDisplay();
             this.updateResourcesDisplay();
         }
-    }
-
-    collectResource() {
-        const resource = this.getRandomResource();
-        if (resource) {
-            playerInventory.addItem(resource.id, 1);
-            updateInventoryDisplay(currentTranslations); // Assurez-vous d'avoir une variable currentTranslations
-        }
-    }
-
-    getRandomResource() {
-        if (this.resources.length === 0) {
-            return null;
-        }
-        const weightedResources = [];
-        for (let i = 0; i < this.level; i++) {
-            for (let j = 0; j < this.level - i; j++) {
-                weightedResources.push(this.resources[i]);
-            }
-        }
-        return weightedResources[Math.floor(Math.random() * weightedResources.length)];
     }
 
     autoIncrement() {

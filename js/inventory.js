@@ -1,30 +1,36 @@
+import { globalResourceManager } from './resourceManager.js';
+
 export class Inventory {
     constructor() {
-        this.items = {};
+        this.items = new Map();
     }
 
-    addItem(itemId, quantity = 1) {
-        if (this.items[itemId]) {
-            this.items[itemId] += quantity;
+    addItem(resourceId, quantity = 1) {
+        const currentQuantity = this.items.get(resourceId) || 0;
+        this.items.set(resourceId, currentQuantity + quantity);
+    }
+
+    removeItem(resourceId, quantity = 1) {
+        const currentQuantity = this.items.get(resourceId) || 0;
+        const newQuantity = Math.max(0, currentQuantity - quantity);
+        if (newQuantity === 0) {
+            this.items.delete(resourceId);
         } else {
-            this.items[itemId] = quantity;
+            this.items.set(resourceId, newQuantity);
         }
     }
 
-    removeItem(itemId, quantity = 1) {
-        if (this.items[itemId]) {
-            this.items[itemId] = Math.max(0, this.items[itemId] - quantity);
-            if (this.items[itemId] === 0) {
-                delete this.items[itemId];
-            }
-        }
-    }
-
-    getItemQuantity(itemId) {
-        return this.items[itemId] || 0;
+    getItemQuantity(resourceId) {
+        return this.items.get(resourceId) || 0;
     }
 
     getAllItems() {
-        return { ...this.items };
+        return Array.from(this.items.entries()).map(([resourceId, quantity]) => {
+            const resource = globalResourceManager.getResource(resourceId);
+            return { resource, quantity };
+        });
     }
 }
+
+// Créer une instance globale
+export const globalInventory = new Inventory();
