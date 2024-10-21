@@ -6,6 +6,7 @@
         "changeName": "Changer le Nom",
         "saveName": "Enregistrer le Nom",
         "characterLevelLabel": "Niveau:",
+        "xp" : "XP",
         "professionsTitle": "Métiers",
         "autoIncrementTitle": "Auto-Incrément",
         "inventoryTitle": "Inventaire",
