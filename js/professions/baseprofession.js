@@ -30,6 +30,8 @@ export class BaseProfession {
             globalInventory.addItem(resource.id, 1);
             this.exp += 1;
             this.checkLevelUp();
+            this.updateResourcesDisplay(currentTranslations);
+            updateInventoryDisplay(currentTranslations);
         }
     }
     
@@ -57,7 +59,9 @@ export class BaseProfession {
 
     updateResourcesDisplay(translations) {
         if (!translations) return;
-        const resources = this.resources.slice(0, this.level).map(res => translations.resources[res.id]).join(", ") || "None";
+        const resources = this.resourceIds.slice(0, this.level)
+            .map(id => translations.resources[id])
+            .join(", ") || "None";
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
@@ -65,7 +69,7 @@ export class BaseProfession {
         if (this.exp >= this.level * 100) {
             this.level += 1;
             this.updateLevelDisplay();
-            this.updateResourcesDisplay();
+            this.updateResourcesDisplay(currentTranslations);
         }
     }
 
