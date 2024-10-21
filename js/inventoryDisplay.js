@@ -32,11 +32,13 @@ export function updateInventoryDisplay(translations) {
         if (i < itemsToDisplay.length) {
             const { resource, quantity } = itemsToDisplay[i];
             if (resource) {
+                const resourceName = translations && translations.resources ? translations.resources[resource.id] : resource.id;
                 slot.innerHTML = `
-                    <img src="${resource.image}" alt="${translations && translations.resources ? translations.resources[resource.id] : resource.id}">
+                    <img src="${resource.image}" alt="${resourceName}">
                     <div class="item-count">${quantity}</div>
-                    <div class="tooltip">${translations && translations.resources ? translations.resources[resource.id] : resource.id}</div>
+                    <div class="tooltip">${resourceName}</div>
                 `;
+                slot.title = resourceName; // Ajout d'un titre pour l'infobulle native du navigateur
             }
         } else {
             slot.innerHTML = '<div class="empty-slot"></div>';
