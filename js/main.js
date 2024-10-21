@@ -60,6 +60,12 @@ function initializeGame() {
         }
     });
 
+    document.getElementById('mine-button').addEventListener('click', () => {
+        const minedAmount = miner.mine(currentTranslations);
+        console.log(`Mined ${minedAmount} ore`);
+        miner.updateDisplay(currentTranslations);
+    });
+
     document.getElementById('language-select').addEventListener('change', (event) => {
         loadTranslations(event.target.value);
     });
@@ -75,6 +81,16 @@ function initializeGame() {
             addLoot(loot);
         }
     });
+
+    // Démarrer l'auto-minage
+    setInterval(() => {
+        const autoMinedAmount = miner.autoMine(currentTranslations);
+        if (autoMinedAmount > 0) {
+            console.log(`Auto-mined ${autoMinedAmount} ore`);
+            miner.updateDisplay(currentTranslations);
+        }
+    }, 1000);  // Vérifier toutes les secondes
+
     updateInventoryDisplay(currentTranslations);
     updateExperienceBar();
     loadGame();
@@ -130,6 +146,7 @@ export function loadTranslations(language) {
             document.getElementById('inventory-title').innerText = translations.inventoryTitle;
             document.getElementById('attack-monster').innerText = translations.attack;
             updateInventoryDisplay(translations);
+            miner.updateDisplay(translations);
         });
 }
 
