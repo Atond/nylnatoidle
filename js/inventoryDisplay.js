@@ -1,29 +1,29 @@
-import { playerInventory, currentTranslations } from './main.js';
+import { globalInventory } from './inventory.js';
+import { globalResourceManager } from './resourceManager.js';
 
 let currentPage = 1;
 const itemsPerPage = 10;
 
 export function updateInventoryDisplay(translations) {
     const inventoryElement = document.getElementById('profession-inventory');
-    const allItems = playerInventory.getAllItems();
-    const totalItems = Object.keys(allItems).length;
+    const allItems = globalInventory.getAllItems();
+    const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
     inventoryElement.innerHTML = '';
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-    const itemsToDisplay = Object.entries(allItems).slice(startIndex, endIndex);
+    const itemsToDisplay = allItems.slice(startIndex, endIndex);
 
-    for (const [resourceId, count] of itemsToDisplay) {
-        const resource = resourceManager.getResource(resourceId); // Use resourceManager to get resource data
+    for (const { resource, quantity } of itemsToDisplay) {
         if (resource) {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
             slot.innerHTML = `
-                <img src="${resource.image}" alt="${translations.resources[resourceId]}">
-                <div class="item-count">${count}</div>
-                <div class="tooltip">${translations.resources[resourceId]}</div>
+                <img src="${resource.image}" alt="${translations.resources[resource.id]}">
+                <div class="item-count">${quantity}</div>
+                <div class="tooltip">${translations.resources[resource.id]}</div>
             `;
             inventoryElement.appendChild(slot);
         }

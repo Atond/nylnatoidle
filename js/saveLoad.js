@@ -1,6 +1,7 @@
 import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
-import { miner, lumberjack, loadTranslations, playerInventory } from './main.js'; // Import the necessary functions and variables
-import { updateInventoryDisplay } from './inventoryDisplay.js'; // Import updateInventoryDisplay directly from inventoryDisplay.js
+import { miner, lumberjack, loadTranslations } from './main.js';
+import { updateInventoryDisplay } from './inventoryDisplay.js';
+import { globalInventory } from './inventory.js';
 
 export function saveGame() {
     const gameState = {
@@ -9,7 +10,7 @@ export function saveGame() {
         minerLevel: miner.level,
         lumberjackExp: lumberjack.exp,
         lumberjackLevel: lumberjack.level,
-        inventory: playerInventory.getAllItems(),
+        inventory: Array.from(globalInventory.items.entries()),
         characterName: document.getElementById('character-name').innerText
     };
     localStorage.setItem('idleRPGSave', JSON.stringify(gameState));
@@ -27,9 +28,9 @@ export function loadGame() {
         lumberjack.setLevel(gameState.lumberjackLevel);
         
         // Charger l'inventaire
-        const inventory = gameState.inventory || {}; // Ensure inventory is an object
-        for (const [itemId, quantity] of Object.entries(inventory)) {
-            playerInventory.addItem(itemId, quantity);
+        globalInventory.items.clear();
+        for (const [itemId, quantity] of gameState.inventory) {
+            globalInventory.addItem(itemId, quantity);
         }
         
         document.getElementById('character-name').innerText = gameState.characterName || 'Unknown';
@@ -45,6 +46,3 @@ export function loadGame() {
         });
     }
 }
-
-// Sauvegarder automatiquement toutes les 30 secondes
-setInterval(saveGame, 30000);

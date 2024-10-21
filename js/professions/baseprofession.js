@@ -61,24 +61,6 @@ export class BaseProfession {
         document.getElementById(`${this.name}-resources`).innerText = resources;
     }
 
-    updateInventoryDisplay(translations, inventoryElement) {
-        if (!translations) return;
-        inventoryElement.innerHTML = '';
-        for (const [resourceId, count] of Object.entries(this.inventory)) {
-            const resourceData = this.resources.find(res => res.id === resourceId);
-            if (resourceData) {
-                const slot = document.createElement('div');
-                slot.className = 'inventory-slot';
-                slot.innerHTML = `
-                    <img src="${resourceData.image}" alt="${translations.resources[resourceId]}">
-                    <div class="item-count">${count}</div>
-                    <div class="tooltip">${translations.resources[resourceId]}</div>
-                `;
-                inventoryElement.appendChild(slot);
-            }
-        }
-    }
-
     checkLevelUp() {
         if (this.exp >= this.level * 100) {
             this.level += 1;
