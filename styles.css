@@ -150,6 +150,13 @@ button:hover {
     display: block;
 }
 
+.empty-slot {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+}
+
 #monster {
     margin-top: 20px;
     padding: 10px;

@@ -16,17 +16,27 @@ export function updateInventoryDisplay(translations) {
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
     const itemsToDisplay = allItems.slice(startIndex, endIndex);
 
+    // Ajouter des emplacements vides si nécessaire pour compléter la page
+    while (itemsToDisplay.length < itemsPerPage) {
+        itemsToDisplay.push({ resource: null, quantity: 0 });
+    }
+
     for (const { resource, quantity } of itemsToDisplay) {
+        const slot = document.createElement('div');
+        slot.className = 'inventory-slot';
+        
         if (resource) {
-            const slot = document.createElement('div');
-            slot.className = 'inventory-slot';
             slot.innerHTML = `
                 <img src="${resource.image}" alt="${translations && translations.resources ? translations.resources[resource.id] : resource.id}">
                 <div class="item-count">${quantity}</div>
                 <div class="tooltip">${translations && translations.resources ? translations.resources[resource.id] : resource.id}</div>
             `;
-            inventoryElement.appendChild(slot);
+        } else {
+            // Emplacement vide
+            slot.innerHTML = '<div class="empty-slot"></div>';
         }
+        
+        inventoryElement.appendChild(slot);
     }
 
     const paginationElement = document.getElementById('pagination');
