@@ -7,16 +7,49 @@ export class Miner extends BaseProfession {
         super('miner', resourceIds);
         this.miningPower = 1;
         this.autoMinerCount = 0;
-        this.upgrades = [
-            { id: 'betterPickaxe', name: 'Better Pickaxe', cost: 10, effect: () => { this.miningPower += 1; } },
-            { id: 'efficientTechnique', name: 'Efficient Technique', cost: 50, effect: () => { this.miningPower *= 1.5; } },
-            { id: 'autoMiner', name: 'Auto Miner', cost: 100, effect: () => { this.autoMinerCount += 1; } },
+        this.progression = [
+            {
+                level: 1,
+                expRequired: 0,
+                resources: ['minerai111'],
+                upgrades: [
+                    { id: 'betterPickaxe1', name: 'Better Pickaxe I', cost: { minerai111: 10 }, effect: () => { this.miningPower += 1; } },
+                ]
+            },
+            {
+                level: 2,
+                expRequired: 100,
+                resources: ['minerai111', 'minerai112'],
+                upgrades: [
+                    { id: 'betterPickaxe2', name: 'Better Pickaxe II', cost: { minerai111: 20, minerai112: 5 }, effect: () => { this.miningPower += 2; } },
+                    { id: 'autoMiner1', name: 'Auto Miner I', cost: { minerai111: 50, minerai112: 20 }, effect: () => { this.autoMinerCount += 1; } },
+                ]
+            },
+            {
+                level: 3,
+                expRequired: 300,
+                resources: ['minerai111', 'minerai112', 'minerai113'],
+                upgrades: [
+                    { id: 'efficientTechnique1', name: 'Efficient Technique I', cost: { minerai112: 30, minerai113: 10 }, effect: () => { this.miningPower *= 1.5; } },
+                    { id: 'autoMiner2', name: 'Auto Miner II', cost: { minerai112: 80, minerai113: 40 }, effect: () => { this.autoMinerCount += 2; } },
+                ]
+            },
+            {
+                level: 4,
+                expRequired: 600,
+                resources: ['minerai111', 'minerai112', 'minerai113', 'minerai114'],
+                upgrades: [
+                    { id: 'betterPickaxe3', name: 'Better Pickaxe III', cost: { minerai113: 40, minerai114: 20 }, effect: () => { this.miningPower += 5; } },
+                ]
+            },
+            // Ajoutez plus de niveaux ici...
         ];
         this.unlockedUpgrades = new Set();
     }
 
     mine(translations) {
-        const resource = this.getRandomResource();
+        const currentProgression = this.getCurrentProgression();
+        const resource = this.getRandomResource(currentProgression.resources);
         if (resource) {
             const amount = Math.floor(this.miningPower);
             globalInventory.addItem(resource.id, amount);
@@ -27,6 +60,23 @@ export class Miner extends BaseProfession {
             return amount;
         }
         return 0;
+    }
+
+    checkLevelUp() {
+        const nextLevel = this.progression.find(p => p.level === this.level + 1);
+        if (nextLevel && this.exp >= nextLevel.expRequired) {
+            this.level += 1;
+            this.updateLevelDisplay();
+            // Vous pouvez ajouter ici une notification ou un effet visuel pour le passage de niveau
+        }
+    }
+
+    getCurrentProgression() {
+        return this.progression.filter(p => p.level <= this.level).pop();
+    }
+
+    getNextLevelProgression() {
+        return this.progression.find(p => p.level === this.level + 1);
     }
 
     autoMine(translations) {
@@ -71,15 +121,10 @@ export class Miner extends BaseProfession {
     }
 
     updateDisplay(translations) {
-        const minerTranslations = translations.miner;
-        
-        document.getElementById('miner-title').textContent = minerTranslations.title;
-        document.getElementById('miner-exp-label').textContent = minerTranslations.expLabel;
-        document.getElementById('miner-level-label').textContent = minerTranslations.levelLabel;
-        document.getElementById('miner-resources-label').textContent = minerTranslations.resourcesLabel;
-        
         super.updateExpDisplay();
         super.updateLevelDisplay();
+        
+        const minerTranslations = translations.miner;
         
         // Update mining power display
         const miningPowerElement = document.getElementById('miner-mining-power');
@@ -93,17 +138,18 @@ export class Miner extends BaseProfession {
             autoMinerElement.textContent = `${minerTranslations.autoMiners}: ${this.autoMinerCount}`;
         }
 
-        // Update resources display
-        const resourcesElement = document.getElementById('miner-resources');
-        if (resourcesElement) {
-            const resourceNames = this.resourceIds.slice(0, this.level)
-                .map(id => minerTranslations.resources[id])
-                .join(", ");
-            resourcesElement.textContent = resourceNames || "None";
+        // Update experience and level display
+        const expElement = document.getElementById('miner-exp');
+        const nextLevel = this.getNextLevelProgression();
+        if (expElement && nextLevel) {
+            expElement.textContent = `${this.exp} / ${nextLevel.expRequired}`;
         }
 
+        // Update resources display
+        this.updateResourcesDisplay(translations);
+
         // Update available upgrades
-        this.updateUpgradesDisplay(minerTranslations);
+        this.updateUpgradesDisplay(translations);
     }
 
     updateUpgradesDisplay(minerTranslations) {

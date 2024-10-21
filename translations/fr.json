@@ -14,6 +14,7 @@
     "miner": {
         "title": "Mineur",
         "expLabel": "Expérience:",
+        "expRequired": "Expérience requise pour le niveau suivant:",
         "levelLabel": "Niveau:",
         "resourcesLabel": "Ressources:",
         "miningPower": "Puissance de Minage",
@@ -40,6 +41,7 @@
     "lumberjack": {
         "title": "Bûcheron",
         "expLabel": "Expérience:",
+        "expRequired": "Expérience requise pour le niveau suivant:",
         "levelLabel": "Niveau:",
         "resourcesLabel": "Ressources:",
         "resources": {

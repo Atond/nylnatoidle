@@ -14,6 +14,7 @@
     "miner": {
         "title": "Miner",
         "expLabel": "Experience:",
+        "expRequired": "Experience required for next level:",
         "levelLabel": "Level:",
         "resourcesLabel": "Resources:",
         "miningPower": "Mining Power",
@@ -40,6 +41,7 @@
     "lumberjack": {
         "title": "Lumberjack",
         "expLabel": "Experience:",
+        "expRequired": "Experience required for next level:",
         "levelLabel": "Level:",
         "resourcesLabel": "Resources:",
         "resources": {
