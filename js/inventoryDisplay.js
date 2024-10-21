@@ -1,4 +1,3 @@
-import { getResourceData } from './resourceManager.js';
 import { playerInventory, currentTranslations } from './main.js';
 
 let currentPage = 1;
