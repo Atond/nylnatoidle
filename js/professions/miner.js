@@ -99,10 +99,10 @@ export class Miner extends BaseProfession {
             return;
         }
 
+        const minerTranslations = translations.miner;
+
         super.updateExpDisplay();
         super.updateLevelDisplay();
-        
-        const minerTranslations = translations.miner;
         
         // Update mining power display
         const miningPowerElement = document.getElementById('miner-mining-power');
