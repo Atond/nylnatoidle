@@ -60,12 +60,6 @@ function initializeGame() {
         }
     });
 
-    document.getElementById('mine-button').addEventListener('click', () => {
-        const minedAmount = miner.mine(currentTranslations);
-        console.log(`Mined ${minedAmount} ore`);
-        miner.updateDisplay(currentTranslations);
-    });
-
     document.getElementById('language-select').addEventListener('change', (event) => {
         loadTranslations(event.target.value);
     });
@@ -80,6 +74,12 @@ function initializeGame() {
             addExperience(expGained);
             addLoot(loot);
         }
+    });
+
+    document.getElementById('mine-button').addEventListener('click', () => {
+        const minedAmount = miner.mine(currentTranslations);
+        console.log(`Mined ${minedAmount} ore`);
+        miner.updateDisplay(currentTranslations);
     });
 
     // Démarrer l'auto-minage

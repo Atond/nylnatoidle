@@ -25,24 +25,7 @@ export class Miner extends BaseProfession {
                     { id: 'autoMiner1', name: 'Auto Miner I', cost: { minerai111: 50, minerai112: 20 }, effect: () => { this.autoMinerCount += 1; } },
                 ]
             },
-            {
-                level: 3,
-                expRequired: 300,
-                resources: ['minerai111', 'minerai112', 'minerai113'],
-                upgrades: [
-                    { id: 'efficientTechnique1', name: 'Efficient Technique I', cost: { minerai112: 30, minerai113: 10 }, effect: () => { this.miningPower *= 1.5; } },
-                    { id: 'autoMiner2', name: 'Auto Miner II', cost: { minerai112: 80, minerai113: 40 }, effect: () => { this.autoMinerCount += 2; } },
-                ]
-            },
-            {
-                level: 4,
-                expRequired: 600,
-                resources: ['minerai111', 'minerai112', 'minerai113', 'minerai114'],
-                upgrades: [
-                    { id: 'betterPickaxe3', name: 'Better Pickaxe III', cost: { minerai113: 40, minerai114: 20 }, effect: () => { this.miningPower += 5; } },
-                ]
-            },
-            // Ajoutez plus de niveaux ici...
+            // Ajoutez d'autres niveaux ici...
         ];
         this.unlockedUpgrades = new Set();
     }
@@ -52,7 +35,7 @@ export class Miner extends BaseProfession {
         const resource = this.getRandomResource(currentProgression.resources);
         if (resource) {
             const amount = Math.floor(this.miningPower);
-            globalInventory.addItem(resource.id, amount);
+            globalInventory.addItem(resource, amount);
             this.exp += amount;
             this.checkLevelUp();
             this.updateResourcesDisplay(translations);
@@ -62,13 +45,11 @@ export class Miner extends BaseProfession {
         return 0;
     }
 
-    checkLevelUp() {
-        const nextLevel = this.progression.find(p => p.level === this.level + 1);
-        if (nextLevel && this.exp >= nextLevel.expRequired) {
-            this.level += 1;
-            this.updateLevelDisplay();
-            // Vous pouvez ajouter ici une notification ou un effet visuel pour le passage de niveau
+    getRandomResource(availableResources) {
+        if (availableResources.length === 0) {
+            return null;
         }
+        return availableResources[Math.floor(Math.random() * availableResources.length)];
     }
 
     getCurrentProgression() {
@@ -79,45 +60,29 @@ export class Miner extends BaseProfession {
         return this.progression.find(p => p.level === this.level + 1);
     }
 
-    autoMine(translations) {
-        if (this.autoMinerCount > 0) {
-            const totalMined = this.autoMinerCount * this.mine(translations);
-            return totalMined;
-        }
-        return 0;
+    getAvailableUpgrades() {
+        const currentProgression = this.getCurrentProgression();
+        return currentProgression.upgrades.filter(u => !this.unlockedUpgrades.has(u.id));
     }
 
     buyUpgrade(upgradeId) {
-        const upgrade = this.upgrades.find(u => u.id === upgradeId);
-        if (upgrade && !this.unlockedUpgrades.has(upgradeId)) {
-            const oreCost = upgrade.cost;
-            let totalOre = 0;
-            for (const resourceId of this.resourceIds) {
-                totalOre += globalInventory.getItemQuantity(resourceId);
-            }
-            if (totalOre >= oreCost) {
-                // Deduct the cost
-                let remainingCost = oreCost;
-                for (const resourceId of this.resourceIds) {
-                    const quantity = globalInventory.getItemQuantity(resourceId);
-                    if (quantity > 0) {
-                        const deduct = Math.min(quantity, remainingCost);
-                        globalInventory.removeItem(resourceId, deduct);
-                        remainingCost -= deduct;
-                        if (remainingCost <= 0) break;
-                    }
+        const upgrade = this.getAvailableUpgrades().find(u => u.id === upgradeId);
+        if (upgrade) {
+            for (const [resourceId, cost] of Object.entries(upgrade.cost)) {
+                if (globalInventory.getItemQuantity(resourceId) < cost) {
+                    return false; // Not enough resources
                 }
-                // Apply the upgrade
-                upgrade.effect();
-                this.unlockedUpgrades.add(upgradeId);
-                return true;
             }
+            // Deduct the cost
+            for (const [resourceId, cost] of Object.entries(upgrade.cost)) {
+                globalInventory.removeItem(resourceId, cost);
+            }
+            // Apply the upgrade
+            upgrade.effect();
+            this.unlockedUpgrades.add(upgradeId);
+            return true;
         }
         return false;
-    }
-
-    getAvailableUpgrades() {
-        return this.upgrades.filter(u => !this.unlockedUpgrades.has(u.id) && this.level >= 2);
     }
 
     updateDisplay(translations) {
@@ -152,22 +117,49 @@ export class Miner extends BaseProfession {
         this.updateUpgradesDisplay(translations);
     }
 
-    updateUpgradesDisplay(minerTranslations) {
+    updateResourcesDisplay(translations) {
+        const minerTranslations = translations.miner;
+        const currentProgression = this.getCurrentProgression();
+        const resourcesElement = document.getElementById('miner-resources');
+        if (resourcesElement) {
+            const resourceNames = currentProgression.resources
+                .map(id => minerTranslations.resources[id])
+                .join(", ");
+            resourcesElement.textContent = resourceNames || "None";
+        }
+    }
+
+    updateUpgradesDisplay(translations) {
+        const minerTranslations = translations.miner;
         const upgradesContainer = document.getElementById('miner-upgrades');
         if (upgradesContainer) {
             upgradesContainer.innerHTML = '';
             const availableUpgrades = this.getAvailableUpgrades();
             availableUpgrades.forEach(upgrade => {
                 const upgradeButton = document.createElement('button');
-                upgradeButton.textContent = `${minerTranslations.upgrades[upgrade.id]} (${upgrade.cost} ore)`;
+                const costText = Object.entries(upgrade.cost)
+                    .map(([resourceId, cost]) => `${minerTranslations.resources[resourceId]}: ${cost}`)
+                    .join(', ');
+                upgradeButton.textContent = `${minerTranslations.upgrades[upgrade.id]} (${costText})`;
                 upgradeButton.onclick = () => {
                     if (this.buyUpgrade(upgrade.id)) {
-                        this.updateDisplay(minerTranslations);
-                        updateInventoryDisplay(minerTranslations);
+                        this.updateDisplay(translations);
+                        updateInventoryDisplay(translations);
+                    } else {
+                        console.log("Not enough resources");
                     }
                 };
                 upgradesContainer.appendChild(upgradeButton);
             });
+        }
+    }
+
+    checkLevelUp() {
+        const nextLevel = this.getNextLevelProgression();
+        if (nextLevel && this.exp >= nextLevel.expRequired) {
+            this.level += 1;
+            this.updateLevelDisplay();
+            // Vous pouvez ajouter ici une notification ou un effet visuel pour le passage de niveau
         }
     }
 }

@@ -21,9 +21,9 @@
         "autoMiners": "Auto Miners",
         "mineButton": "Mine",
         "upgrades": {
-            "betterPickaxe": "Better Pickaxe",
-            "efficientTechnique": "Efficient Technique",
-            "autoMiner": "Auto Miner"
+            "betterPickaxe1": "Meilleure Pioche I",
+            "betterPickaxe2": "Meilleure Pioche II",
+            "autoMiner1": "Mineur Automatique I"
         },
         "resources": {
             "minerai111": "Iron",
