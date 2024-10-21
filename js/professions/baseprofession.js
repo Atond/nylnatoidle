@@ -1,5 +1,5 @@
 export class BaseProfession {
-    constructor(name, resourceIds) {
+    constructor(name, Resources) {
         this.name = name;
         this.resourceIds = resourceIds;
         this.exp = 0;

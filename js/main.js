@@ -6,8 +6,8 @@ import { Inventory } from './inventory.js';
 import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { ResourceManager } from './resourceManager.js';
 
-let minerResources = [];
-let lumberjackResources = [];
+let minerResourceIds = [];
+let lumberjackResourceIds = [];
 let worlds = [];
 let zones = [];
 let autoIncrementInterval;
@@ -26,12 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('data.json')
     .then(response => response.json())
     .then(data => {
-        minerResources = data.minerResources;
-        lumberjackResources = data.lumberjackResources;
+        minerResourceIds = data.minerResources.map(resource => resource.id);
+        lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
         worlds = data.worlds;
         zones = data.zones;
-        miner = new Miner(minerResources); // Initialize miner
-        lumberjack = new Lumberjack(lumberjackResources); // Initialize lumberjack
+        miner = new Miner(minerResourceIds); // Initialize miner with resource IDs
+        lumberjack = new Lumberjack(lumberjackResourceIds); // Initialize lumberjack with resource IDs
+        miner.setResources(data.minerResources); // Set actual resources for miner
+        lumberjack.setResources(data.lumberjackResources); // Set actual resources for lumberjack
         data.minerResources.forEach(resource => resourceManager.addResource(resource));
         data.lumberjackResources.forEach(resource => resourceManager.addResource(resource));
         // Ajoutez ici d'autres types de ressources au fur et à mesure que vous ajoutez des métiers
