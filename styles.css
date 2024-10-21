@@ -59,6 +59,61 @@ button:hover {
     margin-top: 0;
 }
 
+#professions-list {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#professions-list div {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#professions-list div:hover {
+    background-color: #0056b3;
+}
+
+.profession-details {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.profession-details h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.profession-details div {
+    margin-bottom: 10px;
+}
+
+.profession-details button {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#miner-upgrades {
+    margin-top: 20px;
+}
+
+#miner-upgrades button {
+    margin-top: 10px;
+}
+
 #auto-increment-select {
     margin-top: 20px;
     padding: 10px;

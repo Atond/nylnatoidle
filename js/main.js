@@ -40,6 +40,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+export const professions = {
+    miner: new Miner(minerResourceIds),
+    lumberjack: new Lumberjack(lumberjackResourceIds),
+    // Ajoutez d'autres métiers ici à l'avenir
+};
+
 function initializeGame() {
     document.getElementById('auto-increment-select').addEventListener('change', (event) => {
         clearInterval(autoIncrementInterval);
@@ -89,6 +95,8 @@ function initializeGame() {
         miner.updateDisplay();
     });
 
+    displayProfessionsList();
+
     // Démarrer l'auto-minage
     setInterval(() => {
         if (miner.autoMinerCount > 0) {
@@ -131,6 +139,34 @@ function addLoot(loot) {
     updateInventoryDisplay();
 }
 
+function updateCommonElements() {
+    // Mettez à jour les éléments communs ici, comme le niveau du personnage, l'expérience globale, etc.
+    updateExperienceBar();
+}
+
+function displayProfessionsList() {
+    const professionsList = document.getElementById('professions-list');
+    professionsList.innerHTML = '';
+    
+    for (const [professionName, profession] of Object.entries(professions)) {
+        const professionElement = document.createElement('div');
+        professionElement.textContent = globalTranslationManager.translate(`professions.${professionName}.title`);
+        professionElement.addEventListener('click', () => selectProfession(professionName));
+        professionsList.appendChild(professionElement);
+    }
+}
+
+function selectProfession(professionName) {
+    document.querySelectorAll('.profession-details').forEach(el => el.style.display = 'none');
+    
+    const selectedProfessionDetails = document.getElementById(`${professionName}-details`);
+    if (selectedProfessionDetails) {
+        selectedProfessionDetails.style.display = 'block';
+    }
+    
+    updateDisplays(professionName);
+}
+
 function updateUITranslations() {
     document.getElementById('title').innerText = globalTranslationManager.translate('ui.title');
     document.getElementById('character-title').innerText = globalTranslationManager.translate('ui.characterTitle');
@@ -162,4 +198,18 @@ window.showTab = function (tabId) {
         tab.style.display = 'none';
     });
     document.getElementById(tabId).style.display = 'block';
+}
+
+export function updateDisplays(selectedProfession = null) {
+    updateInventoryDisplay();
+    updateCommonElements();
+    
+    if (selectedProfession && professions[selectedProfession]) {
+        const profession = professions[selectedProfession];
+        if (typeof profession.updateDisplay === 'function') {
+            profession.updateDisplay();
+        } else {
+            console.warn(`Update display function not available for ${selectedProfession}`);
+        }
+    }
 }

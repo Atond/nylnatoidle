@@ -101,20 +101,22 @@ export class Miner extends BaseProfession {
         
         const miningPowerElement = document.getElementById('miner-mining-power');
         if (miningPowerElement) {
-            miningPowerElement.textContent = `${globalTranslationManager.translate('professions.miner.miningPower')}: ${this.miningPower.toFixed(1)}`;
+            miningPowerElement.textContent = `${this.miningPower.toFixed(1)}`;
         }
-
+    
         const autoMinerElement = document.getElementById('miner-auto-miners');
         if (autoMinerElement) {
-            autoMinerElement.textContent = `${globalTranslationManager.translate('professions.miner.autoMiners')}: ${this.autoMinerCount}`;
+            autoMinerElement.textContent = `${this.autoMinerCount}`;
         }
-
+    
         const expElement = document.getElementById('miner-exp');
+        const expRequiredElement = document.getElementById('miner-exp-required');
         const nextLevel = this.getNextLevelProgression();
-        if (expElement && nextLevel) {
-            expElement.textContent = `${this.exp} / ${nextLevel.expRequired}`;
+        if (expElement && expRequiredElement && nextLevel) {
+            expElement.textContent = this.exp;
+            expRequiredElement.textContent = nextLevel.expRequired;
         }
-
+    
         this.updateResourcesDisplay();
         this.updateUpgradesDisplay();
     }
@@ -159,6 +161,7 @@ export class Miner extends BaseProfession {
         if (nextLevel && this.exp >= nextLevel.expRequired) {
             this.level += 1;
             this.updateLevelDisplay();
+            this.updateDisplay()
             // Vous pouvez ajouter ici une notification ou un effet visuel pour le passage de niveau
         }
     }

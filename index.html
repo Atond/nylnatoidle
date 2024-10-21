@@ -34,48 +34,41 @@
     <div id="monster"></div>
     <button id="attack-monster">Attack</button>
 
-    <h2 id="professions-title">Professions</h2>
     <div id="professions">
-        <div id="miner" class="profession">
+        <h2>Métiers</h2>
+        <div id="professions-list"></div>
+    </div>
+    
+    <div id="profession-details">
+        <div id="miner-details" class="profession-details" style="display: none;">
             <h3 id="miner-title">Miner</h3>
             <div>
-                <span id="miner-exp-label">Experience:</span>
-                <span id="miner-exp">0</span>
+                <span id="miner-exp-label">Experience: </span>
+                <span id="miner-exp">0</span> / <span id="miner-exp-required">100</span>
             </div>
             <div>
-                <span id="miner-level-label">Level:</span>
+                <span id="miner-level-label">Level: </span>
                 <span id="miner-level">1</span>
             </div>
             <div>
-                <span id="miner-resources-label">Resources:</span>
+                <span id="miner-resources-label">Resources: </span>
                 <span id="miner-resources">None</span>
             </div>
             <div>
-                <span>Mining Power:</span>
+                <span id="miner-mining-power-label">Mining Power: </span>
                 <span id="miner-mining-power">1.0</span>
             </div>
             <div>
-                <span>Auto Miners:</span>
+                <span id="miner-auto-miners-label">Auto Miners: </span>
                 <span id="miner-auto-miners">0</span>
             </div>
             <button id="mine-button">Mine</button>
             <div id="miner-upgrades"></div>
         </div>
-        <div id="lumberjack" class="profession">
-            <h3 id="lumberjack-title">Lumberjack</h3>
-            <div>
-                <span id="lumberjack-exp-label">Experience:</span>
-                <span id="lumberjack-exp">0</span>
-            </div>
-            <div>
-                <span id="lumberjack-level-label">Level:</span>
-                <span id="lumberjack-level">1</span>
-            </div>
-            <div>
-                <span id="lumberjack-resources-label">Resources:</span>
-                <span id="lumberjack-resources">None</span>
-            </div>
+        <div id="lumberjack-details" class="profession-details" style="display: none;">
+            <!-- Détails du bûcheron ici -->
         </div>
+        <!-- Ajoutez d'autres métiers ici -->
     </div>
 
     <h2 id="auto-increment-title">Auto-Increment</h2>
