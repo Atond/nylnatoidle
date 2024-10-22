@@ -160,13 +160,20 @@ export class Miner extends BaseProfession {
                 const upgradeInfo = globalTranslationManager.translate(`professions.miner.upgrades.${upgrade.id}`);
                 const costText = Object.entries(upgrade.cost)
                     .map(([resourceId, cost]) => {
+                        // On change juste cette ligne pour accéder correctement aux ressources
                         const resourceName = globalTranslationManager.translate(`resources.professions.miner.${resourceId}`);
                         return `${resourceName}: ${cost}`;
                     })
                     .join(', ');
                 
-                upgradeButton.textContent = `${upgradeInfo.name} (${costText})`;
-                upgradeButton.title = upgradeInfo.description; // Ajoute une infobulle avec la description
+                // S'il s'agit d'un objet avec name, on l'utilise, sinon on utilise directement la traduction
+                const upgradeName = typeof upgradeInfo === 'object' ? upgradeInfo.name : upgradeInfo;
+                upgradeButton.textContent = `${upgradeName} (${costText})`;
+                
+                // Ajout de la description si disponible
+                if (upgradeInfo.description) {
+                    upgradeButton.title = upgradeInfo.description;
+                }
                 
                 upgradeButton.onclick = () => {
                     if (this.buyUpgrade(upgrade.id)) {
