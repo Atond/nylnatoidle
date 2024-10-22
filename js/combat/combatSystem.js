@@ -1,7 +1,7 @@
 import { globalResourceManager } from '../resourceManager.js';
 import { combatUI } from './combatUI.js';
 import { globalInventory } from '../inventory.js';
-import { questSystem } from './quests/questSystem.js';
+import { questSystem } from '../quests/questSystem.js';
 
 class CombatSystem {
     constructor() {
