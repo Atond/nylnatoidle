@@ -5,9 +5,9 @@
       "defaultName": "Goblin",
       "image": "path/to/goblin.png",
       "baseStats": {
-        "hp": 50,
-        "attack": 5,
-        "defense": 3
+        "hp": 10,
+        "attack": 1,
+        "defense": 1
       },
       "baseExperience": 20,
       "loot": [

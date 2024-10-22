@@ -30,9 +30,60 @@
         </div>
     </div>
 
-    <h2>Combat</h2>
-    <div id="monster"></div>
-    <button id="attack-monster">Attack</button>
+<!-- Section Combat -->
+<div class="combat-section">
+    <div class="combat-area">
+        <!-- Zone du joueur -->
+        <div class="character-stats">
+            <div class="char-image">
+                <img src="/api/placeholder/150/150" alt="Character" />
+            </div>
+            <div class="health-bar">
+                <div class="health-bar-fill" id="player-health"></div>
+                <span class="health-text" id="player-health-text">100/100</span>
+            </div>
+            <div class="stats">
+                <span id="player-attack">Attack: 1</span>
+                <span id="player-defense">Defense: 0</span>
+            </div>
+        </div>
+
+        <!-- Zone centrale avec les informations de combat -->
+        <div class="combat-info">
+            <div class="zone-info">
+                <h3 id="current-zone">Zone: Not Selected</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="zone-progress"></div>
+                    <span class="progress-text" id="zone-progress-text">0/10</span>
+                </div>
+            </div>
+            
+            <div class="combat-controls">
+                <button id="attack-btn" class="combat-button">{#ui.attack#}</button>
+                <button id="auto-combat-btn" class="combat-button">{#ui.autoCombat#}</button>
+            </div>
+            
+            <div id="combat-log" class="combat-log">
+                <!-- Les messages de combat apparaîtront ici -->
+            </div>
+        </div>
+
+        <!-- Zone du monstre -->
+        <div class="monster-stats" id="monster-container">
+            <div class="monster-image">
+                <img src="/api/placeholder/150/150" alt="Monster" id="monster-image" />
+            </div>
+            <div class="health-bar">
+                <div class="health-bar-fill" id="monster-health"></div>
+                <span class="health-text" id="monster-health-text">???/???</span>
+            </div>
+            <div class="stats">
+                <span id="monster-name">No Monster</span>
+                <span id="monster-level">Level: ???</span>
+            </div>
+        </div>
+    </div>
+</div>
 
     <div id="professions">
         <h2>Métiers</h2>

@@ -1,0 +1,107 @@
+{
+    "worldProgression": [
+      {
+        "id": "green_fields",
+        "zones": [
+          {
+            "id": "peaceful_meadow",
+            "requirements": {
+              "monstersPerZone": 10
+            }
+          },
+          {
+            "id": "dark_forest",
+            "requirements": {
+              "monstersPerZone": 10,
+              "completedQuests": ["beginnerQuest"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "fiery_mountains",
+        "requirements": {
+          "completedQuests": ["minerApprentice"]
+        },
+        "zones": [
+          {
+            "id": "dragon_peak",
+            "requirements": {
+              "monstersPerZone": 10
+            }
+          }
+        ]
+      }
+    ],
+    "defaultUnlocks": {
+      "worlds": ["green_fields"],
+      "zones": ["peaceful_meadow"]
+    },
+    "quests": {
+      "beginnerQuest": {
+        "id": "beginnerQuest",
+        "title": "Premiers pas",
+        "description": "Tuez 5 gobelins dans la Prairie Paisible",
+        "requirements": {
+          "monstersKilled": {
+            "goblin": 5,
+            "zone": "peaceful_meadow"
+          }
+        },
+        "rewards": {
+          "experience": 100,
+          "items": [
+            {
+              "id": "wooden_sword",
+              "quantity": 1
+            }
+          ]
+        },
+        "autoStart": true
+      },
+      "minerApprentice": {
+        "id": "minerApprentice",
+        "title": "Apprenti Mineur",
+        "description": "Collectez 50 minerais de fer",
+        "requirements": {
+          "items": {
+            "iron_ore": 50
+          }
+        },
+        "rewards": {
+          "experience": 200,
+          "professionExp": {
+            "miner": 500
+          },
+          "unlocks": {
+            "minerUpgrade": "autoMiner1"
+          }
+        },
+        "autoStart": true
+      },
+      "dragonSlayer": {
+        "id": "dragonSlayer",
+        "title": "Tueur de Dragon",
+        "description": "Battez le dragon dans le Pic du Dragon",
+        "requirements": {
+          "monstersKilled": {
+            "dragon": 1,
+            "zone": "dragon_peak"
+          }
+        },
+        "rewards": {
+          "experience": 1000,
+          "items": [
+            {
+              "id": "dragon_scale_armor",
+              "quantity": 1
+            }
+          ],
+          "unlocks": {
+            "title": "Tueur de Dragon"
+          }
+        },
+        "autoStart": true
+      }
+    }
+  }

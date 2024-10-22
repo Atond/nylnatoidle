@@ -12,7 +12,27 @@
         "inventoryTitle": "Inventaire",
         "professionResources": "Ressources de Métier",
         "combatResources": "Ressources de Combat",
-        "attack": "Attaquer"
+        "attack": "Attaquer",
+        "autoCombat": "Combat Auto: {state}",
+        "autoCombatOn": "Activé",
+        "autoCombatOff": "Désactivé",
+        "zone": "Zone: {name}",
+        "level": "Niveau: {level}",
+        "health": "{current}/{max} PV",
+        "attack_stat": "Attaque: {value}",
+        "defense_stat": "Défense: {value}",
+        "progress": "{current}/{max} monstres",
+        "victory": "Victoire ! Vous avez vaincu {monster}",
+        "defeat": "Défaite ! Retour à la zone précédente",
+        "damage": "{attacker} inflige {amount} dégâts à {defender}",
+        "errorLoading": "Erreur lors du chargement des données",
+        "buttonDisabled": "Non disponible",
+        "noMonster": "Pas de monstre",
+        "zoneCompleted": "Zone terminée !",
+        "worldCompleted": "Monde terminé !",
+        "worldUnlocked": "Nouveau monde débloqué : {world}",
+        "zoneUnlocked": "Nouvelle zone débloquée : {zone}",
+        "gameCompleted": "Félicitations ! Vous avez terminé le jeu !"
     },
     "professions": {
         "miner": {
