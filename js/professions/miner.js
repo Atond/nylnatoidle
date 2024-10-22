@@ -2,6 +2,7 @@ import { BaseProfession } from './baseprofession.js';
 import { globalInventory } from '../inventory.js';
 import { updateInventoryDisplay } from '../inventoryDisplay.js';
 import { globalTranslationManager } from '../translations/translationManager.js';
+import { globalResourceManager } from '../resourceManager.js';
 
 export class Miner extends BaseProfession {
     constructor(resourceIds) {
@@ -26,13 +27,23 @@ export class Miner extends BaseProfession {
                     { id: 'autoMiner1', name: 'Auto Miner I', cost: { iron_ore: 50, copper_ore: 20 }, effect: () => { this.autoMinerCount += 1; } },
                 ]
             },
-            // Ajoutez d'autres niveaux ici...
+            {
+                level: 3,
+                expRequired: 300,
+                resources: ['iron_ore', 'copper_ore', 'gold_ore'],
+                upgrades: [
+                    { id: 'betterPickaxe3', name: 'Better Pickaxe III', cost: { gold_ore: 5 }, effect: () => { this.miningPower += 3; } },
+                    { id: 'autoMiner2', name: 'Auto Miner II', cost: { gold_ore: 15 }, effect: () => { this.autoMinerCount += 2; } },
+                ]
+            }
         ];
         this.unlockedUpgrades = new Set();
     }
 
     mine() {
         const currentProgression = this.getCurrentProgression();
+        if (!currentProgression) return 0;
+
         const resource = this.getRandomResource(currentProgression.resources);
         if (resource) {
             const amount = Math.floor(this.miningPower);
@@ -55,10 +66,12 @@ export class Miner extends BaseProfession {
     }
 
     getRandomResource(availableResources) {
-        if (availableResources.length === 0) {
+        if (!availableResources || availableResources.length === 0) {
             return null;
         }
-        return availableResources[Math.floor(Math.random() * availableResources.length)];
+        const randomIndex = Math.floor(Math.random() * availableResources.length);
+        const resourceId = availableResources[randomIndex];
+        return resourceId;
     }
 
     getCurrentProgression() {
@@ -122,13 +135,18 @@ export class Miner extends BaseProfession {
     }
 
     updateResourcesDisplay() {
-        const currentProgression = this.getCurrentProgression();
-        const resourcesElement = document.getElementById('miner-resources');
-        if (resourcesElement && currentProgression) {
-            const resourceNames = currentProgression.resources
-                .map(id => globalResourceManager.getResourceName(id))
-                .join(", ");
-            resourcesElement.textContent = resourceNames || 'None';
+        try {
+            const currentProgression = this.getCurrentProgression();
+            const resourcesElement = document.getElementById('miner-resources');
+            if (resourcesElement && currentProgression) {
+                const resourceNames = currentProgression.resources
+                    .map(id => globalResourceManager.getResourceName(id))
+                    .filter(name => name) // Filtrer les noms nuls
+                    .join(", ");
+                resourcesElement.textContent = resourceNames || 'None';
+            }
+        } catch (error) {
+            console.error('Error updating resources display:', error);
         }
     }
 

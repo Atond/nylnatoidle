@@ -7,23 +7,23 @@ import { globalTranslationManager } from '../translations/translationManager.js'
 export class BaseProfession {
     constructor(name, resourceIds) {
         this.name = name;
-        this.resourceIds = resourceIds;
+        this.resourceIds = resourceIds || [];
         this.exp = 0;
         this.level = 1;
     }
 
     getRandomResource() {
-        if (this.resourceIds.length === 0) {
+        if (!this.resourceIds || this.resourceIds.length === 0) {
             return null;
         }
         const weightedResources = [];
-        for (let i = 0; i < this.level; i++) {
+        for (let i = 0; i < Math.min(this.level, this.resourceIds.length); i++) {
             for (let j = 0; j < this.level - i; j++) {
                 weightedResources.push(this.resourceIds[i]);
             }
         }
         const randomResourceId = weightedResources[Math.floor(Math.random() * weightedResources.length)];
-        return globalResourceManager.getResource(randomResourceId);
+        return randomResourceId;
     }
 
     collectResource() {
@@ -68,10 +68,12 @@ export class BaseProfession {
     updateResourcesDisplay() {
         const resourcesElement = document.getElementById(`${this.name}-resources`);
         if (resourcesElement) {
-            const resources = this.resourceIds.slice(0, this.level)
-                .map(id => globalTranslationManager.translate(`resources.${id}`))
-                .join(", ") || globalTranslationManager.translate('ui.none');
-            resourcesElement.innerText = resources;
+            const resources = this.resourceIds
+                .slice(0, this.level)
+                .map(id => globalResourceManager.getResourceName(id))
+                .filter(name => name)
+                .join(", ");
+            resourcesElement.textContent = resources || 'None';
         }
     }
 
