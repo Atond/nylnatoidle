@@ -65,17 +65,17 @@ export class BaseProfession {
         }
     }
 
-    updateResourcesDisplay() {
-        const resourcesElement = document.getElementById(`${this.name}-resources`);
-        if (resourcesElement) {
-            const resources = this.resourceIds
-                .slice(0, this.level)
-                .map(id => globalResourceManager.getResourceName(id))
-                .filter(name => name)
-                .join(", ");
-            resourcesElement.textContent = resources || 'None';
-        }
+updateResourcesDisplay() {
+    const resourcesElement = document.getElementById(`${this.name}-resources`);
+    if (resourcesElement) {
+        const resources = this.resourceIds
+            .slice(0, this.level)
+            .map(id => globalTranslationManager.translate(`resources.professions.${this.name}.${id}`))
+            .filter(name => name)
+            .join(", ");
+        resourcesElement.textContent = resources || 'None';
     }
+}
 
     checkLevelUp() {
         if (this.exp >= this.level * 100) {

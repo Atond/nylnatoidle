@@ -21,12 +21,6 @@ class TranslationManager {
     }
 
     translate(key) {
-        // Check for resource translation first
-        if (key.startsWith('resources.') && this.resourceNameProvider) {
-            const resourceId = key.split('.')[1];
-            return this.resourceNameProvider.getResourceName(resourceId);
-        }
-
         const languageTranslations = this.translations.get(this.currentLanguage);
         if (!languageTranslations) return key;
 

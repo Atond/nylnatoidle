@@ -140,8 +140,8 @@ export class Miner extends BaseProfession {
             const resourcesElement = document.getElementById('miner-resources');
             if (resourcesElement && currentProgression) {
                 const resourceNames = currentProgression.resources
-                    .map(id => globalResourceManager.getResourceName(id))
-                    .filter(name => name) // Filtrer les noms nuls
+                    .map(id => globalTranslationManager.translate(`resources.professions.miner.${id}`))
+                    .filter(name => name)
                     .join(", ");
                 resourcesElement.textContent = resourceNames || 'None';
             }
@@ -160,17 +160,14 @@ export class Miner extends BaseProfession {
                 const upgradeInfo = globalTranslationManager.translate(`professions.miner.upgrades.${upgrade.id}`);
                 const costText = Object.entries(upgrade.cost)
                     .map(([resourceId, cost]) => {
-                        // On change juste cette ligne pour accéder correctement aux ressources
                         const resourceName = globalTranslationManager.translate(`resources.professions.miner.${resourceId}`);
                         return `${resourceName}: ${cost}`;
                     })
                     .join(', ');
                 
-                // S'il s'agit d'un objet avec name, on l'utilise, sinon on utilise directement la traduction
                 const upgradeName = typeof upgradeInfo === 'object' ? upgradeInfo.name : upgradeInfo;
                 upgradeButton.textContent = `${upgradeName} (${costText})`;
                 
-                // Ajout de la description si disponible
                 if (upgradeInfo.description) {
                     upgradeButton.title = upgradeInfo.description;
                 }
