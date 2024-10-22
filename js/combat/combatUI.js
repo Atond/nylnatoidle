@@ -216,6 +216,15 @@ class CombatUI {
     addDefeatLog() {
         this.addCombatLog(globalTranslationManager.translate('ui.defeat'));
     }
+
+    addQuestLog(message) {
+        const questLog = document.getElementById('quest-log');
+        if (questLog) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = message;
+            questLog.appendChild(logEntry);
+        }
+    }
 }
 
 export const combatUI = new CombatUI();
