@@ -1,5 +1,5 @@
 import { combatSystem } from './combatSystem.js';
-import { globalTranslationManager } from './translations/translationManager.js';
+import { globalTranslationManager } from '../translations/translationManager.js';
 
 class CombatUI {
     constructor() {
