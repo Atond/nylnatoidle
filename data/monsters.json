@@ -3,7 +3,7 @@
     {
       "id": "goblin",
       "defaultName": "Goblin",
-      "image": "path/to/goblin.png",
+      "image": "../images/enemies/Goblin.png",
       "baseStats": {
         "hp": 10,
         "attack": 1,
