@@ -27,7 +27,9 @@
             "upgrades": {
                 "betterPickaxe1": "Meilleure Pioche I",
                 "betterPickaxe2": "Meilleure Pioche II",
-                "autoMiner1": "Mineur Automatique I"
+                "betterPickaxe3": "Meilleure Pioche III",
+                "autoMiner1": "Mineur Automatique I",
+                "autoMiner2": "Mineur Automatique II"
             }
         },
         "lumberjack": {
