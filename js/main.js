@@ -40,7 +40,7 @@ async function initializeGameData() {
             monstersData,
             worldMapData
         ] = await Promise.all([
-            loadJsonData('professionresources.json'),
+            loadJsonData('professionResources.json'),
             loadJsonData('monsterResources.json'),
             loadJsonData('monsters.json'),
             loadJsonData('worldMap.json')
