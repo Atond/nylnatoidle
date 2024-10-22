@@ -17,6 +17,7 @@ class Character {
         this.level += 1;
         this.experience = 0;
         console.log(`${this.name} has leveled up to level ${this.level}!`);
+        updateCharacterLevelDisplay(); // Mettre à jour l'affichage du niveau
     }
 
     getExperienceToNextLevel() {
@@ -51,4 +52,12 @@ export function getCharacterLevel() {
 
 export function setCharacterLevel(level) {
     character.level = level;
+    updateCharacterLevelDisplay(); // Mettre à jour l'affichage du niveau
+}
+
+export function updateCharacterLevelDisplay() {
+    const levelElement = document.getElementById('character-level-value');
+    if (levelElement) {
+        levelElement.textContent = character.level;
+    }
 }
