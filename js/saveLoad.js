@@ -5,6 +5,7 @@ import { globalInventory } from './inventory.js';
 import { globalTranslationManager } from './translations/translationManager.js';
 import { combatSystem } from './combat/combatSystem.js';
 import { questSystem } from './quests/questSystem.js';
+import { combatUI } from './combat/combatUI.js';
 
 export function saveGame() {
     const gameState = {
@@ -49,6 +50,7 @@ export function saveGame() {
             completedZones: Object.keys(combatSystem.completedZones || {})
         },
         
+        // Progression des quêtes
         quests: {
             active: Array.from(questSystem.activeQuests.entries()).map(([questId, quest]) => ({
                 id: questId,
@@ -136,6 +138,12 @@ export function loadGame() {
                     return acc;
                 }, {});
             }
+            if (gameState.combat.completedZones) {
+                combatSystem.completedZones = gameState.combat.completedZones.reduce((acc, zoneId) => {
+                    acc[zoneId] = true;
+                    return acc;
+                }, {});
+            }
         }
         
         // Charger les quêtes
@@ -164,13 +172,6 @@ export function loadGame() {
             
             // Démarrer automatiquement les quêtes qui devraient l'être
             questSystem.checkAutoStartQuests();
-        }
-
-        if (gameState.combat.completedZones) {
-            combatSystem.completedZones = gameState.combat.completedZones.reduce((acc, zoneId) => {
-                acc[zoneId] = true;
-                return acc;
-            }, {});
         }
         
         // Mettre à jour tous les affichages

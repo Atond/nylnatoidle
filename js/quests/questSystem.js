@@ -24,11 +24,20 @@ class QuestSystem {
     createQuestElement(quest, progress) {
         const element = document.createElement('div');
         element.className = 'quest';
-        // ... logique d'affichage d'une quête ...
+        element.innerHTML = `
+            <h3>${quest.title}</h3>
+            <p>${quest.description}</p>
+            <p>Progress: ${progress.monstersKilled}/${quest.monstersToKill}</p>
+        `;
         return element;
     }
 
     startQuest(questId) {
+        if (!this.progression || !this.progression.quests) {
+            console.error('Quest progression data not loaded.');
+            return false;
+        }
+
         const quest = this.progression.quests[questId];
         if (!quest || this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
             return false;
@@ -36,13 +45,14 @@ class QuestSystem {
 
         this.activeQuests.set(questId, quest);
         this.questProgress.set(questId, {
-            monstersKilled: {},
+            monstersKilled: 0,
             items: {}
         });
 
         combatUI.addQuestLog(`Nouvelle quête : ${quest.title}`);
         return true;
     }
+
 
     updateQuestDisplay() {
         // Mise à jour de l'interface des quêtes
