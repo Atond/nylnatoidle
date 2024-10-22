@@ -25,11 +25,26 @@
             "autoMiners": "Mineurs Automatiques",
             "mineButton": "Miner",
             "upgrades": {
-                "betterPickaxe1": "Meilleure Pioche I",
-                "betterPickaxe2": "Meilleure Pioche II",
-                "betterPickaxe3": "Meilleure Pioche III",
-                "autoMiner1": "Mineur Automatique I",
-                "autoMiner2": "Mineur Automatique II"
+                "betterPickaxe1": {
+                    "name": "Meilleure Pioche I",
+                    "description": "Augmente la puissance de minage de 1"
+                },
+                "betterPickaxe2": {
+                    "name": "Meilleure Pioche II",
+                    "description": "Augmente la puissance de minage de 2"
+                },
+                "betterPickaxe3": {
+                    "name": "Meilleure Pioche III",
+                    "description": "Augmente la puissance de minage de 3"
+                },
+                "autoMiner1": {
+                    "name": "Mineur Automatique I",
+                    "description": "Ajoute 1 mineur automatique"
+                },
+                "autoMiner2": {
+                    "name": "Mineur Automatique II",
+                    "description": "Ajoute 2 mineurs automatiques"
+                }
             }
         },
         "lumberjack": {

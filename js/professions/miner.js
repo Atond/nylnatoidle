@@ -157,13 +157,18 @@ export class Miner extends BaseProfession {
             const availableUpgrades = this.getAvailableUpgrades();
             availableUpgrades.forEach(upgrade => {
                 const upgradeButton = document.createElement('button');
-                const upgradeTrans = globalTranslationManager.translate(`professions.miner.upgrades.${upgrade.id}`);
+                const upgradeInfo = globalTranslationManager.translate(`professions.miner.upgrades.${upgrade.id}`);
                 const costText = Object.entries(upgrade.cost)
-                    .map(([resourceId, cost]) => `${globalTranslationManager.translate(`resources.${resourceId}`)}: ${cost}`)
+                    .map(([resourceId, cost]) => {
+                        const resourceName = globalTranslationManager.translate(`resources.professions.miner.${resourceId}`);
+                        return `${resourceName}: ${cost}`;
+                    })
                     .join(', ');
-                    upgradeButton.textContent = `${upgradeTrans.name} (${costText})`;
-                    upgradeButton.title = upgradeTrans.description;
-                    upgradeButton.onclick = () => {
+                
+                upgradeButton.textContent = `${upgradeInfo.name} (${costText})`;
+                upgradeButton.title = upgradeInfo.description; // Ajoute une infobulle avec la description
+                
+                upgradeButton.onclick = () => {
                     if (this.buyUpgrade(upgrade.id)) {
                         this.updateDisplay();
                         updateInventoryDisplay();
