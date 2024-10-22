@@ -1,7 +1,12 @@
 class TranslationManager {
     constructor() {
         this.translations = new Map();
-        this.currentLanguage = 'fr'; // Langue par défaut
+        this.currentLanguage = 'fr';
+        this.resourceNameProvider = null;
+    }
+
+    setResourceNameProvider(provider) {
+        this.resourceNameProvider = provider;
     }
 
     async loadTranslations(language) {
@@ -17,9 +22,9 @@ class TranslationManager {
 
     translate(key) {
         // Check for resource translation first
-        if (key.startsWith('resources.')) {
+        if (key.startsWith('resources.') && this.resourceNameProvider) {
             const resourceId = key.split('.')[1];
-            return globalResourceManager.getResourceName(resourceId);
+            return this.resourceNameProvider.getResourceName(resourceId);
         }
 
         const languageTranslations = this.translations.get(this.currentLanguage);
