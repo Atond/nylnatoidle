@@ -2,11 +2,6 @@ class TranslationManager {
     constructor() {
         this.translations = new Map();
         this.currentLanguage = 'fr';
-        this.resourceNameProvider = null;
-    }
-
-    setResourceNameProvider(provider) {
-        this.resourceNameProvider = provider;
     }
 
     async loadTranslations(language) {

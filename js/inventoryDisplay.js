@@ -6,6 +6,7 @@ let currentPage = 1;
 const itemsPerPage = 10;
 const rowSize = 5;
 
+// inventoryDisplay.js
 export function updateInventoryDisplay() {
     const inventoryElement = document.getElementById('profession-inventory');
     if (!inventoryElement) return;
@@ -33,13 +34,25 @@ export function updateInventoryDisplay() {
         if (i < itemsToDisplay.length) {
             const { resource, quantity } = itemsToDisplay[i];
             if (resource) {
-                const resourceName = globalResourceManager.getResourceName(resource.id);
+                // Déterminer si c'est une ressource de profession ou de monstre
+                let translationKey;
+                if (resource.category === 'profession') {
+                    // Pour les ressources de profession, on doit déterminer le type (miner, lumberjack, etc.)
+                    const professionType = resource.id.includes('ore') ? 'miner' : 
+                                         resource.id.includes('wood') ? 'lumberjack' : 'unknown';
+                    translationKey = `resources.professions.${professionType}.${resource.id}`;
+                } else {
+                    // Pour les ressources de monstre
+                    translationKey = `resources.monsters.${resource.id}`;
+                }
+
+                const translatedName = globalTranslationManager.translate(translationKey);
                 slot.innerHTML = `
-                    <img src="/${resource.image}" alt="${resourceName}">
+                    <img src="/${resource.image}" alt="${translatedName}">
                     <div class="item-count">${quantity}</div>
-                    <div class="tooltip">${resourceName}</div>
+                    <div class="tooltip">${translatedName}</div>
                 `;
-                slot.title = resourceName;
+                slot.title = translatedName;
             }
         } else {
             slot.innerHTML = '<div class="empty-slot"></div>';

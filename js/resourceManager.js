@@ -1,3 +1,4 @@
+// resourceManager.js
 class ResourceManager {
     constructor() {
         this.resources = new Map();
@@ -5,11 +6,8 @@ class ResourceManager {
 
     addResource(resource, category) {
         const resourceData = {
-            id: resource.id,
-            defaultName: resource.defaultName,
-            image: resource.image,
-            tier: resource.tier,
-            category: category
+            ...resource,            // Garder toutes les propriétés d'origine
+            category: category      // Ajouter la catégorie
         };
         this.resources.set(resource.id, resourceData);
     }

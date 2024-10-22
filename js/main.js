@@ -72,10 +72,7 @@ async function initializeGameData() {
             miner: new Miner(professionResources.miner.map(r => r.id)),
             lumberjack: new Lumberjack(professionResources.lumberjack.map(r => r.id))
         };
-
-        // Configuration du provider de noms de ressources
-        globalTranslationManager.setResourceNameProvider(globalResourceManager);
-
+        
         // Initialisation des traductions
         await globalTranslationManager.loadTranslations('fr');
 
