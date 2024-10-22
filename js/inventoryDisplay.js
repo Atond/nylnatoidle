@@ -8,6 +8,8 @@ const rowSize = 5;
 
 export function updateInventoryDisplay() {
     const inventoryElement = document.getElementById('profession-inventory');
+    if (!inventoryElement) return;
+
     const allItems = globalInventory.getAllItems();
     const totalItems = allItems.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -31,9 +33,9 @@ export function updateInventoryDisplay() {
         if (i < itemsToDisplay.length) {
             const { resource, quantity } = itemsToDisplay[i];
             if (resource) {
-                const resourceName = globalTranslationManager.translate(`resources.${resource.id}`);
+                const resourceName = globalResourceManager.getResourceName(resource.id);
                 slot.innerHTML = `
-                    <img src="${resource.image}" alt="${resourceName}">
+                    <img src="/${resource.image}" alt="${resourceName}">
                     <div class="item-count">${quantity}</div>
                     <div class="tooltip">${resourceName}</div>
                 `;
@@ -48,16 +50,21 @@ export function updateInventoryDisplay() {
 
     inventoryElement.appendChild(grid);
 
+    // Mise à jour de la pagination
     const paginationElement = document.getElementById('pagination');
-    paginationElement.innerHTML = '';
-
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.innerText = i;
-        pageButton.addEventListener('click', () => {
-            currentPage = i;
-            updateInventoryDisplay();
-        });
-        paginationElement.appendChild(pageButton);
+    if (paginationElement) {
+        paginationElement.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.innerText = i;
+            if (i === currentPage) {
+                pageButton.classList.add('current-page');
+            }
+            pageButton.addEventListener('click', () => {
+                currentPage = i;
+                updateInventoryDisplay();
+            });
+            paginationElement.appendChild(pageButton);
+        }
     }
 }

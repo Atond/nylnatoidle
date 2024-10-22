@@ -124,11 +124,11 @@ export class Miner extends BaseProfession {
     updateResourcesDisplay() {
         const currentProgression = this.getCurrentProgression();
         const resourcesElement = document.getElementById('miner-resources');
-        if (resourcesElement) {
+        if (resourcesElement && currentProgression) {
             const resourceNames = currentProgression.resources
-                .map(id => globalTranslationManager.translate(`resources.${id}`))
+                .map(id => globalResourceManager.getResourceName(id))
                 .join(", ");
-            resourcesElement.textContent = resourceNames || globalTranslationManager.translate('ui.none');
+            resourcesElement.textContent = resourceNames || 'None';
         }
     }
 

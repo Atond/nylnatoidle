@@ -16,6 +16,12 @@ class TranslationManager {
     }
 
     translate(key) {
+        // Check for resource translation first
+        if (key.startsWith('resources.')) {
+            const resourceId = key.split('.')[1];
+            return globalResourceManager.getResourceName(resourceId);
+        }
+
         const languageTranslations = this.translations.get(this.currentLanguage);
         if (!languageTranslations) return key;
 
@@ -24,24 +30,12 @@ class TranslationManager {
 
         for (const k of keys) {
             if (result[k] === undefined) {
-                return key; // Retourne la clé originale si la traduction n'est pas trouvée
+                return key;
             }
             result = result[k];
         }
 
         return result;
-    }
-
-    getDefaultName(key) {
-        // Si la clé commence par "resources.", essayez de récupérer le nom par défaut
-        if (key.startsWith('resources.')) {
-            const resourceId = key.split('.')[1];
-            const resource = globalResourceManager.getResource(resourceId);
-            if (resource && resource.defaultName) {
-                return resource.defaultName;
-            }
-        }
-        return key;
     }
 
     setLanguage(language) {
