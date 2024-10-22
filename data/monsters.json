@@ -26,6 +26,31 @@
       ]
     },
     {
+      "id": "wolf",
+      "defaultName": "Wolf",
+      "image": "path/to/goblin.png",
+      "baseStats": {
+        "hp": 10,
+        "attack": 1,
+        "defense": 1
+      },
+      "baseExperience": 20,
+      "loot": [
+        {
+          "resourceId": "goblin_ear",
+          "chance": 0.7,
+          "minQuantity": 1,
+          "maxQuantity": 2
+        },
+        {
+          "resourceId": "goblin_tooth",
+          "chance": 0.3,
+          "minQuantity": 1,
+          "maxQuantity": 1
+        }
+      ]
+    },
+    {
       "id": "dragon",
       "defaultName": "Dragon",
       "image": "path/to/dragon.png",
