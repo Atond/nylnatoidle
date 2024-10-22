@@ -60,8 +60,8 @@ export function saveGame() {
             progress: Array.from(questSystem.questProgress.entries()).map(([questId, progress]) => ({
                 questId,
                 progress: {
-                    monstersKilled: progress.monstersKilled,
-                    items: progress.items
+                    monstersKilled: progress.monstersKilled || {},
+                    items: progress.items || {}
                 }
             }))
         }

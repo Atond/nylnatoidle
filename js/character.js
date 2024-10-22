@@ -44,3 +44,11 @@ class Character {
 }
 
 export const character = new Character('Hero');
+
+export function getCharacterLevel() {
+    return character.level;
+}
+
+export function setCharacterLevel(level) {
+    character.level = level;
+}
