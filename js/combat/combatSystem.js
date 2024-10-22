@@ -1,6 +1,7 @@
-import { globalResourceManager } from './resourceManager.js';
+import { globalResourceManager } from '../resourceManager.js';
 import { combatUI } from './combatUI.js';
-import { globalInventory } from './inventory.js';
+import { globalInventory } from '../inventory.js';
+import { questSystem } from './quests/questSystem.js';
 
 class CombatSystem {
     constructor() {
@@ -13,6 +14,7 @@ class CombatSystem {
         this.autoAttackInterval = null;
         this.progression = null;
         this.loadProgressionConfig();
+        this.completedZones = {}; // Pour suivre les zones terminées
 
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
@@ -51,6 +53,15 @@ class CombatSystem {
             return { attack: totalAttack, defense: totalDefense };
         }
     };
+
+    async loadProgressionConfig() {
+        try {
+            const response = await fetch('/data/gameProgression.json');
+            this.progression = await response.json();
+        } catch (error) {
+            console.error('Failed to load progression config:', error);
+        }
+    }
 
     async loadWorldData(worldId) {
         try {
@@ -100,6 +111,10 @@ class CombatSystem {
             console.error('Error loading world data:', error);
             return null;
         }
+    }
+
+    getCurrentZone() {
+        return this.currentZone;
     }
 
     canUnlockZone(worldId, zoneId) {
@@ -198,6 +213,12 @@ class CombatSystem {
         this.monstersDefeated = 0;
         
         return true;
+    }
+
+    calculateMonsterLevel(monster) {
+        if (!monster.levelRange) return 1;
+        const [min, max] = monster.levelRange;
+        return Math.floor(min + Math.random() * (max - min + 1));
     }
     
     selectRandomMonster(monsters) {

@@ -123,7 +123,7 @@ class QuestSystem {
         // Distribuer les récompenses
         if (quest.rewards) {
             if (quest.rewards.experience) {
-                player.addExperience(quest.rewards.experience);
+                setCharacterLevel(getCharacterLevel() + quest.rewards.experience);
             }
 
             if (quest.rewards.items) {
