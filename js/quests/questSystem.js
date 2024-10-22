@@ -1,7 +1,7 @@
-import { combatUI } from './combatUI.js';
-import { player } from './player.js';
-import { professions } from './main.js';
-import { globalInventory } from './inventory.js';
+import { combatUI } from '..combat/combatUI.js';
+import { character } from '../character.js';
+import { professions } from '../main.js';
+import { globalInventory } from '../inventory.js';
 
 class QuestSystem {
     constructor() {
