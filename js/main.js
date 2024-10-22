@@ -189,27 +189,56 @@ function updateCommonElements() {
 }
 
 function displayProfessionsList() {
+    // Mise à jour de la liste des professions
     const professionsList = document.getElementById('professions-list');
-    professionsList.innerHTML = '';
-    
+    if (professionsList) {
+        professionsList.innerHTML = '';
+        
+        for (const [professionName, profession] of Object.entries(professions)) {
+            const professionButton = document.createElement('button');
+            professionButton.textContent = globalTranslationManager.translate(`professions.${professionName}.title`);
+            professionButton.className = 'profession-button';
+            professionButton.addEventListener('click', () => selectProfession(professionName));
+            professionsList.appendChild(professionButton);
+        }
+    }
+
+    // Configuration des boutons d'action pour chaque profession
     for (const [professionName, profession] of Object.entries(professions)) {
-        const professionElement = document.createElement('div');
-        professionElement.textContent = globalTranslationManager.translate(`professions.${professionName}.title`);
-        professionElement.addEventListener('click', () => selectProfession(professionName));
-        professionsList.appendChild(professionElement);
+        const actionButton = document.getElementById(`${professionName}-action`);
+        if (actionButton) {
+            // Supprimer les anciens event listeners
+            const newButton = actionButton.cloneNode(true);
+            actionButton.parentNode.replaceChild(newButton, actionButton);
+            
+            // Ajouter le nouveau event listener
+            newButton.addEventListener('click', () => {
+                if (typeof profession.mine === 'function') {
+                    const amount = profession.mine();
+                    console.log(`${professionName} gathered ${amount} resources`);
+                    profession.updateDisplay();
+                }
+            });
+        }
     }
 }
 
 function selectProfession(professionName) {
-    document.querySelectorAll('.profession-details').forEach(el => el.style.display = 'none');
+    // Mettre à jour la visibilité des détails de profession
+    document.querySelectorAll('.profession-details').forEach(el => {
+        if (el.id === `${professionName}-details`) {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    });
     
-    const selectedProfessionDetails = document.getElementById(`${professionName}-details`);
-    if (selectedProfessionDetails) {
-        selectedProfessionDetails.style.display = 'block';
+    // Mettre à jour l'affichage de la profession sélectionnée
+    if (professions[professionName]) {
+        professions[professionName].updateDisplay();
     }
-    
-    updateDisplays(professionName);
 }
+
 
 function updateUITranslations() {
     const elements = {
