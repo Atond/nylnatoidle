@@ -1,4 +1,4 @@
-import { combatUI } from '..combat/combatUI.js';
+import { combatUI } from '../combat/combatUI.js';
 import { character } from '../character.js';
 import { professions } from '../main.js';
 import { globalInventory } from '../inventory.js';
