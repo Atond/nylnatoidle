@@ -32,6 +32,18 @@ class TranslationManager {
         return result;
     }
 
+    getDefaultName(key) {
+        // Si la clé commence par "resources.", essayez de récupérer le nom par défaut
+        if (key.startsWith('resources.')) {
+            const resourceId = key.split('.')[1];
+            const resource = globalResourceManager.getResource(resourceId);
+            if (resource && resource.defaultName) {
+                return resource.defaultName;
+            }
+        }
+        return key;
+    }
+
     setLanguage(language) {
         if (this.translations.has(language)) {
             this.currentLanguage = language;

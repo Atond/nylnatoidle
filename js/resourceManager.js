@@ -3,8 +3,13 @@ class ResourceManager {
         this.resources = new Map();
     }
 
-    addResource(id, category, defaultName, image) {
-        this.resources.set(id, { id, category, defaultName, image });
+    addResource(resource) {
+        this.resources.set(resource.id, {
+            id: resource.id,
+            defaultName: resource.defaultName,
+            image: resource.image,
+            tier: resource.tier
+        });
     }
 
     getResource(id) {

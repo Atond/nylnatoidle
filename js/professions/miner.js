@@ -12,18 +12,18 @@ export class Miner extends BaseProfession {
             {
                 level: 1,
                 expRequired: 0,
-                resources: ['minerai111'],
+                resources: ['iron_ore'],
                 upgrades: [
-                    { id: 'betterPickaxe1', name: 'Better Pickaxe I', cost: { minerai111: 10 }, effect: () => { this.miningPower += 1; } },
+                    { id: 'betterPickaxe1', name: 'Better Pickaxe I', cost: { iron_ore: 10 }, effect: () => { this.miningPower += 1; } },
                 ]
             },
             {
                 level: 2,
                 expRequired: 100,
-                resources: ['minerai111', 'minerai112'],
+                resources: ['iron_ore', 'copper_ore'],
                 upgrades: [
-                    { id: 'betterPickaxe2', name: 'Better Pickaxe II', cost: { minerai111: 20, minerai112: 5 }, effect: () => { this.miningPower += 2; } },
-                    { id: 'autoMiner1', name: 'Auto Miner I', cost: { minerai111: 50, minerai112: 20 }, effect: () => { this.autoMinerCount += 1; } },
+                    { id: 'betterPickaxe2', name: 'Better Pickaxe II', cost: { iron_ore: 20, copper_ore: 5 }, effect: () => { this.miningPower += 2; } },
+                    { id: 'autoMiner1', name: 'Auto Miner I', cost: { iron_ore: 50, copper_ore: 20 }, effect: () => { this.autoMinerCount += 1; } },
                 ]
             },
             // Ajoutez d'autres niveaux ici...

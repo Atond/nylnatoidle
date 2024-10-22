@@ -16,28 +16,89 @@ export let professions = {};
 let playerExperience = 0;
 const experienceToNextLevel = 100;
 
+// Fonction pour charger un fichier JSON
+async function loadJsonData(path) {
+    try {
+        const response = await fetch(`data/${path}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`Error loading ${path}:`, error);
+        return null;
+    }
+}
+
+// Fonction pour initialiser toutes les ressources du jeu
+async function initializeGameData() {
+    try {
+        // Chargement de tous les fichiers de données
+        const [
+            professionResources,
+            monsterResources,
+            monstersData,
+            worldMapData
+        ] = await Promise.all([
+            loadJsonData('professionresources.json'),
+            loadJsonData('monsterResources.json'),
+            loadJsonData('monsters.json'),
+            loadJsonData('worldMap.json')
+        ]);
+
+        if (!professionResources || !monsterResources || !monstersData || !worldMapData) {
+            throw new Error('Failed to load one or more required data files');
+        }
+
+        // Initialisation des ressources des professions
+        if (professionResources.miner) {
+            professionResources.miner.forEach(resource => 
+                globalResourceManager.addResource(resource, 'profession'));
+        }
+        if (professionResources.lumberjack) {
+            professionResources.lumberjack.forEach(resource => 
+                globalResourceManager.addResource(resource, 'profession'));
+        }
+
+        // Initialisation des ressources des monstres
+        monsterResources.resources.forEach(resource => 
+            globalResourceManager.addResource(resource, 'monster'));
+
+        // Stockage des données des monstres et du monde
+        worlds = worldMapData.worlds;
+        zones = worlds.flatMap(world => world.zones);
+
+        // Création des instances de profession
+        professions = {
+            miner: new Miner(professionResources.miner.map(r => r.id)),
+            lumberjack: new Lumberjack(professionResources.lumberjack.map(r => r.id))
+        };
+
+        // Initialisation des traductions
+        await globalTranslationManager.loadTranslations('fr');
+
+        return true;
+    } catch (error) {
+        console.error('Error initializing game data:', error);
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const response = await fetch('data.json');
-        const data = await response.json();
+        const dataInitialized = await initializeGameData();
+        if (!dataInitialized) {
+            throw new Error('Failed to initialize game data');
+        }
         
-        data.minerResources.forEach(resource => globalResourceManager.addResource(resource));
-        data.lumberjackResources.forEach(resource => globalResourceManager.addResource(resource));
-        worlds = data.worlds;
-        zones = data.zones;
-        const minerResourceIds = data.minerResources.map(resource => resource.id);
-        const lumberjackResourceIds = data.lumberjackResources.map(resource => resource.id);
-
-        professions = {
-            miner: new Miner(minerResourceIds),
-            lumberjack: new Lumberjack(lumberjackResourceIds),
-        };
-        
-        // Charger les traductions avant d'initialiser le jeu
-        await globalTranslationManager.loadTranslations('fr');
         initializeGame();
     } catch (error) {
-        console.error("Error initializing game:", error);
+        console.error("Error starting game:", error);
+        // Afficher un message d'erreur à l'utilisateur
+        const errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        errorElement.textContent = 'Failed to load game data. Please refresh the page.';
+        document.body.prepend(errorElement);
     }
 });
 
@@ -193,6 +254,23 @@ window.showTab = function (tabId) {
         tab.style.display = 'none';
     });
     document.getElementById(tabId).style.display = 'block';
+}
+
+// Exportez les données qui pourraient être nécessaires ailleurs
+export function getWorlds() {
+    return worlds;
+}
+
+export function getZones() {
+    return zones;
+}
+
+export function getZoneById(zoneId) {
+    return zones.find(zone => zone.id === zoneId);
+}
+
+export function getWorldById(worldId) {
+    return worlds.find(world => world.id === worldId);
 }
 
 export function updateDisplays(selectedProfession = null) {
