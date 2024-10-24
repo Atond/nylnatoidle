@@ -26,6 +26,31 @@
       ]
     },
     {
+      "id": "chef_goblin",
+      "defaultName": "Chef goblin",
+      "image": "../images/enemies/Goblin.png",
+      "baseStats": {
+        "hp": 15,
+        "attack": 1,
+        "defense": 0
+      },
+      "baseExperience": 20,
+      "loot": [
+        {
+          "resourceId": "goblin_ear",
+          "chance": 0.7,
+          "minQuantity": 1,
+          "maxQuantity": 2
+        },
+        {
+          "resourceId": "goblin_tooth",
+          "chance": 0.3,
+          "minQuantity": 1,
+          "maxQuantity": 1
+        }
+      ]
+    },
+    {
       "id": "wolf",
       "defaultName": "Wolf",
       "image": "../images/enemies/Goblin.png",

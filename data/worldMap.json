@@ -12,7 +12,7 @@
             {
               "id": "goblin",
               "spawnRate": 0.7,
-              "levelRange": [1, 5]
+              "levelRange": [1, 2]
             }
           ],
           "resources": ["herb", "flower"]

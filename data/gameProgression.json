@@ -37,6 +37,22 @@
       "worlds": ["green_fields"],
       "zones": ["peaceful_meadow"]
     },
+    "scaling": {
+      "zoneMultiplier": 0.4,
+      "scalingPower": 2,
+      "levelScaling": 0.1,
+      "stats": {
+          "hp": {
+              "useFullScaling": true
+          },
+          "attack": {
+              "useFullScaling": false
+          },
+          "defense": {
+              "useFullScaling": false
+          }
+      }
+  },
     "quests": {
       "beginnerQuest": {
         "id": "beginnerQuest",
