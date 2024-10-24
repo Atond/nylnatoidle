@@ -1,3 +1,5 @@
+import { globalTranslationManager } from './translations/translationManager.js';
+
 class Character {
     constructor(name) {
         this.name = name;
