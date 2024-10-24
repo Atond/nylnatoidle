@@ -2,6 +2,8 @@ import { globalResourceManager } from '../resourceManager.js';
 import { combatUI } from './combatUI.js';
 import { globalInventory } from '../inventory.js';
 import { questSystem } from '../quests/questSystem.js';
+import { globalTranslationManager } from '../translations/translationManager.js';
+import { character } from '../character.js'
 
 class CombatSystem {
     constructor() {
@@ -20,11 +22,7 @@ class CombatSystem {
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
         
-        // Initialiser la première zone au chargement
-        this.initZone('peaceful_meadow', 'green_fields').catch(error => {
-            console.error('Failed to initialize first zone:', error);
-            combatUI.addCombatLog(globalTranslationManager.translate('ui.errorLoading'));
-        });
+        this.initialize();
     }
 
     // Stats de base du joueur
@@ -58,9 +56,48 @@ class CombatSystem {
     async loadProgressionConfig() {
         try {
             const response = await fetch('/data/gameProgression.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             this.progression = await response.json();
+            
+            // Vérifier que la configuration est valide
+            if (!this.progression || !this.progression.worldProgression) {
+                throw new Error('Invalid progression configuration');
+            }
         } catch (error) {
             console.error('Failed to load progression config:', error);
+            this.progression = {
+                // Configuration par défaut en cas d'erreur
+                worldProgression: [],
+                scaling: {
+                    zoneMultiplier: 0.4,
+                    scalingPower: 2,
+                    levelScaling: 0.1,
+                    stats: {
+                        hp: { useFullScaling: true },
+                        attack: { useFullScaling: false },
+                        defense: { useFullScaling: false }
+                    }
+                }
+            };
+        }
+    }
+
+    async initialize() {
+        try {
+            // Charger d'abord la configuration
+            await this.loadProgressionConfig();
+            
+            // Une fois la configuration chargée, initialiser la première zone
+            const success = await this.initZone('peaceful_meadow', 'green_fields');
+            
+            if (!success) {
+                throw new Error('Failed to initialize first zone');
+            }
+        } catch (error) {
+            console.error('Failed to initialize combat system:', error);
+            combatUI.addCombatLog(globalTranslationManager.translate('ui.errorLoading'));
         }
     }
 
@@ -273,6 +310,12 @@ class CombatSystem {
     
     generateMonster() {
         if (!this.currentZone) return null;
+
+        // S'assurer que la progression est chargée
+        if (!this.progression) {
+            console.error('Progression configuration not loaded');
+            return null;
+        }
     
         const monsterTemplate = this.currentZone.isBossZone && this.monstersDefeated >= 9
             ? this.currentZone.boss
@@ -296,27 +339,6 @@ class CombatSystem {
             currentHp: stats.hp,
             stats
         };
-    }
-
-    calculateMonsterExperience(monster) {
-        if (!monster.baseExperience) return 0;
-        
-        // Formule de base pour l'expérience
-        let experience = monster.baseExperience;
-        
-        // Bonus d'expérience basé sur le niveau du monstre
-        const levelBonus = 1 + (monster.level - 1) * 0.1;
-        
-        // Bonus d'expérience basé sur la zone (plus on avance, plus on gagne d'xp)
-        const zoneIndex = this.currentWorld.zones.findIndex(z => z.id === this.currentZone.id);
-        const zoneBonus = 1 + zoneIndex * 0.2;
-        
-        // Bonus pour les monstres rares ou les boss
-        const rarityMultiplier = monster.isRare ? 2 : (monster.isBoss ? 5 : 1);
-        
-        experience = Math.floor(experience * levelBonus * zoneBonus * rarityMultiplier);
-        
-        return experience;
     }
 
     // Combat

@@ -238,18 +238,6 @@ class CombatUI {
             questLog.appendChild(logEntry);
         }
     }
-
-    updateButtons() {
-        if (this.attackButton) {
-            const disabled = !combatSystem.inCombat || combatSystem.player.currentHp <= 0;
-            this.attackButton.disabled = disabled;
-        }
-        
-        if (this.autoCombatButton && combatSystem.autoCombatUnlocked) {
-            const disabled = combatSystem.player.currentHp <= 0;
-            this.autoCombatButton.disabled = disabled;
-        }
-    }
 }
 
 export const combatUI = new CombatUI();

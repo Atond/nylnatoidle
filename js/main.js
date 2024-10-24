@@ -1,20 +1,15 @@
 import { loadGame, saveGame } from './saveLoad.js';
 import { Miner } from './professions/miner.js';
 import { Lumberjack } from './professions/lumberjack.js';
-//import { MonsterManager } from './enemies/monster.js';
 import { globalInventory } from './inventory.js'; 
 import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { globalResourceManager } from './resourceManager.js';
 import { globalTranslationManager } from './translations/translationManager.js';
+import { character } from './character.js';
 
 let worlds = [];
 let zones = [];
-let autoIncrementInterval;
-
 export let professions = {};
-
-let playerExperience = 0;
-const experienceToNextLevel = 100;
 
 // Fonction pour charger un fichier JSON
 async function loadJsonData(path) {
@@ -33,6 +28,9 @@ async function loadJsonData(path) {
 // Fonction pour initialiser toutes les ressources du jeu
 async function initializeGameData() {
     try {
+        // Charger d'abord les traductions
+        await globalTranslationManager.loadTranslations('fr');
+
         // Chargement de tous les fichiers de données
         const [
             professionResources,
@@ -50,6 +48,7 @@ async function initializeGameData() {
             throw new Error('Failed to load one or more required data files');
         }
 
+        // Initialiser les ressources
         if (professionResources.miner) {
             professionResources.miner.forEach(resource => 
                 globalResourceManager.addResource(resource, 'profession'));
@@ -59,7 +58,6 @@ async function initializeGameData() {
                 globalResourceManager.addResource(resource, 'profession'));
         }
 
-        // Initialisation des ressources des monstres
         monsterResources.resources.forEach(resource => 
             globalResourceManager.addResource(resource, 'monster'));
 
@@ -72,9 +70,6 @@ async function initializeGameData() {
             miner: new Miner(professionResources.miner.map(r => r.id)),
             lumberjack: new Lumberjack(professionResources.lumberjack.map(r => r.id))
         };
-        
-        // Initialisation des traductions
-        await globalTranslationManager.loadTranslations('fr');
 
         return true;
     } catch (error) {
@@ -83,109 +78,70 @@ async function initializeGameData() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+function initializeUI() {
+    // Character name handlers
+    const changeNameBtn = document.getElementById('change-name');
+    const saveNameBtn = document.getElementById('save-name');
+    
+    changeNameBtn?.addEventListener('click', () => {
+        document.getElementById('character-name-input').style.display = 'inline';
+        saveNameBtn.style.display = 'inline';
+        changeNameBtn.style.display = 'none';
+    });
+
+    saveNameBtn?.addEventListener('click', () => {
+        const nameInput = document.getElementById('character-name-input');
+        const name = nameInput.value;
+        if (name) {
+            document.getElementById('character-name').innerText = name;
+            nameInput.style.display = 'none';
+            saveNameBtn.style.display = 'none';
+            changeNameBtn.style.display = 'inline';
+        }
+    });
+
+    // Language handler
+    document.getElementById('language-select')?.addEventListener('change', async (event) => {
+        await globalTranslationManager.setLanguage(event.target.value);
+        updateUITranslations();
+    });
+
+    // Initialize displays
+    displayProfessionsList();
+}
+
+async function initializeGame() {
     try {
+        // Initialiser les données
         const dataInitialized = await initializeGameData();
         if (!dataInitialized) {
             throw new Error('Failed to initialize game data');
         }
+
+        // Initialiser l'UI
+        initializeUI();
         
-        initializeGame();
+        // Charger la sauvegarde
+        loadGame();
+        
+        // Mettre à jour l'affichage
+        updateInventoryDisplay();
+        updateUITranslations();
+        character.updateExperienceDisplay();
+        
+        // Démarrer l'auto-save
+        setInterval(saveGame, 30000);
+        
     } catch (error) {
         console.error("Error starting game:", error);
-        // Afficher un message d'erreur à l'utilisateur
         const errorElement = document.createElement('div');
         errorElement.className = 'error-message';
-        errorElement.textContent = 'Failed to load game data. Please refresh the page.';
+        errorElement.textContent = globalTranslationManager.translate('ui.errorLoading');
         document.body.prepend(errorElement);
     }
-});
-
-function initializeGame() {
-    document.getElementById('auto-increment-select').addEventListener('change', (event) => {
-        clearInterval(autoIncrementInterval);
-        if (event.target.value === 'miner') {
-            autoIncrementInterval = setInterval(() => professions.miner.autoIncrement(), 1000);
-        } else if (event.target.value === 'lumberjack') {
-            autoIncrementInterval = setInterval(() => professions.lumberjack.autoIncrement(), 1000);
-        }
-    });
-
-    document.getElementById('change-name').addEventListener('click', () => {
-        document.getElementById('character-name-input').style.display = 'inline';
-        document.getElementById('save-name').style.display = 'inline';
-        document.getElementById('change-name').style.display = 'none';
-    });
-
-    document.getElementById('save-name').addEventListener('click', () => {
-        const name = document.getElementById('character-name-input').value;
-        if (name) {
-            document.getElementById('character-name').innerText = name;
-            document.getElementById('character-name-input').style.display = 'none';
-            document.getElementById('save-name').style.display = 'none';
-            document.getElementById('change-name').style.display = 'inline';
-        }
-    });
-
-    document.getElementById('language-select').addEventListener('change', (event) => {
-        globalTranslationManager.setLanguage(event.target.value);
-        updateUITranslations();
-    });
-
-    document.getElementById('mine-button').addEventListener('click', () => {
-        const minedAmount = professions.miner.mine();
-        console.log(`Mined ${minedAmount} ore`);
-        professions.miner.updateDisplay();
-    });
-
-    displayProfessionsList();
-
-    // Démarrer l'auto-minage
-    setInterval(() => {
-        if (professions.miner.autoMinerCount > 0) {
-            const autoMinedAmount = professions.miner.autoMine();
-            if (autoMinedAmount > 0) {
-                console.log(`Auto-mined ${autoMinedAmount} ore`);
-                professions.miner.updateDisplay();
-            }
-        }
-    }, 1000);  // Vérifier toutes les secondes
-
-    updateInventoryDisplay();
-    updateExperienceBar();
-    loadGame();
-    updateUITranslations();
-    setInterval(saveGame, 30000);
 }
 
-function addExperience(amount) {
-    playerExperience += amount;
-    if (playerExperience >= experienceToNextLevel) {
-        playerExperience -= experienceToNextLevel;
-        // Gérer le passage au niveau supérieur ici
-    }
-    updateExperienceBar();
-}
-
-function updateExperienceBar() {
-    const expBar = document.getElementById('experience-bar');
-    const expPercentage = (playerExperience / experienceToNextLevel) * 100;
-    expBar.style.width = `${expPercentage}%`;
-    document.getElementById('experience-text').textContent = 
-        `${playerExperience} / ${experienceToNextLevel} ${globalTranslationManager.translate('ui.xp')}`;
-}
-
-function addLoot(loot) {
-    for (const item of loot) {
-        globalInventory.addItem(item, 1);
-    }
-    updateInventoryDisplay();
-}
-
-function updateCommonElements() {
-    // Mettez à jour les éléments communs ici, comme le niveau du personnage, l'expérience globale, etc.
-    updateExperienceBar();
-}
+document.addEventListener('DOMContentLoaded', initializeGame);
 
 function displayProfessionsList() {
     // Mise à jour de la liste des professions
@@ -201,29 +157,9 @@ function displayProfessionsList() {
             professionsList.appendChild(professionButton);
         }
     }
-
-    // Configuration des boutons d'action pour chaque profession
-    for (const [professionName, profession] of Object.entries(professions)) {
-        const actionButton = document.getElementById(`${professionName}-action`);
-        if (actionButton) {
-            // Supprimer les anciens event listeners
-            const newButton = actionButton.cloneNode(true);
-            actionButton.parentNode.replaceChild(newButton, actionButton);
-            
-            // Ajouter le nouveau event listener
-            newButton.addEventListener('click', () => {
-                if (typeof profession.mine === 'function') {
-                    const amount = profession.mine();
-                    console.log(`${professionName} gathered ${amount} resources`);
-                    profession.updateDisplay();
-                }
-            });
-        }
-    }
 }
 
 function selectProfession(professionName) {
-    // Mettre à jour la visibilité des détails de profession
     document.querySelectorAll('.profession-details').forEach(el => {
         if (el.id === `${professionName}-details`) {
             el.style.display = 'block';
@@ -232,12 +168,10 @@ function selectProfession(professionName) {
         }
     });
     
-    // Mettre à jour l'affichage de la profession sélectionnée
     if (professions[professionName]) {
         professions[professionName].updateDisplay();
     }
 }
-
 
 function updateUITranslations() {
     const elements = {
@@ -248,15 +182,6 @@ function updateUITranslations() {
         'save-name': 'ui.saveName',
         'character-level-label': 'ui.characterLevelLabel',
         'professions-title': 'ui.professionsTitle',
-        'miner-title': 'professions.miner.title',
-        'miner-exp-label': 'professions.miner.expLabel',
-        'miner-level-label': 'professions.miner.levelLabel',
-        'miner-resources-label': 'professions.miner.resourcesLabel',
-        'lumberjack-title': 'professions.lumberjack.title',
-        'lumberjack-exp-label': 'professions.lumberjack.expLabel',
-        'lumberjack-level-label': 'professions.lumberjack.levelLabel',
-        'lumberjack-resources-label': 'professions.lumberjack.resourcesLabel',
-        'auto-increment-title': 'ui.autoIncrementTitle',
         'inventory-title': 'ui.inventoryTitle',
         'attack-monster': 'ui.attack'
     };
@@ -284,33 +209,20 @@ window.showTab = function (tabId) {
     document.getElementById(tabId).style.display = 'block';
 }
 
-// Exportez les données qui pourraient être nécessaires ailleurs
-export function getWorlds() {
-    return worlds;
-}
-
-export function getZones() {
-    return zones;
-}
-
-export function getZoneById(zoneId) {
-    return zones.find(zone => zone.id === zoneId);
-}
-
-export function getWorldById(worldId) {
-    return worlds.find(world => world.id === worldId);
-}
+// Exports
+export function getWorlds() { return worlds; }
+export function getZones() { return zones; }
+export function getZoneById(zoneId) { return zones.find(zone => zone.id === zoneId); }
+export function getWorldById(worldId) { return worlds.find(world => world.id === worldId); }
 
 export function updateDisplays(selectedProfession = null) {
     updateInventoryDisplay();
-    updateCommonElements();
+    character.updateExperienceDisplay();
     
     if (selectedProfession && professions[selectedProfession]) {
         const profession = professions[selectedProfession];
         if (typeof profession.updateDisplay === 'function') {
             profession.updateDisplay();
-        } else {
-            console.warn(`Update display function not available for ${selectedProfession}`);
         }
     }
 }
