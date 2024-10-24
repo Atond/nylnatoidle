@@ -7,7 +7,7 @@
       "baseStats": {
         "hp": 10,
         "attack": 1,
-        "defense": 1
+        "defense": 0
       },
       "baseExperience": 20,
       "loot": [
