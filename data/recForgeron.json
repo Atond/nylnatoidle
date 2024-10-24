@@ -1,0 +1,60 @@
+{
+    "recipes": [
+        {
+            "id": "wooden_sword",
+            "name": "Épée en bois",
+            "description": "Une épée basique en bois. Parfaite pour débuter.",
+            "materials": {
+                "oak_wood": 5
+            },
+            "result": {
+                "id": "wooden_sword",
+                "quantity": 1
+            },
+            "experience": 10,
+            "unlocked": true,
+            "stats": {
+                "attack": 2
+            },
+            "required_level": 1
+        },
+        {
+            "id": "copper_sword",
+            "name": "Épée en cuivre",
+            "description": "Une épée en cuivre. Plus efficace que le bois.",
+            "materials": {
+                "copper_ore": 8,
+                "oak_wood": 2
+            },
+            "result": {
+                "id": "copper_sword",
+                "quantity": 1
+            },
+            "experience": 25,
+            "unlocked": false,
+            "stats": {
+                "attack": 5
+            },
+            "required_level": 2
+        },
+        {
+            "id": "iron_sword",
+            "name": "Épée en fer",
+            "description": "Une épée solide en fer.",
+            "materials": {
+                "iron_ore": 10,
+                "oak_wood": 3
+            },
+            "result": {
+                "id": "iron_sword",
+                "quantity": 1
+            },
+            "experience": 50,
+            "unlocked": false,
+            "stats": {
+                "attack": 8
+            },
+            "required_level": 3
+        }
+    ]
+}

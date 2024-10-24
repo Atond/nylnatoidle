@@ -298,6 +298,27 @@ class CombatSystem {
         };
     }
 
+    calculateMonsterExperience(monster) {
+        if (!monster.baseExperience) return 0;
+        
+        // Formule de base pour l'expérience
+        let experience = monster.baseExperience;
+        
+        // Bonus d'expérience basé sur le niveau du monstre
+        const levelBonus = 1 + (monster.level - 1) * 0.1;
+        
+        // Bonus d'expérience basé sur la zone (plus on avance, plus on gagne d'xp)
+        const zoneIndex = this.currentWorld.zones.findIndex(z => z.id === this.currentZone.id);
+        const zoneBonus = 1 + zoneIndex * 0.2;
+        
+        // Bonus pour les monstres rares ou les boss
+        const rarityMultiplier = monster.isRare ? 2 : (monster.isBoss ? 5 : 1);
+        
+        experience = Math.floor(experience * levelBonus * zoneBonus * rarityMultiplier);
+        
+        return experience;
+    }
+
     // Combat
     async startCombat() {
         if (this.inCombat) return;
@@ -344,6 +365,27 @@ class CombatSystem {
         }
     }
 
+    calculateMonsterExperience(monster) {
+        if (!monster.baseExperience) return 0;
+        
+        // Expérience de base plus modérée
+        let experience = monster.baseExperience;
+        
+        // Bonus de niveau réduit
+        const levelBonus = 1 + (monster.level - 1) * 0.05; // 5% par niveau au lieu de 10%
+        
+        // Bonus de zone plus modéré
+        const zoneIndex = this.currentWorld.zones.findIndex(z => z.id === this.currentZone.id);
+        const zoneBonus = 1 + zoneIndex * 0.1; // 10% par zone au lieu de 20%
+        
+        // Bonus pour les monstres spéciaux ajustés
+        const rarityMultiplier = monster.isRare ? 1.5 : (monster.isBoss ? 3 : 1);
+        
+        experience = Math.floor(experience * levelBonus * zoneBonus * rarityMultiplier);
+        
+        return experience;
+    }
+
     autoAttack() {
         if (!this.inCombat || !this.currentMonster) {
             this.startCombat();
@@ -358,12 +400,38 @@ class CombatSystem {
         this.inCombat = false;
         this.monstersDefeated++;
         
+        // Générer le butin
         const loot = this.generateLoot(monster);
-        const experience = this.calculateExperience(monster);
         
+        // Calculer l'expérience
+        const experience = this.calculateMonsterExperience(monster);
+        character.addExperience(experience);
+        
+        if (experience > 0) {
+            combatUI.addCombatLog(
+                globalTranslationManager.translate('ui.experienceGained')
+                    .replace('{experience}', experience)
+            );
+        }
+        
+        // Ajouter le butin à l'inventaire
         loot.forEach(item => {
             globalInventory.addItem(item.id, item.quantity);
+            // Ajouter un message dans le log pour chaque item obtenu
+            combatUI.addCombatLog(
+                globalTranslationManager.translate('ui.lootObtained')
+                    .replace('{quantity}', item.quantity)
+                    .replace('{item}', globalResourceManager.getResourceName(item.id))
+            );
         });
+        
+        // Ajouter un message pour l'expérience gagnée
+        if (experience > 0) {
+            combatUI.addCombatLog(
+                globalTranslationManager.translate('ui.experienceGained')
+                    .replace('{experience}', experience)
+            );
+        }
         
         combatUI.addVictoryLog(monster.name);
         
@@ -408,6 +476,32 @@ class CombatSystem {
         
         // Déclencher la quête de l'épée
         questSystem.startQuest('craft_sword_quest');
+    }
+
+    generateLoot(monster) {
+        if (!monster.loot) return [];
+
+        const lootItems = [];
+        
+        // Pour chaque item possible dans la table de loot du monstre
+        monster.loot.forEach(lootEntry => {
+            const { resourceId, chance, minQuantity, maxQuantity } = lootEntry;
+            
+            // Vérifier si l'item est obtenu basé sur sa chance
+            if (Math.random() < chance) {
+                // Calculer la quantité aléatoire entre min et max
+                const quantity = minQuantity === maxQuantity ? 
+                    minQuantity : 
+                    Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity;
+                
+                lootItems.push({
+                    id: resourceId,
+                    quantity: quantity
+                });
+            }
+        });
+
+        return lootItems;
     }
 
     returnToPreviousZone() {
