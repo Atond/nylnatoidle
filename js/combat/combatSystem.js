@@ -10,6 +10,7 @@ class CombatSystem {
         this.monstersDefeated = 0;
         this.inCombat = false;
         this.autoCombatEnabled = false;
+        this.autoCombatUnlocked = false;
         this.currentMonster = null;
         this.autoAttackInterval = null;
         this.progression = null;
@@ -323,9 +324,11 @@ class CombatSystem {
         this.currentMonster.currentHp -= playerDamage;
         combatUI.addDamageLog('Joueur', this.currentMonster.name, playerDamage);
     
-        // Le monstre contre-attaque
-        this.player.currentHp -= monsterDamage;
-        combatUI.addDamageLog(this.currentMonster.name, 'Joueur', monsterDamage);
+        // Le monstre contre-attaque s'il est encore vivant
+        if (this.currentMonster.currentHp > 0) {
+            this.player.currentHp -= monsterDamage;
+            combatUI.addDamageLog(this.currentMonster.name, 'Joueur', monsterDamage);
+        }
     
         // Vérifier la défaite du joueur
         if (this.player.currentHp <= 0) {
@@ -364,19 +367,19 @@ class CombatSystem {
         
         combatUI.addVictoryLog(monster.name);
         
+        // Vérification de la complétion de zone
         if (this.monstersDefeated >= 10) {
             this.completeZone();
-            this.autoCombatEnabled = false;
-            if (this.autoAttackInterval) {
-                clearInterval(this.autoAttackInterval);
-                this.autoAttackInterval = null;
+            
+            // Débloquer l'auto-combat si c'est la première zone
+            if (!this.autoCombatUnlocked && this.currentZone?.id === 'peaceful_meadow') {
+                this.unlockAutoCombat();
             }
-        } else if (this.autoCombatEnabled) {
-            // Démarrer automatiquement le combat suivant
-            setTimeout(() => this.startCombat(), 100);
+        } else {
+            // Faire apparaître automatiquement un nouveau monstre
+            setTimeout(() => this.startCombat(), 1000);
         }
     
-        this.currentMonster = null;
         combatUI.updateUI();
     }
 
@@ -396,6 +399,15 @@ class CombatSystem {
         }
         
         this.returnToPreviousZone();
+    }
+
+    unlockAutoCombat() {
+        this.autoCombatUnlocked = true;
+        combatUI.showAutoCombatButton(); // Nouvelle méthode dans CombatUI
+        combatUI.addCombatLog(globalTranslationManager.translate('ui.autoCombatUnlocked'));
+        
+        // Déclencher la quête de l'épée
+        questSystem.startQuest('craft_sword_quest');
     }
 
     returnToPreviousZone() {

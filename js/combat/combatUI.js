@@ -6,6 +6,19 @@ class CombatUI {
         this.initializeElements();
         this.bindEvents();
         this.updateInterval = setInterval(() => this.updateUI(), 100);
+
+        // Cacher initialement le bouton d'auto-combat
+        if (this.autoCombatButton) {
+            this.autoCombatButton.style.display = 'none';
+        }
+    }
+
+    showAutoCombatButton() {
+        if (this.autoCombatButton) {
+            // Afficher le bouton avec une animation
+            this.autoCombatButton.style.display = 'block';
+            this.autoCombatButton.classList.add('button-appear');
+        }
     }
 
     initializeElements() {
@@ -223,6 +236,18 @@ class CombatUI {
             const logEntry = document.createElement('div');
             logEntry.textContent = message;
             questLog.appendChild(logEntry);
+        }
+    }
+
+    updateButtons() {
+        if (this.attackButton) {
+            const disabled = !combatSystem.inCombat || combatSystem.player.currentHp <= 0;
+            this.attackButton.disabled = disabled;
+        }
+        
+        if (this.autoCombatButton && combatSystem.autoCombatUnlocked) {
+            const disabled = combatSystem.player.currentHp <= 0;
+            this.autoCombatButton.disabled = disabled;
         }
     }
 }
