@@ -5,31 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Idle RPG</title>
     <link rel="stylesheet" href="modern.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container container">
             <div class="nav-brand">
-                <i data-lucide="layout"></i>
                 <span>Idle RPG</span>
             </div>
 
             <div class="nav-tabs">
                 <button class="nav-tab active" data-tab="combat">
-                    <i data-lucide="sword"></i>
                     Combat
                 </button>
                 <button class="nav-tab" data-tab="character">
-                    <i data-lucide="user"></i>
                     Personnage
                 </button>
                 <button class="nav-tab" data-tab="professions">
-                    <i data-lucide="briefcase"></i>
                     Métiers
                 </button>
                 <button class="nav-tab" data-tab="dragons">
-                    <i data-lucide="flame"></i>
                     Dragons
                 </button>
             </div>
@@ -89,11 +83,9 @@
                         <!-- Combat Controls -->
                         <div class="flex gap-2 mb-4">
                             <button id="attack-btn" class="btn btn-primary flex-1">
-                                <i data-lucide="sword" class="w-4 h-4"></i>
                                 Attaquer
                             </button>
                             <button id="auto-combat-btn" class="btn btn-secondary flex-1">
-                                <i data-lucide="play" class="w-4 h-4"></i>
                                 Auto Combat
                             </button>
                         </div>
@@ -154,9 +146,6 @@
     </main>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
         // Tab management
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -173,6 +162,6 @@
             });
         });
     </script>
-    <script type="module" src="main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
