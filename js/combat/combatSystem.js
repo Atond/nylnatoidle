@@ -371,14 +371,18 @@ class CombatSystem {
             this.currentMonster.stats.attack,
             this.player.getTotalStats().defense
         );
-    
+
+        combatUI.addDamageLog('Joueur', this.currentMonster, playerDamage);
         this.currentMonster.currentHp -= playerDamage;
-        combatUI.addDamageLog('Joueur', this.currentMonster.name, playerDamage);
     
         // Le monstre contre-attaque s'il est encore vivant
         if (this.currentMonster.currentHp > 0) {
+            const monsterDamage = this.calculateDamage(
+                this.currentMonster.stats.attack,
+                this.player.getTotalStats().defense
+            );
             this.player.currentHp -= monsterDamage;
-            combatUI.addDamageLog(this.currentMonster.name, 'Joueur', monsterDamage);
+            combatUI.addDamageLog(this.currentMonster, 'Joueur', monsterDamage);
         }
     
         // Vérifier la défaite du joueur

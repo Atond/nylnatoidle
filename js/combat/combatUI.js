@@ -51,7 +51,7 @@ class CombatUI {
 
         // Initialiser les textes des boutons
         if (this.attackButton) {
-            this.attackButton.textContent = globalTranslationManager.translate('ui.attack');
+            this.attackButton.textContent = globalTranslationManager.translate('combat.attack');
         }
         if (this.autoCombatButton) {
             this.autoCombatButton.textContent = globalTranslationManager.translate('ui.autoCombat')
@@ -156,11 +156,14 @@ class CombatUI {
             this.monsterLevel.textContent = globalTranslationManager.translate('ui.level')
                 .replace('{level}', monster.level);
         }
+
         if (this.monsterAttack) {
-            this.monsterAttack.textContent = `Attack: ${monster.stats.attack}`;
+            this.monsterAttack.textContent = globalTranslationManager.translate('ui.monster_attack_stat')
+                .replace('{value}', monster.stats.attack);
         }
         if (this.monsterDefense) {
-            this.monsterDefense.textContent = `Defense: ${monster.stats.defense}`;
+            this.monsterDefense.textContent = globalTranslationManager.translate('ui.monster_defense_stat')
+                .replace('{value}', monster.stats.defense);
         }
         if (this.monsterImage) {
             this.monsterImage.style.visibility = 'visible';
@@ -233,10 +236,19 @@ class CombatUI {
 
     // Nouvelles méthodes pour les messages de combat
     addDamageLog(attacker, defender, amount) {
-        const attackerName = attacker === 'Joueur' ? attacker : 
-            globalTranslationManager.translate(`monsters.${attacker.id}`);
-        const defenderName = defender === 'Joueur' ? defender : 
-            globalTranslationManager.translate(`monsters.${defender.id}`);
+        let attackerName, defenderName;
+    
+        if (attacker === 'Joueur') {
+            attackerName = attacker;
+        } else {
+            attackerName = globalTranslationManager.translate(`monsters.${attacker.id}`);
+        }
+    
+        if (defender === 'Joueur') {
+            defenderName = defender;
+        } else {
+            defenderName = globalTranslationManager.translate(`monsters.${defender.id}`);
+        }
             
         this.addCombatLog(
             globalTranslationManager.translate('combat.damage')
