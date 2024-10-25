@@ -27,6 +27,8 @@
         "health": "{current}/{max} PV",
         "attack_stat": "Attaque: {value}",
         "defense_stat": "Défense: {value}",
+        "monster_attack_stat": "Attaque: {value}",
+        "monster_defense_stat": "Défense: {value}",
         "progress": "{current}/{max} monstres",
         "victory": "Victoire ! Vous avez vaincu {monster}",
         "defeat": "Défaite ! Retour à la zone précédente",
