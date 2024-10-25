@@ -494,7 +494,7 @@ class CombatSystem {
     handleDefeat() {
         combatUI.addDefeatLog();
         this.inCombat = false;
-        this.player.currentHp = this.player.maxHp;
+        this.player.currentHp = this.player.maxHp; // Réinitialiser les HP
         this.monstersDefeated = 0;
         this.currentMonster = null;
         
@@ -505,7 +505,10 @@ class CombatSystem {
             this.autoAttackInterval = null;
         }
         
-        this.returnToPreviousZone();
+        // Important: Redémarrer le combat après un court délai
+        setTimeout(() => {
+            this.startCombat();
+        }, 1000);
     }
     
     unlockAutoCombat() {
@@ -673,6 +676,20 @@ class CombatSystem {
             }
         }
         combatUI.addCombatLog(globalTranslationManager.translate('ui.worldCompleted'));
+    }
+    
+    async startCombat() {
+        if (this.inCombat) return;
+        
+        if (this.player.currentHp <= 0) {
+            this.player.currentHp = this.player.maxHp;
+        }
+        
+        this.currentMonster = await this.generateMonster();
+        if (!this.currentMonster) return;
+        
+        this.inCombat = true;
+        combatUI.updateUI();
     }
     
     saveProgress() {

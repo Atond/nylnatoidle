@@ -7,8 +7,8 @@ class ExperienceManager {
     }
 
     initializeElements() {
-        this.experienceBar = document.getElementById('experience-bar');
-        this.experienceText = document.getElementById('experience-text');
+        this.levelElement = document.getElementById('character-level');
+        this.expFill = document.querySelector('.exp-fill');
         
         // Démarrer la mise à jour périodique
         this.startPeriodicUpdate();
@@ -17,29 +17,28 @@ class ExperienceManager {
     startPeriodicUpdate() {
         // Mettre à jour l'affichage toutes les 100ms pour une animation fluide
         this.updateInterval = setInterval(() => {
-            if (this.experienceBar && this.experienceBar.dataset.targetWidth) {
-                const current = parseFloat(this.experienceBar.style.width || '0');
-                const target = parseFloat(this.experienceBar.dataset.targetWidth);
+            if (this.expFill && this.expFill.dataset.targetWidth) {
+                const current = parseFloat(this.expFill.style.width || '0');
+                const target = parseFloat(this.expFill.dataset.targetWidth);
                 if (current !== target) {
                     const newWidth = current + (target - current) * 0.1;
-                    this.experienceBar.style.width = `${newWidth}%`;
+                    this.expFill.style.width = `${newWidth}%`;
                 }
             }
         }, 100);
     }
 
     updateExperience(currentExp, maxExp, level) {
-        if (this.experienceBar) {
-            const percentage = (currentExp / maxExp) * 100;
-            // Stocker la largeur cible pour l'animation
-            this.experienceBar.dataset.targetWidth = percentage;
+        // Mettre à jour le niveau
+        if (this.levelElement) {
+            this.levelElement.textContent = `Niveau ${level}`;
         }
 
-        if (this.experienceText) {
-            this.experienceText.textContent = 
-                `${globalTranslationManager.translate('ui.levelLabel')} ${level} - ` +
-                `${currentExp.toLocaleString()}/${maxExp.toLocaleString()} ` +
-                `${globalTranslationManager.translate('ui.xp')}`;
+        // Mettre à jour la barre d'expérience
+        if (this.expFill) {
+            const percentage = (currentExp / maxExp) * 100;
+            // Stocker la largeur cible pour l'animation
+            this.expFill.dataset.targetWidth = percentage;
         }
     }
 
