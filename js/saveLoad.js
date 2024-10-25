@@ -47,7 +47,8 @@ export function saveGame() {
             autoCombatEnabled: combatSystem.autoCombatEnabled,
             unlockedWorlds: Object.keys(combatSystem.unlockedWorlds || {}),
             unlockedZones: Object.keys(combatSystem.unlockedZones || {}),
-            completedZones: Object.keys(combatSystem.completedZones || {})
+            completedZones: Object.keys(combatSystem.completedZones || {}),
+            savedProgress: Array.from(combatSystem.savedProgress.entries())
         },
         
         // Progression des quêtes
@@ -118,6 +119,10 @@ export function loadGame() {
         
         // Charger la progression du combat
         if (gameState.combat) {
+            if (gameState.combat.savedProgress) {
+                combatSystem.savedProgress = new Map(gameState.combat.savedProgress);
+            }
+
             if (gameState.combat.currentWorld && gameState.combat.currentZone) {
                 combatSystem.initZone(gameState.combat.currentZone, gameState.combat.currentWorld);
             }

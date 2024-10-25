@@ -1,4 +1,6 @@
 import { globalTranslationManager } from './translations/translationManager.js';
+import { experienceManager } from './combat/experience.js';
+import { combatUI } from './combat/combatUI.js';
 
 class Character {
     constructor(name) {
@@ -37,6 +39,8 @@ class Character {
             }
             // etc...
         };
+
+        this.updateExperienceDisplay();
     }
     
     // Formule d'expérience requise pour le prochain niveau
@@ -56,52 +60,57 @@ class Character {
     
     addExperience(amount) {
         this.experience += amount;
-        let leveled = false;
         
+        // Mettre à jour l'affichage avant de vérifier le level up
+        experienceManager.updateExperience(
+            this.experience,
+            this.getExperienceToNextLevel(),
+            this.level
+        );
+
+        // Vérifier si le personnage doit monter de niveau
         while (this.experience >= this.getExperienceToNextLevel()) {
+            const remainingExp = this.experience - this.getExperienceToNextLevel();
             this.levelUp();
-            leveled = true;
+            this.experience = remainingExp;
         }
-        
-        if (leveled) {
-            this.onLevelUp();
-        }
-        
-        this.updateExperienceDisplay();
     }
-    
-    levelUp() {
+
+levelUp() {
         const oldStats = this.getBaseStats();
-        this.experience -= this.getExperienceToNextLevel();
         this.level += 1;
         const newStats = this.getBaseStats();
-
-        // Gains de stats modérés
+        
+        // Calculer les gains de stats
         const statGains = {
             maxHp: newStats.maxHp - oldStats.maxHp,
             attack: newStats.attack - oldStats.attack,
             defense: newStats.defense - oldStats.defense
         };
 
+        // Afficher le message de level up avec les gains
+        this.displayLevelUpMessage(statGains);
+        
         // Vérifier les paliers de niveau
         if (this.levelMilestones[this.level]) {
             const milestone = this.levelMilestones[this.level];
-            milestone.effect();
             this.displayMilestoneMessage(milestone.description);
+            milestone.effect();
         }
-
-        // Restaurer une partie des HP seulement
-        this.currentHp = Math.min(this.currentHp + statGains.maxHp, newStats.maxHp);
-
-        this.displayLevelUpMessage(statGains);
-    }
-
-    displayMilestoneMessage(description) {
-        combatUI.addCombatLog(
-            globalTranslationManager.translate('ui.levelMilestone')
-                .replace('{level}', this.level)
-                .replace('{description}', description)
+        
+        // Mettre à jour l'affichage
+        experienceManager.updateExperience(
+            this.experience,
+            this.getExperienceToNextLevel(),
+            this.level
         );
+        updateCharacterLevelDisplay();
+        
+        // Restaurer les HP au maximum après le level up
+        if (combatSystem.player) {
+            combatSystem.player.currentHp = newStats.maxHp;
+            combatUI.updateUI();
+        }
     }
     
     displayLevelUpMessage(statGains) {

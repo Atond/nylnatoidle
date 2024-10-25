@@ -18,6 +18,7 @@ class CombatSystem {
         this.progression = null;
         this.loadProgressionConfig();
         this.completedZones = {}; // Pour suivre les zones terminées
+        this.savedProgress = new Map();
 
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
@@ -236,6 +237,13 @@ class CombatSystem {
         
         const zone = world.zones.find(z => z.id === zoneId);
         if (!zone) return false;
+
+        const savedZoneProgress = this.savedProgress.get(zoneId);
+        if (savedZoneProgress) {
+            this.monstersDefeated = savedZoneProgress.monstersDefeated;
+        } else {
+            this.monstersDefeated = 0;
+        }
         
         this.currentWorld = world;
         this.currentZone = {
@@ -428,12 +436,17 @@ class CombatSystem {
         // Calculer l'expérience
         const experience = this.calculateMonsterExperience(monster);
         character.addExperience(experience);
+
+        this.savedProgress.set(this.currentZone.id, {
+            monstersDefeated: this.monstersDefeated,
+            worldId: this.currentWorld.id
+        });
         
         if (experience > 0) {
             combatUI.addCombatLog(
                 globalTranslationManager.translate('ui.experienceGained')
                     .replace('{experience}', experience)
-            );
+            );    
         }
         
         // Ajouter le butin à l'inventaire
@@ -656,6 +669,27 @@ class CombatSystem {
             }
         }
         combatUI.addCombatLog(globalTranslationManager.translate('ui.worldCompleted'));
+    }
+
+    saveProgress() {
+        const progressData = {
+            savedProgress: Array.from(this.savedProgress.entries()),
+            unlockedWorlds: this.unlockedWorlds,
+            unlockedZones: this.unlockedZones,
+            autoCombatUnlocked: this.autoCombatUnlocked
+        };
+        localStorage.setItem('combatProgress', JSON.stringify(progressData));
+    }
+
+    loadProgress() {
+        const saved = localStorage.getItem('combatProgress');
+        if (saved) {
+            const data = JSON.parse(saved);
+            this.savedProgress = new Map(data.savedProgress);
+            this.unlockedWorlds = data.unlockedWorlds;
+            this.unlockedZones = data.unlockedZones;
+            this.autoCombatUnlocked = data.autoCombatUnlocked;
+        }
     }
 }
 

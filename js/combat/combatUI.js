@@ -27,6 +27,8 @@ class CombatUI {
         this.playerHealthText = document.getElementById('player-health-text');
         this.playerAttack = document.getElementById('player-attack');
         this.playerDefense = document.getElementById('player-defense');
+        this.playerExp = document.getElementById('player-exp');
+        this.playerExpBar = document.getElementById('player-exp-bar');
 
         // Monster elements
         this.monsterHealth = document.getElementById('monster-health');
@@ -34,10 +36,12 @@ class CombatUI {
         this.monsterName = document.getElementById('monster-name');
         this.monsterLevel = document.getElementById('monster-level');
         this.monsterImage = document.getElementById('monster-image');
+        this.monsterAttack = document.getElementById('monster-attack');
+        this.monsterDefense = document.getElementById('monster-defense');
 
         // Combat controls
-        this.attackButton = document.getElementById('attack-btn');
-        this.autoCombatButton = document.getElementById('auto-combat-btn');
+        //this.attackButton = document.getElementById('attack-btn');
+        //this.autoCombatButton = document.getElementById('auto-combat-btn');
         this.combatLog = document.getElementById('combat-log');
 
         // Zone progress
@@ -111,6 +115,16 @@ class CombatUI {
         }
     }
 
+    updatePlayerExperience(currentExp, maxExp, level) {
+        if (this.playerExp) {
+            this.playerExp.textContent = `${currentExp}/${maxExp} XP`;
+        }
+        if (this.playerExpBar) {
+            const percentage = (currentExp / maxExp) * 100;
+            this.playerExpBar.style.width = `${percentage}%`;
+        }
+    }
+
     updateMonsterStats() {
         if (!combatSystem.currentMonster) {
             // Réinitialiser l'affichage du monstre
@@ -119,6 +133,8 @@ class CombatUI {
             if (this.monsterName) this.monsterName.textContent = globalTranslationManager.translate('ui.noMonster');
             if (this.monsterLevel) this.monsterLevel.textContent = '';
             if (this.monsterImage) this.monsterImage.style.visibility = 'hidden';
+            if (this.monsterAttack) this.monsterAttack.textContent = '';
+            if (this.monsterDefense) this.monsterDefense.textContent = '';
             return;
         }
     
@@ -139,6 +155,12 @@ class CombatUI {
         if (this.monsterLevel) {
             this.monsterLevel.textContent = globalTranslationManager.translate('ui.level')
                 .replace('{level}', monster.level);
+        }
+        if (this.monsterAttack) {
+            this.monsterAttack.textContent = `Attack: ${monster.stats.attack}`;
+        }
+        if (this.monsterDefense) {
+            this.monsterDefense.textContent = `Defense: ${monster.stats.defense}`;
         }
         if (this.monsterImage) {
             this.monsterImage.style.visibility = 'visible';
@@ -211,18 +233,24 @@ class CombatUI {
 
     // Nouvelles méthodes pour les messages de combat
     addDamageLog(attacker, defender, amount) {
+        const attackerName = attacker === 'Joueur' ? attacker : 
+            globalTranslationManager.translate(`monsters.${attacker.id}`);
+        const defenderName = defender === 'Joueur' ? defender : 
+            globalTranslationManager.translate(`monsters.${defender.id}`);
+            
         this.addCombatLog(
-            globalTranslationManager.translate('ui.damage')
-                .replace('{attacker}', attacker)
-                .replace('{defender}', defender)
+            globalTranslationManager.translate('combat.damage')
+                .replace('{attacker}', attackerName)
+                .replace('{defender}', defenderName)
                 .replace('{amount}', amount)
         );
     }
 
     addVictoryLog(monster) {
+        const monsterName = globalTranslationManager.translate(`monsters.${monster.id}`);
         this.addCombatLog(
-            globalTranslationManager.translate('ui.victory')
-                .replace('{monster}', monster)
+            globalTranslationManager.translate('combat.victory')
+                .replace('{monster}', monsterName)
         );
     }
 
