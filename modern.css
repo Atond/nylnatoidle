@@ -431,3 +431,31 @@ body {
     padding: 4px 0;
     border-bottom: 1px solid #e5e7eb;
 }
+
+.quests-section {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.quest-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+}
+
+.quest-item .progress-bar {
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.quest-item .progress-bar > div {
+    height: 100%;
+    background: #4f46e5;
+    transition: width 0.3s ease;
+}

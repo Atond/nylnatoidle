@@ -28,9 +28,13 @@ class CombatSystem {
         
         // Ajouter un écouteur d'événement pour le level up
         window.addEventListener('characterLevelUp', (event) => {
-            if (this.player) {
-                this.player.currentHp = event.detail.maxHp;
-                combatUI.updateUI();
+            this.player.maxHp = event.detail.maxHp; // Mettre à jour les PV max
+            this.player.currentHp = this.player.maxHp; // Restaurer les PV au maximum
+            combatUI.updateUI();
+
+            // Débloquer les quêtes au niveau 2
+            if (character.level === 2) {
+                this.unlockQuests();
             }
         });
     }
@@ -59,7 +63,11 @@ class CombatSystem {
                 }
             });
             
-            return { attack: totalAttack, defense: totalDefense };
+            return { 
+                attack: totalAttack, 
+                defense: totalDefense,
+                maxHp: this.maxHp // Ajouter maxHp aux stats
+            };
         }
     };
     
@@ -254,9 +262,6 @@ class CombatSystem {
             monstersDefeated: this.monstersDefeated, // Gardons le nombre actuel de monstres tués
             isBossZone: zone.hasBoss
         };
-        
-        // Ne réinitialisons PAS le compteur de monstres
-        // this.monstersDefeated = 0; <- Supprimons cette ligne
         
         // Réinitialiser l'état du combat
         this.inCombat = false;
@@ -472,11 +477,9 @@ class CombatSystem {
             if (!this.autoCombatUnlocked && this.currentZone?.id === 'peaceful_meadow') {
                 this.unlockAutoCombat();
             }
-        } else {
-            this.currentMonster = null; // Réinitialiser le monstre actuel
-            // Faire apparaître un nouveau monstre après un court délai
-            setTimeout(() => this.startCombat(), 1000);
-        }
+        } 
+        
+        setTimeout(() => this.startCombat(), 1000);
         
         combatUI.updateUI();
     }
@@ -681,6 +684,23 @@ class CombatSystem {
         
         this.inCombat = true;
         combatUI.updateUI();
+    }
+
+    unlockQuests() {
+        // Créer et afficher la zone de quêtes
+        const combatTab = document.getElementById('combat-tab');
+        const questsContainer = document.createElement('div');
+        questsContainer.id = 'quests-container';
+        questsContainer.className = 'quests-section card mt-4';
+        questsContainer.innerHTML = `
+            <h2 class="card-title">Quêtes</h2>
+            <div id="active-quests" class="quests-list"></div>
+        `;
+        combatTab.appendChild(questsContainer);
+
+        // Démarrer la première quête
+        questSystem.startQuest('beginnerQuest');
+        questSystem.updateQuestDisplay();
     }
     
     saveProgress() {

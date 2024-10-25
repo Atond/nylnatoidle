@@ -109,7 +109,7 @@ class CombatUI {
         if (this.playerHealthText) {
             this.playerHealthText.textContent = globalTranslationManager.translate('ui.health')
                 .replace('{current}', Math.round(combatSystem.player.currentHp))
-                .replace('{max}', combatSystem.player.maxHp);
+                .replace('{max}', combatSystem.player.maxHp); // Utiliser maxHp des stats
         }
         if (this.playerAttack) {
             this.playerAttack.textContent = globalTranslationManager.translate('ui.attack_stat')

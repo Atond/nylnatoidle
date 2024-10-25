@@ -16,7 +16,7 @@ class Character {
         
         this.statsPerLevel = {
             maxHp: 5,
-            attack: 0.1,
+            attack: 1,
             defense: 0.1
         };
         
@@ -94,6 +94,12 @@ class Character {
             this.displayMilestoneMessage(milestone.description);
             milestone.effect();
         }
+
+        this.baseStats.maxHp = newStats.maxHp;
+        this.baseStats.attack = newStats.attack;
+        this.baseStats.defense = newStats.defense;
+    
+        this.displayLevelUpMessage(statGains);
         
         experienceManager.updateExperience(
             this.experience,

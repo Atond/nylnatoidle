@@ -2,6 +2,7 @@ import { combatUI } from '../combat/combatUI.js';
 import { character } from '../character.js';
 import { professions } from '../main.js';
 import { globalInventory } from '../inventory.js';
+import { globalTranslationManager } from '../translations/translationManager.js';
 
 class QuestSystem {
     constructor() {
@@ -55,18 +56,57 @@ class QuestSystem {
 
 
     updateQuestDisplay() {
-        // Mise à jour de l'interface des quêtes
-        const questContainer = document.getElementById('quests-container');
-        if (!questContainer) return;
+        const questsContainer = document.getElementById('active-quests');
+        if (!questsContainer) return;
     
-        questContainer.innerHTML = '';
+        questsContainer.innerHTML = '';
     
-        // Afficher les quêtes actives
         this.activeQuests.forEach((quest, questId) => {
             const progress = this.questProgress.get(questId);
-            const questElement = this.createQuestElement(quest, progress);
-            questContainer.appendChild(questElement);
+            const questElement = document.createElement('div');
+            questElement.className = 'quest-item p-4 bg-gray-50 rounded-lg mb-2';
+            
+            let progressText = '';
+            if (quest.requirements.monstersKilled) {
+                Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
+                    if (monsterId !== 'zone') {
+                        const current = (progress?.monstersKilled?.[monsterId] || 0);
+                        progressText += `${current}/${required} ${globalTranslationManager.translate(`monsters.${monsterId}`)} tués`;
+                    }
+                });
+            }
+            
+            questElement.innerHTML = `
+                <h3 class="font-medium text-lg mb-2">${quest.title}</h3>
+                <p class="text-gray-600 mb-2">${quest.description}</p>
+                <div class="progress-bar bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: ${this.calculateQuestProgress(questId)}%"></div>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">${progressText}</p>
+            `;
+            
+            questsContainer.appendChild(questElement);
         });
+    }
+
+    calculateQuestProgress(questId) {
+        const quest = this.activeQuests.get(questId);
+        const progress = this.questProgress.get(questId);
+        if (!quest || !progress) return 0;
+
+        let totalRequired = 0;
+        let totalCompleted = 0;
+
+        if (quest.requirements.monstersKilled) {
+            Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
+                if (monsterId !== 'zone') {
+                    totalRequired += required;
+                    totalCompleted += (progress.monstersKilled?.[monsterId] || 0);
+                }
+            });
+        }
+
+        return totalRequired > 0 ? (totalCompleted / totalRequired) * 100 : 0;
     }
 
     updateQuestProgress(questId, type, data) {
