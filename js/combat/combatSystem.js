@@ -23,6 +23,7 @@ class CombatSystem {
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
         
+        this.loadProgress();
         this.initialize();
     }
 
@@ -435,16 +436,18 @@ class CombatSystem {
         
         this.inCombat = false;
         this.monstersDefeated++;
-        
-        // Générer le butin et expérience
-        const loot = this.generateLoot(monster);
-        const experience = this.calculateMonsterExperience(monster);
-        
+
         // Sauvegarder la progression
         this.savedProgress.set(this.currentZone.id, {
             monstersDefeated: this.monstersDefeated,
             worldId: this.currentWorld.id
         });
+        
+        this.saveProgress();
+
+        // Générer le butin et expérience
+        const loot = this.generateLoot(monster);
+        const experience = this.calculateMonsterExperience(monster);
     
         // Ajouter l'expérience et le message
         if (experience > 0) {

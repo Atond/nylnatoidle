@@ -41,6 +41,15 @@ class Character {
         };
 
         this.updateExperienceDisplay();
+
+        setTimeout(() => {
+            this.updateExperienceDisplay();
+            experienceManager.updateExperience(
+                this.experience,
+                this.getExperienceToNextLevel(),
+                this.level
+            );
+        }, 100);
     }
     
     // Formule d'expérience requise pour le prochain niveau
@@ -168,6 +177,13 @@ export function getCharacterLevel() {
 export function setCharacterLevel(level) {
     character.level = level;
     updateCharacterLevelDisplay(); // Mettre à jour l'affichage du niveau
+
+    character.updateExperienceDisplay();
+    experienceManager.updateExperience(
+        character.experience,
+        character.getExperienceToNextLevel(),
+        character.level
+    );
 }
 
 export function updateCharacterLevelDisplay() {

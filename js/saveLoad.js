@@ -122,32 +122,26 @@ export function loadGame() {
             if (gameState.combat.savedProgress) {
                 combatSystem.savedProgress = new Map(gameState.combat.savedProgress);
             }
-
-            if (gameState.combat.currentWorld && gameState.combat.currentZone) {
-                combatSystem.initZone(gameState.combat.currentZone, gameState.combat.currentWorld);
-            }
-            combatSystem.monstersDefeated = gameState.combat.monstersDefeated || 0;
-            combatSystem.inCombat = gameState.combat.inCombat || false;
-            combatSystem.autoCombatEnabled = gameState.combat.autoCombatEnabled || false;
             
             // Restaurer les zones et mondes débloqués
             if (gameState.combat.unlockedWorlds) {
-                combatSystem.unlockedWorlds = gameState.combat.unlockedWorlds.reduce((acc, worldId) => {
-                    acc[worldId] = true;
-                    return acc;
-                }, {});
+                combatSystem.unlockedWorlds = gameState.combat.unlockedWorlds;
             }
             if (gameState.combat.unlockedZones) {
-                combatSystem.unlockedZones = gameState.combat.unlockedZones.reduce((acc, zoneId) => {
-                    acc[zoneId] = true;
-                    return acc;
-                }, {});
+                combatSystem.unlockedZones = gameState.combat.unlockedZones;
             }
             if (gameState.combat.completedZones) {
-                combatSystem.completedZones = gameState.combat.completedZones.reduce((acc, zoneId) => {
-                    acc[zoneId] = true;
-                    return acc;
-                }, {});
+                combatSystem.completedZones = gameState.combat.completedZones;
+            }
+
+            if (gameState.combat.currentWorld && gameState.combat.currentZone) {
+                setTimeout(() => {
+                    combatSystem.initZone(gameState.combat.currentZone, gameState.combat.currentWorld);
+                    combatSystem.monstersDefeated = gameState.combat.monstersDefeated || 0;
+                    combatSystem.inCombat = gameState.combat.inCombat || false;
+                    combatSystem.autoCombatEnabled = gameState.combat.autoCombatEnabled || false;
+                    combatUI.updateUI();
+                }, 100);
             }
         }
         
