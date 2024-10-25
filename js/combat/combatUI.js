@@ -50,20 +50,12 @@ class CombatUI {
 
         // Initialiser les textes des boutons
         if (this.attackButton) {
-            this.attackButton.innerHTML = `
-                <i data-lucide="sword" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('combat.attack')}
-            `;
+            this.attackButton.textContent = globalTranslationManager.translate('combat.attack');
         }
         if (this.autoCombatButton) {
-            this.autoCombatButton.innerHTML = `
-                <i data-lucide="play" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('ui.autoCombat').replace('{state}', 
-                    globalTranslationManager.translate('ui.autoCombatOff'))}
-            `;
+            this.autoCombatButton.textContent = globalTranslationManager.translate('ui.autoCombat')
+                .replace('{state}', globalTranslationManager.translate('ui.autoCombatOff'));
         }
-
-        lucide.createIcons();
     }
 
     bindEvents() {
