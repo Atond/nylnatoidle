@@ -80,7 +80,6 @@ async function initializeGameData() {
 }
 
 function initializeUI() {
-    // Gestion des onglets avec Lucide icons
     const navTabs = document.querySelectorAll('.nav-tab');
     navTabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -96,9 +95,6 @@ function initializeUI() {
             document.getElementById(tabId).classList.add('active');
         });
     });
-
-    // Initialiser les icônes Lucide
-    lucide.createIcons();
 
     // Charger l'expérience initiale
     experienceManager.updateExperience(
