@@ -1,3 +1,4 @@
+// Dans character.js
 import { globalTranslationManager } from './translations/translationManager.js';
 import { experienceManager } from './combat/experience.js';
 import { combatUI } from './combat/combatUI.js';
@@ -14,12 +15,11 @@ class Character {
         };
         
         this.statsPerLevel = {
-            maxHp: 5,     // +5 HP par niveau (au lieu de 10)
-            attack: 0.1,  // +0.1 attaque par niveau (au lieu de 0.5)
-            defense: 0.1  // +0.1 défense par niveau (au lieu de 0.2)
+            maxHp: 5,
+            attack: 0.1,
+            defense: 0.1
         };
         
-        // Ajout de paliers de niveau pour des bonus spéciaux
         this.levelMilestones = {
             5: {
                 description: "Débloque un emplacement d'équipement supplémentaire (Anneau)",
@@ -37,11 +37,9 @@ class Character {
                 description: "Débloque les quêtes de guilde",
                 effect: () => questSystem.unlockGuildQuests()
             }
-            // etc...
         };
 
         setTimeout(() => {
-            this.updateExperienceDisplay();
             experienceManager.updateExperience(
                 this.experience,
                 this.getExperienceToNextLevel(),
@@ -50,13 +48,10 @@ class Character {
         }, 100);
     }
     
-    // Formule d'expérience requise pour le prochain niveau
-    // Utilise une progression quadratique pour une courbe d'expérience croissante
     getExperienceToNextLevel() {
         return Math.floor(150 * Math.pow(1.6, this.level - 1));
     }
     
-    // Calcul des stats totales en fonction du niveau
     getBaseStats() {
         return {
             maxHp: Math.floor(this.baseStats.maxHp + (this.level - 1) * this.statsPerLevel.maxHp),
@@ -68,14 +63,12 @@ class Character {
     addExperience(amount) {
         this.experience += amount;
         
-        // Mettre à jour l'affichage
         experienceManager.updateExperience(
             this.experience,
             this.getExperienceToNextLevel(),
             this.level
         );
 
-        // Vérifier le level up
         while (this.experience >= this.getExperienceToNextLevel()) {
             const remainingExp = this.experience - this.getExperienceToNextLevel();
             this.levelUp();
@@ -102,7 +95,6 @@ class Character {
             milestone.effect();
         }
         
-        // Mettre à jour l'affichage
         experienceManager.updateExperience(
             this.experience,
             this.getExperienceToNextLevel(),
@@ -110,56 +102,32 @@ class Character {
         );
         updateCharacterLevelDisplay();
         
-        // Restaurer les HP
-        if (combatSystem.player) {
-            combatSystem.player.currentHp = newStats.maxHp;
-            combatUI.updateUI();
-        }
+        // Émettre un événement pour notifier le combat system
+        this.emitLevelUpEvent(newStats.maxHp);
+    }
+    
+    // Nouvelle méthode pour émettre un événement
+    emitLevelUpEvent(newMaxHp) {
+        const event = new CustomEvent('characterLevelUp', {
+            detail: { maxHp: newMaxHp }
+        });
+        window.dispatchEvent(event);
     }
     
     displayLevelUpMessage(statGains) {
         const message = globalTranslationManager.translate('ui.levelUp')
-        .replace('{level}', this.level);
+            .replace('{level}', this.level);
         
         const statsMessage = Object.entries(statGains)
-        .map(([stat, gain]) => `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`)
-        .join(', ');
+            .map(([stat, gain]) => `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`)
+            .join(', ');
         
         combatUI.addCombatLog(message);
         combatUI.addCombatLog(statsMessage);
     }
     
-    updateExperienceDisplay() {
-        const expElement = document.getElementById('player-experience');
-        const expBarElement = document.getElementById('experience-bar');
-        
-        if (expElement) {
-            expElement.textContent = `${this.experience}/${this.getExperienceToNextLevel()}`;
-        }
-        
-        if (expBarElement) {
-            const percentage = (this.experience / this.getExperienceToNextLevel()) * 100;
-            expBarElement.style.width = `${percentage}%`;
-        }
-    }
-    
-    addItem(itemId, quantity) {
-        const currentQuantity = this.inventory.get(itemId) || 0;
-        this.inventory.set(itemId, currentQuantity + quantity);
-    }
-    
-    removeItem(itemId, quantity) {
-        const currentQuantity = this.inventory.get(itemId) || 0;
-        const newQuantity = Math.max(0, currentQuantity - quantity);
-        if (newQuantity === 0) {
-            this.inventory.delete(itemId);
-        } else {
-            this.inventory.set(itemId, newQuantity);
-        }
-    }
-    
-    getItemQuantity(itemId) {
-        return this.inventory.get(itemId) || 0;
+    displayMilestoneMessage(description) {
+        combatUI.addCombatLog(description);
     }
 }
 
@@ -171,9 +139,7 @@ export function getCharacterLevel() {
 
 export function setCharacterLevel(level) {
     character.level = level;
-    updateCharacterLevelDisplay(); // Mettre à jour l'affichage du niveau
-
-    character.updateExperienceDisplay();
+    updateCharacterLevelDisplay();
     experienceManager.updateExperience(
         character.experience,
         character.getExperienceToNextLevel(),

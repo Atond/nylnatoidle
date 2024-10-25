@@ -19,14 +19,22 @@ class CombatSystem {
         this.loadProgressionConfig();
         this.completedZones = {}; // Pour suivre les zones terminées
         this.savedProgress = new Map();
-
+        
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
         
         this.loadProgress();
         this.initialize();
+        
+        // Ajouter un écouteur d'événement pour le level up
+        window.addEventListener('characterLevelUp', (event) => {
+            if (this.player) {
+                this.player.currentHp = event.detail.maxHp;
+                combatUI.updateUI();
+            }
+        });
     }
-
+    
     // Stats de base du joueur
     player = {
         maxHp: 100,
@@ -54,7 +62,7 @@ class CombatSystem {
             return { attack: totalAttack, defense: totalDefense };
         }
     };
-
+    
     async loadProgressionConfig() {
         try {
             const response = await fetch('/data/gameProgression.json');
@@ -85,7 +93,7 @@ class CombatSystem {
             };
         }
     }
-
+    
     async initialize() {
         try {
             // Charger d'abord la configuration
@@ -102,7 +110,7 @@ class CombatSystem {
             combatUI.addCombatLog(globalTranslationManager.translate('ui.errorLoading'));
         }
     }
-
+    
     async loadWorldData(worldId) {
         try {
             // Charger les données du monde et des monstres
@@ -110,22 +118,22 @@ class CombatSystem {
                 fetch('/data/worldMap.json'),
                 fetch('/data/monsters.json')
             ]);
-    
+            
             const [worldMapData, monstersData] = await Promise.all([
                 worldMapResponse.json(),
                 monstersResponse.json()
             ]);
-    
+            
             // Trouver le monde demandé
             const world = worldMapData.worlds.find(w => w.id === worldId);
             if (!world) return null;
-    
+            
             // Créer un dictionnaire des monstres pour un accès rapide
             const monstersDict = monstersData.monsters.reduce((acc, monster) => {
                 acc[monster.id] = monster;
                 return acc;
             }, {});
-    
+            
             // Enrichir les données des zones avec les informations complètes des monstres
             const enrichedWorld = {
                 ...world,
@@ -145,25 +153,25 @@ class CombatSystem {
                     }).filter(Boolean) // Enlever les monstres null
                 }))
             };
-    
+            
             return enrichedWorld;
         } catch (error) {
             console.error('Error loading world data:', error);
             return null;
         }
     }
-
+    
     getCurrentZone() {
         return this.currentZone;
     }
-
+    
     canUnlockZone(worldId, zoneId) {
         const worldConfig = this.progression.worldProgression.find(w => w.id === worldId);
         if (!worldConfig) return false;
-
+        
         const zoneConfig = worldConfig.zones.find(z => z.id === zoneId);
         if (!zoneConfig) return false;
-
+        
         // Vérifier les prérequis du monde si c'est un nouveau monde
         if (worldConfig.requirements) {
             if (worldConfig.requirements.completedQuests) {
@@ -172,10 +180,10 @@ class CombatSystem {
                 }
             }
         }
-
+        
         // Vérifier les prérequis de la zone
         const requirements = zoneConfig.requirements;
-
+        
         // Vérifier le nombre de monstres tués dans la zone précédente
         if (requirements.monstersPerZone) {
             const previousZone = this.getCurrentZone();
@@ -183,45 +191,45 @@ class CombatSystem {
                 return false;
             }
         }
-
+        
         // Vérifier les quêtes requises
         if (requirements.completedQuests) {
             for (const questId of requirements.completedQuests) {
                 if (!questSystem.isQuestCompleted(questId)) return false;
             }
         }
-
+        
         return true;
     }
-
+    
     isWorldUnlocked(worldId) {
         return this.unlockedWorlds[worldId] === true;
     }
-
+    
     isZoneUnlocked(zoneId) {
         return this.unlockedZones[zoneId] === true;
     }
-
+    
     unlockWorld(worldId) {
         if (!this.unlockedWorlds[worldId]) {
             this.unlockedWorlds[worldId] = true;
             combatUI.addCombatLog(
                 globalTranslationManager.translate('ui.worldUnlocked')
-                    .replace('{world}', globalTranslationManager.translate(`worlds.${worldId}`))
+                .replace('{world}', globalTranslationManager.translate(`worlds.${worldId}`))
             );
         }
     }
-
+    
     unlockZone(zoneId) {
         if (!this.unlockedZones[zoneId]) {
             this.unlockedZones[zoneId] = true;
             combatUI.addCombatLog(
                 globalTranslationManager.translate('ui.zoneUnlocked')
-                    .replace('{zone}', globalTranslationManager.translate(`zones.${zoneId}`))
+                .replace('{zone}', globalTranslationManager.translate(`zones.${zoneId}`))
             );
         }
     }
-
+    
     async initZone(zoneId, worldId) {
         if (!this.isWorldUnlocked(worldId)) {
             console.warn(`Trying to access locked world: ${worldId}`);
@@ -232,13 +240,13 @@ class CombatSystem {
             console.warn(`Trying to access locked zone: ${zoneId}`);
             return false;
         }
-    
+        
         const world = await this.loadWorldData(worldId);
         if (!world) return false;
         
         const zone = world.zones.find(z => z.id === zoneId);
         if (!zone) return false;
-    
+        
         this.currentWorld = world;
         this.currentZone = {
             ...zone,
@@ -253,20 +261,20 @@ class CombatSystem {
         // Réinitialiser l'état du combat
         this.inCombat = false;
         this.currentMonster = null;
-    
+        
         // Faire apparaître un monstre immédiatement
         await this.startCombat();
         
         return true;
     }
     
-
+    
     calculateMonsterLevel(monster) {
         if (!monster.levelRange) return 1;
         const [min, max] = monster.levelRange;
         return Math.floor(min + Math.random() * (max - min + 1));
     }
-
+    
     scaleMonsterStats(baseStats, level, zoneIndex) {
         // Paramètres de scaling
         const a = 0.4; // Facteur de progression par zone
@@ -315,19 +323,19 @@ class CombatSystem {
     
     generateMonster() {
         if (!this.currentZone) return null;
-
+        
         // S'assurer que la progression est chargée
         if (!this.progression) {
             console.error('Progression configuration not loaded');
             return null;
         }
-    
+        
         const monsterTemplate = this.currentZone.isBossZone && this.monstersDefeated >= 9
-            ? this.currentZone.boss
-            : this.selectRandomMonster(this.currentZone.monsters);
-    
+        ? this.currentZone.boss
+        : this.selectRandomMonster(this.currentZone.monsters);
+        
         if (!monsterTemplate) return null;
-    
+        
         const level = this.calculateMonsterLevel(monsterTemplate);
         
         // Calculer l'index global de la zone
@@ -345,7 +353,7 @@ class CombatSystem {
             stats
         };
     }
-
+    
     // Combat
     async startCombat() {
         if (this.inCombat) return;
@@ -356,10 +364,10 @@ class CombatSystem {
         this.inCombat = true;
         combatUI.updateUI();
     }
-
+    
     attack() {
         if (!this.inCombat || !this.currentMonster) return;
-    
+        
         const playerDamage = this.calculateDamage(
             this.player.getTotalStats().attack, 
             this.currentMonster.stats.defense
@@ -368,10 +376,10 @@ class CombatSystem {
             this.currentMonster.stats.attack,
             this.player.getTotalStats().defense
         );
-
+        
         combatUI.addDamageLog('Joueur', this.currentMonster, playerDamage);
         this.currentMonster.currentHp -= playerDamage;
-    
+        
         // Le monstre contre-attaque s'il est encore vivant
         if (this.currentMonster.currentHp > 0) {
             const monsterDamage = this.calculateDamage(
@@ -381,13 +389,13 @@ class CombatSystem {
             this.player.currentHp -= monsterDamage;
             combatUI.addDamageLog(this.currentMonster, 'Joueur', monsterDamage);
         }
-    
+        
         // Vérifier la défaite du joueur
         if (this.player.currentHp <= 0) {
             this.handleDefeat();
             return;
         }
-    
+        
         // Vérifier la victoire
         if (this.currentMonster.currentHp <= 0) {
             this.handleVictory(this.currentMonster);
@@ -395,7 +403,7 @@ class CombatSystem {
             combatUI.updateUI();
         }
     }
-
+    
     calculateMonsterExperience(monster) {
         if (!monster.baseExperience) return 0;
         
@@ -416,23 +424,23 @@ class CombatSystem {
         
         return experience;
     }
-
+    
     autoAttack() {
         if (!this.inCombat || !this.currentMonster) {
             this.startCombat();
             return;
         }
-    
+        
         this.attack();
     }
-
+    
     // Gestion de la victoire
     handleVictory(monster) {
         if (!monster) return; // Protection contre monster undefined
         
         this.inCombat = false;
         this.monstersDefeated++;
-
+        
         // Sauvegarder la progression
         this.savedProgress.set(this.currentZone.id, {
             monstersDefeated: this.monstersDefeated,
@@ -440,17 +448,17 @@ class CombatSystem {
         });
         
         this.saveProgress();
-
+        
         // Générer le butin et expérience
         const loot = this.generateLoot(monster);
         const experience = this.calculateMonsterExperience(monster);
-    
+        
         // Ajouter l'expérience et le message
         if (experience > 0) {
             character.addExperience(experience);
             combatUI.addCombatLog(
                 globalTranslationManager.translate('combat.experience')
-                    .replace('{amount}', experience)
+                .replace('{amount}', experience)
             );
         }
         
@@ -459,8 +467,8 @@ class CombatSystem {
             globalInventory.addItem(item.id, item.quantity);
             combatUI.addCombatLog(
                 globalTranslationManager.translate('combat.loot')
-                    .replace('{quantity}', item.quantity)
-                    .replace('{item}', globalResourceManager.getResourceName(item.id))
+                .replace('{quantity}', item.quantity)
+                .replace('{item}', globalResourceManager.getResourceName(item.id))
             );
         });
         
@@ -481,7 +489,7 @@ class CombatSystem {
         
         combatUI.updateUI();
     }
-
+    
     // Gestion de la défaite
     handleDefeat() {
         combatUI.addDefeatLog();
@@ -499,7 +507,7 @@ class CombatSystem {
         
         this.returnToPreviousZone();
     }
-
+    
     unlockAutoCombat() {
         this.autoCombatUnlocked = true;
         combatUI.showAutoCombatButton(); // Nouvelle méthode dans CombatUI
@@ -508,10 +516,10 @@ class CombatSystem {
         // Déclencher la quête de l'épée
         questSystem.startQuest('craft_sword_quest');
     }
-
+    
     generateLoot(monster) {
         if (!monster.loot) return [];
-
+        
         const lootItems = [];
         
         // Pour chaque item possible dans la table de loot du monstre
@@ -522,8 +530,8 @@ class CombatSystem {
             if (Math.random() < chance) {
                 // Calculer la quantité aléatoire entre min et max
                 const quantity = minQuantity === maxQuantity ? 
-                    minQuantity : 
-                    Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity;
+                minQuantity : 
+                Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity;
                 
                 lootItems.push({
                     id: resourceId,
@@ -531,10 +539,10 @@ class CombatSystem {
                 });
             }
         });
-
+        
         return lootItems;
     }
-
+    
     returnToPreviousZone() {
         const currentZoneIndex = this.currentWorld.zones.findIndex(z => z.id === this.currentZone.id);
         if (currentZoneIndex > 0) {
@@ -545,30 +553,30 @@ class CombatSystem {
             this.initZone(this.currentZone.id, this.currentWorld.id);
         }
     }
-
+    
     // Méthodes utilitaires
     calculateDamage(attack, defense) {
         const baseDamage = Math.max(0, attack - defense/2);
         return Math.floor(baseDamage * (0.9 + Math.random() * 0.2)); // ±10% de variation
     }
-
+    
     scaleMonsterStats(baseStats, level, zoneIndex) {
         if (!this.progression || !this.progression.scaling) {
             // Valeurs par défaut si la configuration n'est pas chargée
             return this.defaultScaling(baseStats, level, zoneIndex);
         }
-    
+        
         const scaling = this.progression.scaling;
         const a = scaling.zoneMultiplier;
         const b = scaling.scalingPower;
         const levelScaling = scaling.levelScaling;
-    
+        
         // Calcul du multiplicateur de zone
         const zoneMultiplier = Math.pow(1 + a * zoneIndex, b);
         
         // Scaling de niveau
         const levelMultiplier = 1 + (level - 1) * levelScaling;
-    
+        
         return Object.entries(baseStats).reduce((acc, [stat, value]) => {
             // Vérifier si cette stat utilise le scaling complet
             const useFullScaling = scaling.stats[stat]?.useFullScaling ?? false;
@@ -583,7 +591,7 @@ class CombatSystem {
             return acc;
         }, {});
     }
-
+    
     defaultScaling(baseStats, level, zoneIndex) {
         // Méthode de fallback avec les valeurs par défaut
         const a = 0.4;
@@ -602,7 +610,7 @@ class CombatSystem {
             return acc;
         }, {});
     }
-
+    
     toggleAutoCombat() {
         this.autoCombatEnabled = !this.autoCombatEnabled;
         
@@ -620,23 +628,23 @@ class CombatSystem {
             }
         }
     }
-
+    
     completeZone() {
         if (!this.currentWorld || !this.currentZone) return;
-
+        
         combatUI.addCombatLog(globalTranslationManager.translate('ui.zoneCompleted'));
-
+        
         // Chercher la prochaine zone disponible
         const currentWorldConfig = this.progression.worldProgression.find(
             w => w.id === this.currentWorld.id
         );
-
+        
         if (!currentWorldConfig) return;
-
+        
         const currentZoneIndex = currentWorldConfig.zones.findIndex(
             z => z.id === this.currentZone.id
         );
-
+        
         // Vérifier la prochaine zone dans le monde actuel
         if (currentZoneIndex < currentWorldConfig.zones.length - 1) {
             const nextZone = currentWorldConfig.zones[currentZoneIndex + 1];
@@ -646,12 +654,12 @@ class CombatSystem {
                 return;
             }
         }
-
+        
         // Chercher le prochain monde si on est à la dernière zone
         const currentWorldIndex = this.progression.worldProgression.findIndex(
             w => w.id === this.currentWorld.id
         );
-
+        
         if (currentWorldIndex < this.progression.worldProgression.length - 1) {
             const nextWorld = this.progression.worldProgression[currentWorldIndex + 1];
             if (nextWorld.zones.length > 0) {
@@ -666,7 +674,7 @@ class CombatSystem {
         }
         combatUI.addCombatLog(globalTranslationManager.translate('ui.worldCompleted'));
     }
-
+    
     saveProgress() {
         const progressData = {
             savedProgress: Array.from(this.savedProgress.entries()),
@@ -676,7 +684,7 @@ class CombatSystem {
         };
         localStorage.setItem('combatProgress', JSON.stringify(progressData));
     }
-
+    
     loadProgress() {
         const saved = localStorage.getItem('combatProgress');
         if (saved) {
