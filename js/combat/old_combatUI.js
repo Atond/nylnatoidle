@@ -6,16 +6,17 @@ class CombatUI {
         this.initializeElements();
         this.bindEvents();
         this.updateInterval = setInterval(() => this.updateUI(), 100);
-    
+
+        // Cacher initialement le bouton d'auto-combat
         if (this.autoCombatButton) {
             this.autoCombatButton.style.display = 'none';
-            this.autoCombatButton.classList.add('btn', 'btn-secondary');
         }
     }
 
     showAutoCombatButton() {
         if (this.autoCombatButton) {
-            this.autoCombatButton.style.display = 'flex'; // Changé à flex pour l'alignement avec l'icône
+            // Afficher le bouton avec une animation
+            this.autoCombatButton.style.display = 'block';
             this.autoCombatButton.classList.add('button-appear');
         }
     }
@@ -50,20 +51,12 @@ class CombatUI {
 
         // Initialiser les textes des boutons
         if (this.attackButton) {
-            this.attackButton.innerHTML = `
-                <i data-lucide="sword" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('combat.attack')}
-            `;
+            this.attackButton.textContent = globalTranslationManager.translate('combat.attack');
         }
         if (this.autoCombatButton) {
-            this.autoCombatButton.innerHTML = `
-                <i data-lucide="play" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('ui.autoCombat').replace('{state}', 
-                    globalTranslationManager.translate('ui.autoCombatOff'))}
-            `;
+            this.autoCombatButton.textContent = globalTranslationManager.translate('ui.autoCombat')
+                .replace('{state}', globalTranslationManager.translate('ui.autoCombatOff'));
         }
-
-        lucide.createIcons();
     }
 
     bindEvents() {
@@ -89,13 +82,8 @@ class CombatUI {
             globalTranslationManager.translate('ui.autoCombatOn') : 
             globalTranslationManager.translate('ui.autoCombatOff');
             
-        if (this.autoCombatButton) {
-            this.autoCombatButton.innerHTML = `
-                <i data-lucide="${combatSystem.autoCombatEnabled ? 'pause' : 'play'}" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('ui.autoCombat').replace('{state}', state)}
-            `;
-            lucide.createIcons();
-        }
+        this.autoCombatButton.textContent = globalTranslationManager.translate('ui.autoCombat')
+            .replace('{state}', state);
     }
 
     updateUI() {
@@ -203,22 +191,25 @@ class CombatUI {
     }
 
     updateButtons() {
-        const disabled = !combatSystem.inCombat || combatSystem.player.currentHp <= 0;
-        
         if (this.attackButton) {
+            const disabled = !combatSystem.inCombat || combatSystem.player.currentHp <= 0;
             this.attackButton.disabled = disabled;
-            this.attackButton.classList.toggle('opacity-50', disabled);
-            this.attackButton.classList.toggle('cursor-not-allowed', disabled);
+            if (disabled) {
+                this.attackButton.title = globalTranslationManager.translate('ui.buttonDisabled');
+            } else {
+                this.attackButton.title = '';
+            }
         }
-        
-        const autoCombatDisabled = combatSystem.player.currentHp <= 0;
         if (this.autoCombatButton) {
-            this.autoCombatButton.disabled = autoCombatDisabled;
-            this.autoCombatButton.classList.toggle('opacity-50', autoCombatDisabled);
-            this.autoCombatButton.classList.toggle('cursor-not-allowed', autoCombatDisabled);
+            const disabled = combatSystem.player.currentHp <= 0;
+            this.autoCombatButton.disabled = disabled;
+            if (disabled) {
+                this.autoCombatButton.title = globalTranslationManager.translate('ui.buttonDisabled');
+            } else {
+                this.autoCombatButton.title = '';
+            }
         }
     }
-
     cleanup() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
@@ -230,22 +221,18 @@ class CombatUI {
         }
     }
 
-addCombatLog(message) {
-    const logEntry = document.createElement('p');
-    logEntry.className = 'text-gray-600';
-    logEntry.textContent = message;
-    
-    if (this.combatLog) {
+    addCombatLog(message) {
+        const logEntry = document.createElement('p');
+        logEntry.textContent = message;
         this.combatLog.appendChild(logEntry);
-        
+    
         // Limiter à 50 messages
         while (this.combatLog.children.length > 50) {
             this.combatLog.removeChild(this.combatLog.firstChild);
         }
-        
+    
         this.combatLog.scrollTop = this.combatLog.scrollHeight;
     }
-}
 
     // Nouvelles méthodes pour les messages de combat
     addDamageLog(attacker, defender, amount) {

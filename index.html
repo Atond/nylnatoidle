@@ -3,150 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idle RPG Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Idle RPG</title>
+    <link rel="stylesheet" href="modern.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
 </head>
 <body>
-    <h1 id="title">Idle RPG Game</h1>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <div class="nav-brand">
+                <i data-lucide="layout"></i>
+                <span>Idle RPG</span>
+            </div>
 
-    <div id="experience-container">
-        <div id="experience-bar"></div>
-        <div id="experience-text"></div>
-    </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="combat">
+                    <i data-lucide="sword"></i>
+                    Combat
+                </button>
+                <button class="nav-tab" data-tab="character">
+                    <i data-lucide="user"></i>
+                    Personnage
+                </button>
+                <button class="nav-tab" data-tab="professions">
+                    <i data-lucide="briefcase"></i>
+                    Métiers
+                </button>
+                <button class="nav-tab" data-tab="dragons">
+                    <i data-lucide="flame"></i>
+                    Dragons
+                </button>
+            </div>
 
-    <h2 id="character-title">Character</h2>
-    <div id="character">
-        <div>
-            <span id="character-name-label">Name:</span>
-            <span id="character-name">Unknown</span>
-            <button id="change-name">Change Name</button>
-            <input type="text" id="character-name-input" style="display: none;">
-            <button id="save-name" style="display: none;">Save Name</button>
-        </div>
-        <div>
-            <span id="character-level-label">Level:</span>
-            <span id="character-level">1</span>
-        </div>
-    </div>
-
-<!-- Section Combat -->
-<div class="combat-section">
-    <div class="combat-area">
-        <!-- Zone du joueur -->
-        <div class="character-stats">
-            <div class="char-image">
-                <img src="/api/placeholder/150/150" alt="Character" />
-            </div>
-            <div class="health-bar">
-                <div class="health-bar-fill" id="player-health"></div>
-                <div id="player-health-text" class="health-text">100/100</div>
-            </div>
-            <div class="stats">
-                <div id="player-attack">Attack: 1</div>
-                <div id="player-defense">Defense: 0</div>
-            </div>
-        </div>
-
-        <!-- Zone centrale avec les informations de combat -->
-        <div class="combat-info">
-            <div class="zone-info">
-                <h3 id="current-zone">Zone: Not Selected</h3>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="zone-progress"></div>
-                    <div id="zone-progress-text" class="progress-text">0/10</div>
-                </div>
-            </div>
-            
-            <div class="combat-controls">
-                <!--<button id="attack-btn" class="combat-button">Attaquer</button>
-                <button id="auto-combat-btn" class="combat-button">Combat Auto</button>-->
-                <button id="attack-btn">Attaquer</button>
-                <button id="auto-combat-btn">Combat Auto</button>
-            </div>
-            
-            <div id="combat-log" class="combat-log">
-                <!-- Les messages de combat apparaîtront ici -->
-            </div>
-        </div>
-
-        <!-- Zone du monstre -->
-        <div class="monster-stats" id="monster-container">
-            <div class="monster-image">
-                <img id="monster-image" src="/api/placeholder/150/150" alt="Monster" style="visibility: hidden;" />
-            </div>
-            <div class="health-bar">
-                <div class="health-bar-fill" id="monster-health"></div>
-                <div id="monster-health-text" class="health-text">???/???</div>
-            </div>
-            <div class="stats">
-                <div id="monster-name">No Monster</div>
-                <div id="monster-level">Level: ???</div>
-                <div id="monster-stats">
-                    <div id="monster-attack"></div>
-                    <div id="monster-defense"></div>
+            <div class="player-info">
+                <span>Niveau 1</span>
+                <div class="exp-bar">
+                    <div class="exp-fill" style="width: 50%"></div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </nav>
 
-    <div id="professions">
-        <h2>Métiers</h2>
-        <div id="professions-list"></div>
-    </div>
-    
-    <div id="profession-details">
-        <div id="miner-details" class="profession-details" style="display: none;">
-            <h3 id="miner-title">Miner</h3>
-            <div>
-                <span id="miner-exp-label">Experience: </span>
-                <span id="miner-exp">0</span> / <span id="miner-exp-required">100</span>
+    <main class="main-content container">
+        <div id="combat-tab" class="tab-content active">
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Player Stats Card -->
+                <div class="card">
+                    <h2 class="card-title">Joueur</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="char-image">
+                            <img src="/api/placeholder/150/150" alt="Character" class="w-full h-auto rounded-lg">
+                        </div>
+            
+                        <div class="space-y-2">
+                            <!-- Health Bar -->
+                            <div class="progress-bar">
+                                <div id="player-health" class="progress-fill health" style="width: 100%"></div>
+                            </div>
+                            <div id="player-health-text" class="text-sm text-gray-600 text-center">100/100</div>
+            
+                            <!-- Stats -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <div id="player-attack" class="text-sm bg-gray-100 p-2 rounded">
+                                    Attaque: 1
+                                </div>
+                                <div id="player-defense" class="text-sm bg-gray-100 p-2 rounded">
+                                    Défense: 0
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Combat Area Card -->
+                <div class="card">
+                    <div class="flex flex-col h-full">
+                        <!-- Zone Info -->
+                        <div class="text-center mb-4">
+                            <h2 id="current-zone" class="card-title">Zone: Non sélectionnée</h2>
+                            <div class="progress-bar">
+                                <div id="zone-progress" class="progress-fill exp" style="width: 0%"></div>
+                            </div>
+                            <div id="zone-progress-text" class="text-sm text-gray-600">0/10</div>
+                        </div>
+            
+                        <!-- Combat Controls -->
+                        <div class="flex gap-2 mb-4">
+                            <button id="attack-btn" class="btn btn-primary flex-1">
+                                <i data-lucide="sword" class="w-4 h-4"></i>
+                                Attaquer
+                            </button>
+                            <button id="auto-combat-btn" class="btn btn-secondary flex-1">
+                                <i data-lucide="play" class="w-4 h-4"></i>
+                                Auto Combat
+                            </button>
+                        </div>
+            
+                        <!-- Combat Log -->
+                        <div id="combat-log" class="flex-1 bg-gray-50 rounded-lg p-3 h-48 overflow-y-auto text-sm">
+                            <p class="text-gray-600">Le combat commence...</p>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Monster Stats Card -->
+                <div class="card">
+                    <h2 class="card-title">Monstre</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="monster-image">
+                            <img id="monster-image" src="/api/placeholder/150/150" alt="Monster" 
+                                 class="w-full h-auto rounded-lg" style="visibility: hidden">
+                        </div>
+            
+                        <div class="space-y-2">
+                            <!-- Monster Health Bar -->
+                            <div class="progress-bar">
+                                <div id="monster-health" class="progress-fill health" style="width: 0%"></div>
+                            </div>
+                            <div id="monster-health-text" class="text-sm text-gray-600 text-center">???/???</div>
+            
+                            <!-- Monster Info -->
+                            <div class="space-y-2">
+                                <div id="monster-name" class="text-center font-medium">
+                                    Pas de monstre
+                                </div>
+                                <div id="monster-level" class="text-sm text-center text-gray-600">
+                                    Niveau: ???
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div id="monster-attack" class="text-sm bg-gray-100 p-2 rounded"></div>
+                                    <div id="monster-defense" class="text-sm bg-gray-100 p-2 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span id="miner-level-label">Level: </span>
-                <span id="miner-level">1</span>
-            </div>
-            <div>
-                <span id="miner-resources-label">Resources: </span>
-                <span id="miner-resources">None</span>
-            </div>
-            <div>
-                <span id="miner-mining-power-label">Mining Power: </span>
-                <span id="miner-mining-power">1.0</span>
-            </div>
-            <div>
-                <span id="miner-auto-miners-label">Auto Miners: </span>
-                <span id="miner-auto-miners">0</span>
-            </div>
-            <button id="mine-button">Mine</button>
-            <div id="miner-upgrades"></div>
         </div>
-        <div id="lumberjack-details" class="profession-details" style="display: none;">
-            <!-- Détails du bûcheron ici -->
-        </div>
-        <!-- Ajoutez d'autres métiers ici -->
-    </div>
 
-    <h2 id="inventory-title">Inventory</h2>
-    <div id="inventory">
-        <div class="tabs">
-            <button class="tab-button" onclick="showTab('profession-resources')">Profession Resources</button>
-            <button class="tab-button" onclick="showTab('combat-resources')">Combat Resources</button>
+        <div id="character-tab" class="tab-content">
+            <!-- Character content will go here -->
         </div>
-        <div id="profession-resources" class="tab-content">
-            <div id="profession-inventory" class="inventory-grid"></div>
-            <div id="pagination"></div> <!-- Add pagination element -->
-        </div>
-        <div id="combat-resources" class="tab-content" style="display:none;">
-            <div id="combat-inventory" class="inventory-grid"></div>
-        </div>
-    </div>
 
-    <select id="language-select">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-    </select>
+        <div id="professions-tab" class="tab-content">
+            <!-- Professions content will go here -->
+        </div>
 
-    <script type="module" src="js/main.js"></script>
+        <div id="dragons-tab" class="tab-content">
+            <!-- Dragons content will go here -->
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Tab management
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = tab.dataset.tab + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
