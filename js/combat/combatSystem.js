@@ -454,22 +454,11 @@ class CombatSystem {
         const experience = this.calculateMonsterExperience(monster);
         
         // Ajouter l'expérience et le message
-        if (experience > 0) {
-            character.addExperience(experience);
-            combatUI.addCombatLog(
-                globalTranslationManager.translate('combat.experience')
-                .replace('{amount}', experience)
-            );
-        }
-        
-        // Ajouter le butin à l'inventaire
+        combatUI.addExperienceLog(experience);
+
         loot.forEach(item => {
             globalInventory.addItem(item.id, item.quantity);
-            combatUI.addCombatLog(
-                globalTranslationManager.translate('combat.loot')
-                .replace('{quantity}', item.quantity)
-                .replace('{item}', globalResourceManager.getResourceName(item.id))
-            );
+            combatUI.addLootLog(globalResourceManager.getResourceName(item.id), item.quantity);
         });
         
         // Ajouter le message de victoire après le butin

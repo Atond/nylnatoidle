@@ -122,8 +122,7 @@ class Character {
             .map(([stat, gain]) => `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`)
             .join(', ');
         
-        combatUI.addCombatLog(message);
-        combatUI.addCombatLog(statsMessage);
+            combatUI.addLevelUpLog(this.level, statGains);
     }
     
     displayMilestoneMessage(description) {
