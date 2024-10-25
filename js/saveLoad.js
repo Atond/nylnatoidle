@@ -12,6 +12,7 @@ export function saveGame() {
         // Informations du personnage
         character: {
             level: getCharacterLevel(),
+            experience: character.experience,
             name: document.getElementById('character-name').innerText,
             stats: {
                 maxHp: combatSystem.player.maxHp,
@@ -81,6 +82,10 @@ export function loadGame() {
         
         // Charger les informations du personnage
         if (gameState.character) {
+            if (gameState.character.experience !== undefined) {
+                character.experience = gameState.character.experience;
+            }
+
             setCharacterLevel(gameState.character.level);
             document.getElementById('character-name').innerText = 
             gameState.character.name || globalTranslationManager.translate('ui.unknownCharacter');
@@ -119,6 +124,8 @@ export function loadGame() {
         
         // Charger la progression du combat
         if (gameState.combat) {
+            combatSystem.monstersDefeated = gameState.combat.monstersDefeated || 0;
+
             if (gameState.combat.savedProgress) {
                 combatSystem.savedProgress = new Map(gameState.combat.savedProgress);
             }
@@ -134,12 +141,16 @@ export function loadGame() {
                 combatSystem.completedZones = gameState.combat.completedZones;
             }
 
+            // Initialiser la zone après avoir restauré toutes les données
             if (gameState.combat.currentWorld && gameState.combat.currentZone) {
+                // Utilisons setTimeout pour s'assurer que tout est bien initialisé
                 setTimeout(() => {
                     combatSystem.initZone(gameState.combat.currentZone, gameState.combat.currentWorld);
-                    combatSystem.monstersDefeated = gameState.combat.monstersDefeated || 0;
                     combatSystem.inCombat = gameState.combat.inCombat || false;
                     combatSystem.autoCombatEnabled = gameState.combat.autoCombatEnabled || false;
+                    if (combatSystem.autoCombatEnabled) {
+                        combatSystem.toggleAutoCombat();
+                    }
                     combatUI.updateUI();
                 }, 100);
             }
@@ -178,6 +189,9 @@ export function loadGame() {
         updateInventoryDisplay();
         updateDisplays();
         questSystem.updateQuestDisplay();
+        
+        // Mettre à jour l'expérience
+        character.updateExperienceDisplay();
         
         console.log('Game loaded successfully');
     } catch (error) {

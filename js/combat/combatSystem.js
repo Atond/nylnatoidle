@@ -232,38 +232,34 @@ class CombatSystem {
             console.warn(`Trying to access locked zone: ${zoneId}`);
             return false;
         }
-
+    
         const world = await this.loadWorldData(worldId);
         if (!world) return false;
         
         const zone = world.zones.find(z => z.id === zoneId);
         if (!zone) return false;
-
-        const savedZoneProgress = this.savedProgress.get(zoneId);
-        if (savedZoneProgress) {
-            this.monstersDefeated = savedZoneProgress.monstersDefeated;
-        } else {
-            this.monstersDefeated = 0;
-        }
-        
+    
         this.currentWorld = world;
         this.currentZone = {
             ...zone,
             progress: 0,
-            monstersDefeated: 0,
+            monstersDefeated: this.monstersDefeated, // Gardons le nombre actuel de monstres tués
             isBossZone: zone.hasBoss
         };
+        
+        // Ne réinitialisons PAS le compteur de monstres
+        // this.monstersDefeated = 0; <- Supprimons cette ligne
         
         // Réinitialiser l'état du combat
         this.inCombat = false;
         this.currentMonster = null;
-        this.monstersDefeated = 0;
-
+    
         // Faire apparaître un monstre immédiatement
         await this.startCombat();
         
         return true;
     }
+    
 
     calculateMonsterLevel(monster) {
         if (!monster.levelRange) return 1;
