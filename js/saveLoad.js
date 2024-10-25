@@ -45,9 +45,9 @@ export function saveGame() {
             monstersDefeated: combatSystem.monstersDefeated,
             inCombat: combatSystem.inCombat,
             autoCombatEnabled: combatSystem.autoCombatEnabled,
-            unlockedWorlds: Object.keys(combatSystem.unlockedWorlds || {}),
-            unlockedZones: Object.keys(combatSystem.unlockedZones || {}),
-            completedZones: Object.keys(combatSystem.completedZones || {}),
+            unlockedWorlds: combatSystem.unlockedWorlds,
+            unlockedZones: combatSystem.unlockedZones,
+            completedZones: combatSystem.completedZones,
             savedProgress: Array.from(combatSystem.savedProgress.entries())
         },
         

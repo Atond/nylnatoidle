@@ -132,12 +132,12 @@ class CombatUI {
             if (this.monsterHealthText) this.monsterHealthText.textContent = '???/???';
             if (this.monsterName) this.monsterName.textContent = globalTranslationManager.translate('ui.noMonster');
             if (this.monsterLevel) this.monsterLevel.textContent = '';
-            if (this.monsterImage) this.monsterImage.style.visibility = 'hidden';
             if (this.monsterAttack) this.monsterAttack.textContent = '';
             if (this.monsterDefense) this.monsterDefense.textContent = '';
+            if (this.monsterImage) this.monsterImage.style.visibility = 'hidden';
             return;
         }
-    
+        
         const monster = combatSystem.currentMonster;
         const monsterHealthPercent = (monster.currentHp / monster.maxHp) * 100;
         
@@ -259,6 +259,8 @@ class CombatUI {
     }
 
     addVictoryLog(monster) {
+        if (!monster || !monster.id) return;
+        
         const monsterName = globalTranslationManager.translate(`monsters.${monster.id}`);
         this.addCombatLog(
             globalTranslationManager.translate('combat.victory')

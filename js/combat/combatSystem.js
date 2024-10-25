@@ -431,62 +431,55 @@ class CombatSystem {
 
     // Gestion de la victoire
     handleVictory(monster) {
+        if (!monster) return; // Protection contre monster undefined
+        
         this.inCombat = false;
         this.monstersDefeated++;
         
-        // Générer le butin
+        // Générer le butin et expérience
         const loot = this.generateLoot(monster);
-        
-        // Calculer l'expérience
         const experience = this.calculateMonsterExperience(monster);
-        character.addExperience(experience);
-
+        
+        // Sauvegarder la progression
         this.savedProgress.set(this.currentZone.id, {
             monstersDefeated: this.monstersDefeated,
             worldId: this.currentWorld.id
         });
-        
+    
+        // Ajouter l'expérience et le message
         if (experience > 0) {
+            character.addExperience(experience);
             combatUI.addCombatLog(
-                globalTranslationManager.translate('ui.experienceGained')
-                    .replace('{experience}', experience)
-            );    
+                globalTranslationManager.translate('combat.experience')
+                    .replace('{amount}', experience)
+            );
         }
         
         // Ajouter le butin à l'inventaire
         loot.forEach(item => {
             globalInventory.addItem(item.id, item.quantity);
-            // Ajouter un message dans le log pour chaque item obtenu
             combatUI.addCombatLog(
-                globalTranslationManager.translate('ui.lootObtained')
+                globalTranslationManager.translate('combat.loot')
                     .replace('{quantity}', item.quantity)
                     .replace('{item}', globalResourceManager.getResourceName(item.id))
             );
         });
         
-        // Ajouter un message pour l'expérience gagnée
-        if (experience > 0) {
-            combatUI.addCombatLog(
-                globalTranslationManager.translate('ui.experienceGained')
-                    .replace('{experience}', experience)
-            );
-        }
+        // Ajouter le message de victoire après le butin
+        combatUI.addVictoryLog(monster);
         
-        combatUI.addVictoryLog(monster.name);
-        
-        // Vérification de la complétion de zone
+        // Vérifier la complétion de zone
         if (this.monstersDefeated >= 10) {
             this.completeZone();
-            
-            // Débloquer l'auto-combat si c'est la première zone
             if (!this.autoCombatUnlocked && this.currentZone?.id === 'peaceful_meadow') {
                 this.unlockAutoCombat();
             }
         } else {
-            // Faire apparaître automatiquement un nouveau monstre
+            this.currentMonster = null; // Réinitialiser le monstre actuel
+            // Faire apparaître un nouveau monstre après un court délai
             setTimeout(() => this.startCombat(), 1000);
         }
-    
+        
         combatUI.updateUI();
     }
 
