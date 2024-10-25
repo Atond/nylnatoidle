@@ -424,3 +424,10 @@ body {
     margin-bottom: 0;
     border-bottom: none;
 }
+
+.victory-message {
+    color: #059669; /* Vert */
+    font-weight: 500;
+    padding: 4px 0;
+    border-bottom: 1px solid #e5e7eb;
+}

@@ -452,9 +452,11 @@ class CombatSystem {
         // Générer le butin et expérience
         const loot = this.generateLoot(monster);
         const experience = this.calculateMonsterExperience(monster);
-        
-        // Ajouter l'expérience et le message
-        combatUI.addExperienceLog(experience);
+
+        if (experience > 0) {
+            character.addExperience(experience); // Ajout de cette ligne
+            combatUI.addExperienceLog(experience);
+        }
 
         loot.forEach(item => {
             globalInventory.addItem(item.id, item.quantity);

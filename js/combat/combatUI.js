@@ -281,10 +281,15 @@ class CombatUI {
         if (!monster || !monster.id) return;
         
         const monsterName = globalTranslationManager.translate(`monsters.${monster.id}`);
-        this.addCombatLog(
-            globalTranslationManager.translate('combat.victory')
-                .replace('{monster}', monsterName)
-        );
+        const logEntry = document.createElement('div');
+        logEntry.className = 'victory-message';
+        logEntry.textContent = globalTranslationManager.translate('combat.victory')
+        .replace('{monster}', monsterName);
+    
+    if (this.combatLog) {
+        this.combatLog.appendChild(logEntry);
+        this.combatLog.scrollTop = this.combatLog.scrollHeight;
+    }
     }
 
     addLevelUpLog(level, stats) {
