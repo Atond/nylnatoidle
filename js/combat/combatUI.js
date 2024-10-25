@@ -156,20 +156,12 @@ class CombatUI {
             this.monsterLevel.textContent = globalTranslationManager.translate('ui.level')
                 .replace('{level}', monster.level);
         }
-        //if (this.monsterAttack) {
-        //    this.monsterAttack.textContent = `Attack: ${monster.stats.attack}`;
-        //}
         if (this.monsterAttack) {
-            this.monsterAttack.textContent = globalTranslationManager.translate('monster_attack_stat')
-                .replace('{value}', monster.stats.attack);
+            this.monsterAttack.textContent = `Attack: ${monster.stats.attack}`;
         }
         if (this.monsterDefense) {
-            this.monsterDefense.textContent = globalTranslationManager.translate('monster_defense_stat')
-                .replace('{value}', monster.stats.defense);
+            this.monsterDefense.textContent = `Defense: ${monster.stats.defense}`;
         }
-        //if (this.monsterDefense) {
-        //    this.monsterDefense.textContent = `Defense: ${monster.stats.defense}`;
-        //}
         if (this.monsterImage) {
             this.monsterImage.style.visibility = 'visible';
             this.monsterImage.src = monster.image || '/api/placeholder/150/150';
