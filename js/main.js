@@ -6,6 +6,7 @@ import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { globalResourceManager } from './resourceManager.js';
 import { globalTranslationManager } from './translations/translationManager.js';
 import { character } from './character.js';
+import { experienceManager } from './combat/experience.js';
 
 let worlds = [];
 let zones = [];
@@ -127,7 +128,6 @@ async function initializeGame() {
         // Mettre à jour l'affichage
         updateInventoryDisplay();
         updateUITranslations();
-        character.updateExperienceDisplay();
         
         // Démarrer l'auto-save
         setInterval(saveGame, 30000);
@@ -217,7 +217,13 @@ export function getWorldById(worldId) { return worlds.find(world => world.id ===
 
 export function updateDisplays(selectedProfession = null) {
     updateInventoryDisplay();
-    character.updateExperienceDisplay();
+    
+    // Mettre à jour l'expérience
+    experienceManager.updateExperience(
+        character.experience,
+        character.getExperienceToNextLevel(),
+        character.level
+    );
     
     if (selectedProfession && professions[selectedProfession]) {
         const profession = professions[selectedProfession];
