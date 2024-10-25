@@ -1,4 +1,4 @@
-import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay } from './character.js';
+import { getCharacterLevel, setCharacterLevel, updateCharacterLevelDisplay, character } from './character.js';
 import { professions, updateDisplays } from './main.js';
 import { updateInventoryDisplay } from './inventoryDisplay.js';
 import { globalInventory } from './inventory.js';
@@ -6,6 +6,7 @@ import { globalTranslationManager } from './translations/translationManager.js';
 import { combatSystem } from './combat/combatSystem.js';
 import { questSystem } from './quests/questSystem.js';
 import { combatUI } from './combat/combatUI.js';
+import { experienceManager } from './combat/experience.js';
 
 export function saveGame() {
     const gameState = {
@@ -89,6 +90,12 @@ export function loadGame() {
             setCharacterLevel(gameState.character.level);
             document.getElementById('character-name').innerText = 
             gameState.character.name || globalTranslationManager.translate('ui.unknownCharacter');
+
+            experienceManager.updateExperience(
+                character.experience,
+                character.getExperienceToNextLevel(),
+                character.level
+            );
             
             // Charger les stats
             if (gameState.character.stats) {
@@ -191,7 +198,7 @@ export function loadGame() {
         questSystem.updateQuestDisplay();
         
         // Mettre à jour l'expérience
-        character.updateExperienceDisplay();
+        //character.updateExperienceDisplay();
         
         console.log('Game loaded successfully');
     } catch (error) {
