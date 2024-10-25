@@ -81,17 +81,19 @@
             
                         <!-- Combat Controls -->
                         <div class="flex gap-2 mb-4">
-                            <button id="attack-btn" class="btn btn-primary flex-1">
-                                Attaquer
-                            </button>
-                            <button id="auto-combat-btn" class="btn btn-secondary flex-1">
-                                Auto Combat
-                            </button>
+                            <button id="attack-btn" class="btn btn-primary">Attaquer</button>
+                            <button id="auto-combat-btn" class="btn btn-secondary">Auto Combat</button>
                         </div>
-            
-                        <!-- Combat Log -->
-                        <div id="combat-log" class="flex-1 bg-gray-50 rounded-lg p-3 h-48 overflow-y-auto text-sm">
-                            <p class="text-gray-600">Le combat commence...</p>
+
+                        <div class="combat-logs-container">
+                            <div class="logs-tabs">
+                                <button class="tab-button active" data-tab="combat">Combat</button>
+                                <button class="tab-button" data-tab="progression">Progression</button>
+                            </div>
+                            <div class="logs-content">
+                                <div id="combat-log" class="log-panel active">Le combat commence...</div>
+                                <div id="progression-log" class="log-panel"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -161,6 +163,26 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-button');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Retirer la classe active de tous les tabs et panels
+                    document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.log-panel').forEach(p => p.classList.remove('active'));
+                    
+                    // Ajouter la classe active au tab cliqué
+                    tab.classList.add('active');
+                    
+                    // Activer le panel correspondant
+                    const panelId = `${tab.dataset.tab}-log`;
+                    document.getElementById(panelId).classList.add('active');
+                });
+            });
+        });
+        </script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

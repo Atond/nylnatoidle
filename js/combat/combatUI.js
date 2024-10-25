@@ -11,6 +11,8 @@ class CombatUI {
             this.autoCombatButton.style.display = 'none';
             this.autoCombatButton.classList.add('btn', 'btn-secondary');
         }
+        this.combatLog = document.getElementById('combat-log');
+        this.progressionLog = document.getElementById('progression-log');
     }
 
     showAutoCombatButton() {
@@ -222,38 +224,50 @@ class CombatUI {
         }
     }
 
-addCombatLog(message) {
-    const logEntry = document.createElement('p');
-    logEntry.className = 'text-gray-600';
-    logEntry.textContent = message;
-    
-    if (this.combatLog) {
-        this.combatLog.appendChild(logEntry);
+    addCombatLog(message) {
+        if (!this.combatLog) return;
         
-        // Limiter à 50 messages
+        const logEntry = document.createElement('div');
+        logEntry.className = 'combat-message';
+        logEntry.textContent = message;
+        
+        this.combatLog.appendChild(logEntry);
         while (this.combatLog.children.length > 50) {
             this.combatLog.removeChild(this.combatLog.firstChild);
         }
         
         this.combatLog.scrollTop = this.combatLog.scrollHeight;
     }
-}
 
-    // Nouvelles méthodes pour les messages de combat
+    addProgressionLog(message, type) {
+        if (!this.progressionLog) return;
+        
+        const logEntry = document.createElement('div');
+        switch (type) {
+            case 'level':
+                logEntry.className = 'level-message';
+                break;
+            case 'experience':
+                logEntry.className = 'exp-message';
+                break;
+            case 'loot':
+                logEntry.className = 'loot-message';
+                break;
+            default:
+                logEntry.className = 'combat-message';
+        }
+        
+        logEntry.textContent = message;
+        this.progressionLog.appendChild(logEntry);
+        this.progressionLog.scrollTop = this.progressionLog.scrollHeight;
+    }
+
     addDamageLog(attacker, defender, amount) {
-        let attackerName, defenderName;
-    
-        if (attacker === 'Joueur') {
-            attackerName = attacker;
-        } else {
-            attackerName = globalTranslationManager.translate(`monsters.${attacker.id}`);
-        }
-    
-        if (defender === 'Joueur') {
-            defenderName = defender;
-        } else {
-            defenderName = globalTranslationManager.translate(`monsters.${defender.id}`);
-        }
+        // Utiliser addCombatLog pour les messages de dégâts
+        let attackerName = attacker === 'Joueur' ? attacker : 
+            globalTranslationManager.translate(`monsters.${attacker.id}`);
+        let defenderName = defender === 'Joueur' ? defender : 
+            globalTranslationManager.translate(`monsters.${defender.id}`);
             
         this.addCombatLog(
             globalTranslationManager.translate('combat.damage')
@@ -270,6 +284,37 @@ addCombatLog(message) {
         this.addCombatLog(
             globalTranslationManager.translate('combat.victory')
                 .replace('{monster}', monsterName)
+        );
+    }
+
+    addLevelUpLog(level, stats) {
+        this.addProgressionLog(
+            globalTranslationManager.translate('ui.levelUp').replace('{level}', level),
+            'level'
+        );
+        
+        // Ajouter les gains de stats
+        const statsMessage = Object.entries(stats)
+            .map(([stat, gain]) => 
+                `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`
+            ).join(', ');
+        this.addProgressionLog(statsMessage, 'level');
+    }
+
+    addExperienceLog(amount) {
+        this.addProgressionLog(
+            globalTranslationManager.translate('combat.experience')
+                .replace('{amount}', amount),
+            'experience'
+        );
+    }
+
+    addLootLog(item, quantity) {
+        this.addProgressionLog(
+            globalTranslationManager.translate('combat.loot')
+                .replace('{quantity}', quantity)
+                .replace('{item}', item),
+            'loot'
         );
     }
 
