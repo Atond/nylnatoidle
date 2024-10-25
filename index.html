@@ -9,27 +9,24 @@
 <body>
     <nav class="navbar">
         <div class="nav-container container">
+            <!-- Logo -->
             <div class="nav-brand">
-                <span>Idle RPG</span>
+                Idle RPG
             </div>
 
+            <!-- Navigation -->
             <div class="nav-tabs">
-                <button class="nav-tab active" data-tab="combat">
-                    Combat
-                </button>
-                <button class="nav-tab" data-tab="character">
-                    Personnage
-                </button>
-                <button class="nav-tab" data-tab="professions">
-                    Métiers
-                </button>
-                <button class="nav-tab" data-tab="dragons">
-                    Dragons
-                </button>
+                <button class="nav-tab active" data-tab="combat">Combat</button>
+                <button class="nav-tab" data-tab="character">Personnage</button>
+                <button class="nav-tab" data-tab="professions">Métiers</button>
+                <button class="nav-tab" data-tab="dragons">Dragons</button>
             </div>
 
+            <!-- Player Info -->
             <div class="player-info">
-                <span>Niveau 1</span>
+                <!-- Ajout de l'élément character-name -->
+                <span id="character-name">Inconnu</span>
+                <span id="character-level">Niveau 1</span>
                 <div class="exp-bar">
                     <div class="exp-fill" style="width: 50%"></div>
                 </div>

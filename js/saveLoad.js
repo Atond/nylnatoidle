@@ -14,7 +14,7 @@ export function saveGame() {
         character: {
             level: getCharacterLevel(),
             experience: character.experience,
-            name: document.getElementById('character-name').innerText,
+            name: document.getElementById('character-name')?.innerText || 'Inconnu',
             stats: {
                 maxHp: combatSystem.player.maxHp,
                 currentHp: combatSystem.player.currentHp,
@@ -88,8 +88,11 @@ export function loadGame() {
             }
 
             setCharacterLevel(gameState.character.level);
-            document.getElementById('character-name').innerText = 
-            gameState.character.name || globalTranslationManager.translate('ui.unknownCharacter');
+            const characterNameElement = document.getElementById('character-name');
+            if (characterNameElement) {
+                characterNameElement.innerText = gameState.character.name || 
+                    globalTranslationManager.translate('ui.unknownCharacter');
+            }
 
             experienceManager.updateExperience(
                 character.experience,
