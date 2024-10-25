@@ -80,32 +80,26 @@ async function initializeGameData() {
 }
 
 function initializeUI() {
-    // Gestion des onglets avec Lucide icons
-    const navTabs = document.querySelectorAll('.nav-tab');
-    navTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Retirer la classe active de tous les onglets
-            navTabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Ajouter la classe active à l'onglet cliqué
-            tab.classList.add('active');
-            
-            // Afficher le contenu correspondant
-            const tabId = tab.getAttribute('data-tab') + '-tab';
-            document.getElementById(tabId).classList.add('active');
-        });
+    // Character name handlers
+    const changeNameBtn = document.getElementById('change-name');
+    const saveNameBtn = document.getElementById('save-name');
+    
+    changeNameBtn?.addEventListener('click', () => {
+        document.getElementById('character-name-input').style.display = 'inline';
+        saveNameBtn.style.display = 'inline';
+        changeNameBtn.style.display = 'none';
     });
 
-    // Initialiser les icônes Lucide
-    lucide.createIcons();
-
-    // Charger l'expérience initiale
-    experienceManager.updateExperience(
-        character.experience,
-        character.getExperienceToNextLevel(),
-        character.level
-    );
+    saveNameBtn?.addEventListener('click', () => {
+        const nameInput = document.getElementById('character-name-input');
+        const name = nameInput.value;
+        if (name) {
+            document.getElementById('character-name').innerText = name;
+            nameInput.style.display = 'none';
+            saveNameBtn.style.display = 'none';
+            changeNameBtn.style.display = 'inline';
+        }
+    });
 
     // Language handler
     document.getElementById('language-select')?.addEventListener('change', async (event) => {
