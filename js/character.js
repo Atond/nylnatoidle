@@ -38,7 +38,7 @@ class Character {
                 effect: () => questSystem.unlockGuildQuests()
             }
         };
-
+        
         setTimeout(() => {
             experienceManager.updateExperience(
                 this.experience,
@@ -68,14 +68,14 @@ class Character {
             this.getExperienceToNextLevel(),
             this.level
         );
-
+        
         while (this.experience >= this.getExperienceToNextLevel()) {
             const remainingExp = this.experience - this.getExperienceToNextLevel();
             this.levelUp();
             this.experience = remainingExp;
         }
     }
-
+    
     levelUp() {
         const oldStats = this.getBaseStats();
         this.level += 1;
@@ -86,7 +86,13 @@ class Character {
             attack: newStats.attack - oldStats.attack,
             defense: newStats.defense - oldStats.defense
         };
-
+        
+        // Mise à jour immédiate des stats de base
+        this.baseStats.maxHp = newStats.maxHp;
+        this.baseStats.attack = newStats.attack;
+        this.baseStats.defense = newStats.defense;
+        
+        // Un seul affichage du message
         this.displayLevelUpMessage(statGains);
         
         if (this.levelMilestones[this.level]) {
@@ -94,12 +100,6 @@ class Character {
             this.displayMilestoneMessage(milestone.description);
             milestone.effect();
         }
-
-        this.baseStats.maxHp = newStats.maxHp;
-        this.baseStats.attack = newStats.attack;
-        this.baseStats.defense = newStats.defense;
-    
-        this.displayLevelUpMessage(statGains);
         
         experienceManager.updateExperience(
             this.experience,
@@ -112,23 +112,26 @@ class Character {
         this.emitLevelUpEvent(newStats.maxHp);
     }
     
-    // Nouvelle méthode pour émettre un événement
-    emitLevelUpEvent(newMaxHp) {
+    emitLevelUpEvent(newStats) {
         const event = new CustomEvent('characterLevelUp', {
-            detail: { maxHp: newMaxHp }
+            detail: {
+                maxHp: newStats.maxHp,
+                attack: newStats.attack,
+                defense: newStats.defense
+            }
         });
         window.dispatchEvent(event);
     }
     
     displayLevelUpMessage(statGains) {
         const message = globalTranslationManager.translate('ui.levelUp')
-            .replace('{level}', this.level);
+        .replace('{level}', this.level);
         
         const statsMessage = Object.entries(statGains)
-            .map(([stat, gain]) => `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`)
-            .join(', ');
+        .map(([stat, gain]) => `${globalTranslationManager.translate(`ui.${stat}`)}: +${gain}`)
+        .join(', ');
         
-            combatUI.addLevelUpLog(this.level, statGains);
+        combatUI.addLevelUpLog(this.level, statGains);
     }
     
     displayMilestoneMessage(description) {

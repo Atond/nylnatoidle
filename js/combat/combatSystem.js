@@ -30,6 +30,8 @@ class CombatSystem {
         window.addEventListener('characterLevelUp', (event) => {
             this.player.maxHp = event.detail.maxHp; // Mettre à jour les PV max
             this.player.currentHp = this.player.maxHp; // Restaurer les PV au maximum
+            this.player.baseAttack = event.detail.attack;
+            this.player.baseDefense = event.detail.defense;
             combatUI.updateUI();
 
             // Débloquer les quêtes au niveau 2
@@ -373,27 +375,24 @@ class CombatSystem {
     attack() {
         if (!this.inCombat || !this.currentMonster) return;
         
+        const playerStats = this.player.getTotalStats();
         const playerDamage = this.calculateDamage(
-            this.player.getTotalStats().attack, 
+            playerStats.attack,
             this.currentMonster.stats.defense
-        );
-        const monsterDamage = this.calculateDamage(
-            this.currentMonster.stats.attack,
-            this.player.getTotalStats().defense
         );
         
         combatUI.addDamageLog('Joueur', this.currentMonster, playerDamage);
         this.currentMonster.currentHp -= playerDamage;
         
         // Le monstre contre-attaque s'il est encore vivant
-        if (this.currentMonster.currentHp > 0) {
-            const monsterDamage = this.calculateDamage(
-                this.currentMonster.stats.attack,
-                this.player.getTotalStats().defense
-            );
-            this.player.currentHp -= monsterDamage;
-            combatUI.addDamageLog(this.currentMonster, 'Joueur', monsterDamage);
-        }
+    if (this.currentMonster.currentHp > 0) {
+        const monsterDamage = this.calculateDamage(
+            this.currentMonster.stats.attack,
+            playerStats.defense  // Utiliser les stats totales ici aussi
+        );
+        this.player.currentHp -= monsterDamage;
+        combatUI.addDamageLog(this.currentMonster, 'Joueur', monsterDamage);
+    }
         
         // Vérifier la défaite du joueur
         if (this.player.currentHp <= 0) {
@@ -553,8 +552,16 @@ class CombatSystem {
     
     // Méthodes utilitaires
     calculateDamage(attack, defense) {
+        // Log pour debug
+        console.log('Calculating damage with attack:', attack, 'defense:', defense);
+        
         const baseDamage = Math.max(0, attack - defense/2);
-        return Math.floor(baseDamage * (0.9 + Math.random() * 0.2)); // ±10% de variation
+        const finalDamage = Math.floor(baseDamage * (0.9 + Math.random() * 0.2));
+        
+        // Log pour debug
+        console.log('Base damage:', baseDamage, 'Final damage:', finalDamage);
+        
+        return finalDamage;
     }
     
     scaleMonsterStats(baseStats, level, zoneIndex) {
