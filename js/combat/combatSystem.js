@@ -552,14 +552,11 @@ class CombatSystem {
     
     // Méthodes utilitaires
     calculateDamage(attack, defense) {
-        // Log pour debug
-        console.log('Calculating damage with attack:', attack, 'defense:', defense);
+        attack = Number(attack) || 0;
+        defense = Number(defense) || 0;
         
         const baseDamage = Math.max(0, attack - defense/2);
         const finalDamage = Math.floor(baseDamage * (0.9 + Math.random() * 0.2));
-        
-        // Log pour debug
-        console.log('Base damage:', baseDamage, 'Final damage:', finalDamage);
         
         return finalDamage;
     }

@@ -15,6 +15,7 @@ export function saveGame() {
             level: getCharacterLevel(),
             experience: character.experience,
             name: document.getElementById('character-name')?.innerText || 'Inconnu',
+            baseStats: character.baseStats,
             stats: {
                 maxHp: combatSystem.player.maxHp,
                 currentHp: combatSystem.player.currentHp,
@@ -83,8 +84,22 @@ export function loadGame() {
         
         // Charger les informations du personnage
         if (gameState.character) {
+            if (gameState.character.baseStats) {
+                character.baseStats = gameState.character.baseStats;
+            }
+
             if (gameState.character.experience !== undefined) {
                 character.experience = gameState.character.experience;
+            }
+
+            if (gameState.character.level !== undefined) {
+                setCharacterLevel(gameState.character.level);
+                // Recalculer les stats après avoir chargé le niveau
+                const newStats = character.getBaseStats();
+                combatSystem.player.maxHp = newStats.maxHp;
+                combatSystem.player.currentHp = newStats.maxHp; // Restaurer les PV au maximum
+                combatSystem.player.baseAttack = newStats.attack;
+                combatSystem.player.baseDefense = newStats.defense;
             }
 
             setCharacterLevel(gameState.character.level);
