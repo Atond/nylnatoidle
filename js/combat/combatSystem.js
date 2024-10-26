@@ -19,6 +19,7 @@ class CombatSystem {
         this.loadProgressionConfig();
         this.completedZones = {}; // Pour suivre les zones terminées
         this.savedProgress = new Map();
+        this.questsUnlocked = false; 
         
         this.unlockedWorlds = { 'green_fields': true }; // Premier monde débloqué par défaut
         this.unlockedZones = { 'peaceful_meadow': true }; // Première zone débloquée par défaut
@@ -694,6 +695,7 @@ class CombatSystem {
     }
 
     unlockQuests() {
+        this.questsUnlocked = true;
         // Créer et afficher la zone de quêtes
         const combatTab = document.getElementById('combat-tab');
         const questsContainer = document.createElement('div');
@@ -715,7 +717,8 @@ class CombatSystem {
             savedProgress: Array.from(this.savedProgress.entries()),
             unlockedWorlds: this.unlockedWorlds,
             unlockedZones: this.unlockedZones,
-            autoCombatUnlocked: this.autoCombatUnlocked
+            autoCombatUnlocked: this.autoCombatUnlocked,
+            questsUnlocked: this.questsUnlocked
         };
         localStorage.setItem('combatProgress', JSON.stringify(progressData));
     }
@@ -728,6 +731,10 @@ class CombatSystem {
             this.unlockedWorlds = data.unlockedWorlds;
             this.unlockedZones = data.unlockedZones;
             this.autoCombatUnlocked = data.autoCombatUnlocked;
+            this.questsUnlocked = data.questsUnlocked;
+            if (this.questsUnlocked) {
+                this.unlockQuests();
+            }
         }
     }
 }

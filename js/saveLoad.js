@@ -51,7 +51,8 @@ export function saveGame() {
             unlockedWorlds: combatSystem.unlockedWorlds,
             unlockedZones: combatSystem.unlockedZones,
             completedZones: combatSystem.completedZones,
-            savedProgress: Array.from(combatSystem.savedProgress.entries())
+            savedProgress: Array.from(combatSystem.savedProgress.entries()),
+            questsUnlocked: combatSystem.questsUnlocked
         },
         
         // Progression des quêtes
@@ -163,6 +164,10 @@ export function loadGame() {
             }
             if (gameState.combat.completedZones) {
                 combatSystem.completedZones = gameState.combat.completedZones;
+            }
+            if (gameState.combat.questsUnlocked) {
+                combatSystem.questsUnlocked = true;
+                combatSystem.unlockQuests();
             }
 
             // Initialiser la zone après avoir restauré toutes les données
