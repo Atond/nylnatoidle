@@ -109,16 +109,12 @@ class Character {
         updateCharacterLevelDisplay();
         
         // Émettre un événement pour notifier le combat system
-        this.emitLevelUpEvent(newStats.maxHp);
+        this.emitLevelUpEvent(newStats);
     }
     
     emitLevelUpEvent(newStats) {
         const event = new CustomEvent('characterLevelUp', {
-            detail: {
-                maxHp: newStats.maxHp,
-                attack: newStats.attack,
-                defense: newStats.defense
-            }
+            detail: newStats
         });
         window.dispatchEvent(event);
     }

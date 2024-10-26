@@ -28,16 +28,19 @@ class CombatSystem {
         
         // Ajouter un écouteur d'événement pour le level up
         window.addEventListener('characterLevelUp', (event) => {
-            this.player.maxHp = event.detail.maxHp; // Mettre à jour les PV max
-            this.player.currentHp = this.player.maxHp; // Restaurer les PV au maximum
-            this.player.baseAttack = event.detail.attack;
-            this.player.baseDefense = event.detail.defense;
-            combatUI.updateUI();
+            const newStats = event.detail;
+            if (this.player) {
+                this.player.maxHp = newStats.maxHp || this.player.maxHp;
+                this.player.baseAttack = newStats.attack || this.player.baseAttack;
+                this.player.baseDefense = newStats.defense || this.player.baseDefense;
+                this.player.currentHp = this.player.maxHp; // Restaurer les PV au maximum
+                combatUI.updateUI();
 
             // Débloquer les quêtes au niveau 2
             if (character.level === 2) {
                 this.unlockQuests();
             }
+        }
         });
     }
     

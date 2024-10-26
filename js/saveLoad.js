@@ -93,13 +93,12 @@ export function loadGame() {
             }
 
             if (gameState.character.level !== undefined) {
-                setCharacterLevel(gameState.character.level);
-                // Recalculer les stats après avoir chargé le niveau
                 const newStats = character.getBaseStats();
+                setCharacterLevel(gameState.character.level);
                 combatSystem.player.maxHp = newStats.maxHp;
-                combatSystem.player.currentHp = newStats.maxHp; // Restaurer les PV au maximum
                 combatSystem.player.baseAttack = newStats.attack;
                 combatSystem.player.baseDefense = newStats.defense;
+                combatSystem.player.currentHp = newStats.maxHp;
             }
 
             setCharacterLevel(gameState.character.level);
