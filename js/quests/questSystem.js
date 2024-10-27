@@ -33,6 +33,34 @@ class QuestSystem {
         return element;
     }
 
+    canStartQuest(questId) {
+        const quest = this.progression?.quests[questId];
+        if (!quest) return false;
+
+        // Vérifier si la quête n'est pas déjà active ou complétée
+        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+            return false;
+        }
+
+        const conditions = quest.unlockConditions || { minLevel: 1, requiredQuests: [] };
+
+        // Vérifier le niveau minimum
+        if (character.level < conditions.minLevel) {
+            return false;
+        }
+
+        // Vérifier les quêtes requises
+        if (conditions.requiredQuests) {
+            for (const requiredQuest of conditions.requiredQuests) {
+                if (!this.isQuestCompleted(requiredQuest)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     startQuest(questId) {
         if (!this.progression || !this.progression.quests) {
             console.error('Quest progression data not loaded.');
@@ -210,7 +238,7 @@ class QuestSystem {
         if (!this.progression || !this.progression.quests) return;
         
         Object.entries(this.progression.quests)
-            .filter(([id, quest]) => quest.autoStart && !this.completedQuests.has(id))
+            .filter(([id, quest]) => quest.autoStart && this.canStartQuest(id))
             .forEach(([id]) => this.startQuest(id));
     }
 
