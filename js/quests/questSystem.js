@@ -92,27 +92,30 @@ class QuestSystem {
         this.activeQuests.forEach((quest, questId) => {
             const progress = this.questProgress.get(questId);
             const questElement = document.createElement('div');
-            questElement.className = 'quest-item p-4 bg-gray-50 rounded-lg mb-2';
-            
+            questElement.className = 'quest-item';
+    
             let progressText = '';
+            let progressPercentage = 0;
+    
             if (quest.requirements.monstersKilled) {
                 Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
                     if (monsterId !== 'zone') {
-                        const current = (progress?.monstersKilled?.[monsterId] || 0);
-                        progressText += `${current}/${required} ${globalTranslationManager.translate(`monsters.${monsterId}`)} tués`;
+                        const current = progress?.monstersKilled?.[monsterId] || 0;
+                        progressText = `${current}/${required}`;
+                        progressPercentage = (current / required) * 100;
                     }
                 });
             }
-            
+    
             questElement.innerHTML = `
-                <h3 class="font-medium text-lg mb-2">${quest.title}</h3>
-                <p class="text-gray-600 mb-2">${quest.description}</p>
-                <div class="progress-bar bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div class="bg-blue-500 h-full" style="width: ${this.calculateQuestProgress(questId)}%"></div>
+                <h3>${quest.title}</h3>
+                <p>${quest.description}</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercentage}%"></div>
                 </div>
-                <p class="text-sm text-gray-500 mt-1">${progressText}</p>
+                <p class="progress-text">${progressText}</p>
             `;
-            
+    
             questsContainer.appendChild(questElement);
         });
     }
@@ -139,57 +142,79 @@ class QuestSystem {
 
     updateQuestProgress(questId, type, data) {
         if (!this.activeQuests.has(questId)) return;
-
+    
         const quest = this.activeQuests.get(questId);
-        const progress = this.questProgress.get(questId);
-
+        let progress = this.questProgress.get(questId);
+    
+        // Initialiser la progression si elle n'existe pas
+        if (!progress) {
+            progress = {
+                monstersKilled: {},
+                items: {}
+            };
+            this.questProgress.set(questId, progress);
+        }
+    
+        // S'assurer que monstersKilled existe
+        if (!progress.monstersKilled) {
+            progress.monstersKilled = {};
+        }
+    
         switch (type) {
             case 'monsterKill':
                 const { monsterId, zoneId } = data;
-                if (quest.requirements.monstersKilled?.[monsterId]) {
+                if (quest.requirements.monstersKilled) {
                     const requiredZone = quest.requirements.monstersKilled.zone;
                     if (!requiredZone || requiredZone === zoneId) {
-                        progress.monstersKilled[monsterId] = 
-                            (progress.monstersKilled[monsterId] || 0) + 1;
+                        progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
+                        console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}`);
+                        this.updateQuestDisplay();
+                        this.checkQuestCompletion(questId);
                     }
                 }
                 break;
-
+    
             case 'itemCollect':
                 const { itemId, quantity } = data;
-                if (quest.requirements.items?.[itemId]) {
+                if (quest.requirements.items) {
                     progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
+                    this.updateQuestDisplay();
+                    this.checkQuestCompletion(questId);
                 }
                 break;
         }
-
-        this.checkQuestCompletion(questId);
     }
 
     checkQuestCompletion(questId) {
         const quest = this.activeQuests.get(questId);
         const progress = this.questProgress.get(questId);
-
+    
+        if (!quest || !progress) return;
+    
         let completed = true;
-
+    
         // Vérifier les monstres tués
         if (quest.requirements.monstersKilled) {
-            for (const [monsterId, required] of Object.entries(quest.requirements.monstersKilled)) {
-                if (monsterId !== 'zone' && (progress.monstersKilled[monsterId] || 0) < required) {
-                    completed = false;
+            Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
+                if (monsterId !== 'zone') {
+                    const currentKills = progress.monstersKilled[monsterId] || 0;
+                    if (currentKills < required) {
+                        completed = false;
+                    }
                 }
-            }
+            });
         }
-
+    
         // Vérifier les objets collectés
         if (quest.requirements.items) {
-            for (const [itemId, required] of Object.entries(quest.requirements.items)) {
-                if ((progress.items[itemId] || 0) < required) {
+            Object.entries(quest.requirements.items).forEach(([itemId, required]) => {
+                const currentAmount = progress.items[itemId] || 0;
+                if (currentAmount < required) {
                     completed = false;
                 }
-            }
+            });
         }
-
+    
         if (completed) {
             this.completeQuest(questId);
         }

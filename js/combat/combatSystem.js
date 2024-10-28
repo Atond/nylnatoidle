@@ -480,7 +480,14 @@ class CombatSystem {
             if (!this.autoCombatUnlocked && this.currentZone?.id === 'peaceful_meadow') {
                 this.unlockAutoCombat();
             }
-        } 
+        }
+        
+        questSystem.activeQuests.forEach((quest, questId) => {
+            questSystem.updateQuestProgress(questId, 'monsterKill', {
+                monsterId: monster.id,
+                zoneId: this.currentZone.id
+            });
+        });
         
         setTimeout(() => this.startCombat(), 1000);
         
