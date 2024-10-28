@@ -448,6 +448,17 @@ class CombatSystem {
         
         this.inCombat = false;
         this.monstersDefeated++;
+
+            // Mise à jour des quêtes avant toute autre action
+    if (this.currentZone) {
+        questSystem.activeQuests.forEach((quest, questId) => {
+            console.log('Updating quest:', questId, 'for monster:', monster.id, 'in zone:', this.currentZone.id);
+            questSystem.updateQuestProgress(questId, 'monsterKill', {
+                monsterId: monster.id,
+                zoneId: this.currentZone.id
+            });
+        });
+    }
         
         // Sauvegarder la progression
         this.savedProgress.set(this.currentZone.id, {
@@ -481,13 +492,6 @@ class CombatSystem {
                 this.unlockAutoCombat();
             }
         }
-        
-        questSystem.activeQuests.forEach((quest, questId) => {
-            questSystem.updateQuestProgress(questId, 'monsterKill', {
-                monsterId: monster.id,
-                zoneId: this.currentZone.id
-            });
-        });
         
         setTimeout(() => this.startCombat(), 1000);
         

@@ -10,7 +10,13 @@ class QuestSystem {
         this.completedQuests = new Set();
         this.questProgress = new Map();
         this.progression = null;
-        this.loadQuestData();
+        
+            // Initialiser immédiatement les données des quêtes
+    this.loadQuestData().then(() => {
+        console.log('Quest data loaded:', this.progression);
+        // Démarrer les quêtes automatiques après le chargement
+        this.checkAutoStartQuests();
+    });
     }
 
     async loadQuestData() {
@@ -221,45 +227,79 @@ class QuestSystem {
     }
 
     completeQuest(questId) {
-        const quest = this.activeQuests.get(questId);
-        
-        // Distribuer les récompenses
-        if (quest.rewards) {
-            if (quest.rewards.experience) {
-                character.addExperience(quest.rewards.experience);
+        try {
+            const quest = this.activeQuests.get(questId);
+            if (!quest) {
+                console.error('Quest not found:', questId);
+                return;
             }
     
-            if (quest.rewards.items) {
-                quest.rewards.items.forEach(item => {
-                    globalInventory.addItem(item.id, item.quantity);
-                });
+            // Logs pour le débogage
+            console.log('Completing quest:', quest);
+            console.log('Quest unlocks:', quest.unlocks);
+    
+            // Gérer les déblocages avant les récompenses
+            if (quest.unlocks) {
+                if (quest.unlocks.profession) {
+                    console.log('Unlocking profession:', quest.unlocks.profession);
+                    const professionsTab = document.querySelector('[data-tab="professions"]');
+                    if (professionsTab) {
+                        professionsTab.style.display = 'block';
+                        professionsTab.classList.add('tab-appear');
+                    }
+                }
+                if (quest.unlocks.unlockedZones) {
+                    quest.unlocks.unlockedZones.forEach(zoneId => {
+                        console.log('Unlocking zone:', zoneId);
+                        // Ajouter ici la logique pour débloquer la zone
+                    });
+                }
             }
-        }
     
-        // Gérer les déblocages
-        if (quest.unlocks?.profession) {
-            this.unlockProfession(quest.unlocks.profession);
-        }
-    
-        this.activeQuests.delete(questId);
-        this.completedQuests.add(questId);
-        this.questProgress.delete(questId);
-    
-        // Émettre un événement de complétion avec plus de détails
-        const questCompletedEvent = new CustomEvent('questCompleted', {
-            detail: {
-                questId: questId,
-                quest: quest
+            // Distribuer les récompenses si elles existent
+            if (quest.rewards) {
+                if (quest.rewards.experience) {
+                    character.addExperience(quest.rewards.experience);
+                }
+                if (quest.rewards.items) {
+                    quest.rewards.items.forEach(item => {
+                        globalInventory.addItem(item.id, item.quantity);
+                    });
+                }
+                if (quest.rewards.professionExp) {
+                    Object.entries(quest.rewards.professionExp).forEach(([profName, exp]) => {
+                        if (professions[profName]) {
+                            professions[profName].addExperience(exp);
+                        }
+                    });
+                }
             }
-        });
-        window.dispatchEvent(questCompletedEvent);
     
-        // Afficher le message de complétion
-        combatUI.addQuestLog(`Quête terminée : ${quest.title}`);
-        
-        // Pour les quêtes spécifiques qui débloquent des fonctionnalités
-        if (questId === 'beginnerQuest') {
-            combatUI.addQuestLog('Vous avez débloqué les métiers !');
+            // Mettre à jour l'état des quêtes
+            this.activeQuests.delete(questId);
+            this.completedQuests.add(questId);
+            this.questProgress.delete(questId);
+    
+            // Émettre l'événement de complétion
+            const questCompletedEvent = new CustomEvent('questCompleted', {
+                detail: {
+                    questId: questId,
+                    quest: quest
+                }
+            });
+            window.dispatchEvent(questCompletedEvent);
+    
+            // Messages de log
+            combatUI.addQuestLog(`Quête terminée : ${quest.title}`);
+            if (questId === 'beginnerQuest') {
+                combatUI.addQuestLog('Vous avez débloqué les métiers !');
+            }
+    
+            // Vérifier et démarrer les nouvelles quêtes disponibles
+            this.checkAutoStartQuests();
+    
+        } catch (error) {
+            console.error('Error completing quest:', questId, error);
         }
     }
 
@@ -268,11 +308,24 @@ class QuestSystem {
     }
 
     checkAutoStartQuests() {
-        if (!this.progression || !this.progression.quests) return;
+        if (!this.progression?.quests) {
+            console.log('No quest data available');
+            return;
+        }
         
+        console.log('Checking auto-start quests');
         Object.entries(this.progression.quests)
-            .filter(([id, quest]) => quest.autoStart && this.canStartQuest(id))
-            .forEach(([id]) => this.startQuest(id));
+            .filter(([id, quest]) => {
+                const shouldStart = quest.autoStart && 
+                                  !this.activeQuests.has(id) && 
+                                  !this.completedQuests.has(id);
+                console.log(`Quest ${id} should auto-start:`, shouldStart);
+                return shouldStart;
+            })
+            .forEach(([id, quest]) => {
+                console.log('Starting quest:', id);
+                this.startQuest(id);
+            });
     }
 
     handleUnlock(type, value) {
