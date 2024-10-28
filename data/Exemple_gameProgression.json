@@ -1,0 +1,213 @@
+{
+    "worldProgression": [
+      {
+        "id": "green_fields",
+        "zones": [
+          {
+            "id": "peaceful_meadow",
+            "requirements": {
+              "monstersPerZone": 10
+            }
+          },
+          {
+            "id": "dark_forest",
+            "requirements": {
+              "monstersPerZone": 10,
+              "completedQuests": ["Firstweapon"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "fiery_mountains",
+        "requirements": {
+          "completedQuests": ["minerApprentice"]
+        },
+        "zones": [
+          {
+            "id": "dragon_peak",
+            "requirements": {
+              "monstersPerZone": 10
+            }
+          }
+        ]
+      }
+    ],
+    "defaultUnlocks": {
+      "worlds": ["green_fields"],
+      "zones": ["peaceful_meadow"]
+    },
+    "scaling": {
+      "zoneMultiplier": 0.4,
+      "scalingPower": 2,
+      "levelScaling": 0.1,
+      "stats": {
+          "hp": {
+              "useFullScaling": true
+          },
+          "attack": {
+              "useFullScaling": false
+          },
+          "defense": {
+              "useFullScaling": false
+          }
+      }
+  },
+    "quests": {
+      "beginnerQuest": {
+        "id": "beginnerQuest",
+        "title": "Premiers pas",
+        "description": "Tuez 5 gobelins dans la Prairie Paisible",
+        "requirements": {
+            "monstersKilled": {
+                "goblin": 5,
+                "zone": "peaceful_meadow"
+            }
+        },
+        "unlockConditions": {
+          "minLevel": 10,
+          "requiredQuests": ["questA", "questB"],
+          "professionLevels": {
+              "miner": 5,
+              "lumberjack": 3
+        },
+        "unlockedZones": ["dark_forest"],
+        "requiredItems": {
+            "iron_sword": 1
+        }
+      },
+        "rewards": {
+            "experience": 100,
+            "items": [
+                {
+                    "id": "wooden_sword",
+                    "quantity": 1
+                }
+            ]
+        },
+        "autoStart": true
+    },
+    "Firstprofession": {
+        "id": "Firstprofession",
+        "title": "Hé ho, on rentre du boulot !",
+        "description": "Effectuez vos premières tâches dans les métiers de mineur et de bûcheron",
+        "unlockConditions": {
+            "requiredQuests": ["beginnerQuest"]
+        },
+        "requirements": {
+            "professionLevels": {
+                "miner": 2,
+                "lumberjack": 2
+            }
+        },
+        "unlocks": {
+            "profession": "blacksmith"
+        },
+        "autoStart": true
+    },
+    "Firstweapon": {
+        "id": "Firstweapon",
+        "title": "Avec une épée, c'est mieux",
+        "description": "Fabriquez votre première épée en fer",
+        "unlockConditions": {
+            "requiredQuests": ["Firstprofession"]
+        },
+        "requirements": {
+            "items": {
+                "iron_sword": 1
+            }
+        },
+        "unlocks": {
+            "unlockedZones": ["dark_forest"]
+        },
+        "autoStart": true
+    },
+    "masterMinerChallenge": {
+      "id": "masterMinerChallenge",
+      "title": "Le Défi du Maître Mineur",
+      "description": "Prouvez votre expertise en minant 100 minerais d'or dans la Forêt Sombre. Seul un véritable maître mineur peut accomplir cette tâche !",
+      "unlockConditions": {
+          "minLevel": 5,
+          "requiredQuests": ["minerApprentice"],
+          "unlockedZones": ["dark_forest"],
+          "professionLevels": {
+              "miner": 10
+          }
+      },
+      "requirements": {
+          "items": {
+              "gold_ore": 100
+          },
+          "zone": "dark_forest"
+      },
+      "rewards": {
+          "experience": 500,
+          "items": [
+              {
+                  "id": "master_pickaxe",
+                  "quantity": 1
+              },
+              {
+                  "id": "gold_ingot",
+                  "quantity": 50
+              }
+          ],
+          "professionExp": {
+              "miner": 1000
+          },
+          "unlocks": {
+              "minerUpgrade": "autoMiner2",
+              "title": "Maître Mineur"
+          }
+      },
+      "autoStart": true
+  },
+      "minerApprentice": {
+          "id": "minerApprentice",
+          "title": "Apprenti Mineur",
+          "unlockConditions": {
+              "minLevel": 5,
+              "requiredQuests": ["beginnerQuest"]
+          },
+        "requirements": {
+          "items": {
+            "iron_ore": 50
+          }
+        },
+        "rewards": {
+          "experience": 200,
+          "professionExp": {
+            "miner": 500
+          },
+          "unlocks": {
+            "minerUpgrade": "autoMiner1"
+          }
+        },
+        "autoStart": true
+      },
+      "dragonSlayer": {
+        "id": "dragonSlayer",
+        "title": "Tueur de Dragon",
+        "description": "Battez le dragon dans le Pic du Dragon",
+        "requirements": {
+          "monstersKilled": {
+            "dragon": 1,
+            "zone": "dragon_peak"
+          }
+        },
+        "rewards": {
+          "experience": 1000,
+          "items": [
+            {
+              "id": "dragon_scale_armor",
+              "quantity": 1
+            }
+          ],
+          "unlocks": {
+            "title": "Tueur de Dragon"
+          }
+        },
+        "autoStart": true
+      }
+    }
+  }

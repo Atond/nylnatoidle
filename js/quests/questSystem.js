@@ -201,33 +201,41 @@ class QuestSystem {
         // Distribuer les récompenses
         if (quest.rewards) {
             if (quest.rewards.experience) {
-                setCharacterLevel(getCharacterLevel() + quest.rewards.experience);
+                character.addExperience(quest.rewards.experience);
             }
-
+    
             if (quest.rewards.items) {
                 quest.rewards.items.forEach(item => {
                     globalInventory.addItem(item.id, item.quantity);
                 });
             }
-
-            if (quest.rewards.professionExp) {
-                Object.entries(quest.rewards.professionExp).forEach(([profession, exp]) => {
-                    professions[profession].addExperience(exp);
-                });
-            }
-
-            if (quest.rewards.unlocks) {
-                Object.entries(quest.rewards.unlocks).forEach(([type, value]) => {
-                    this.handleUnlock(type, value);
-                });
-            }
         }
-
+    
+        // Gérer les déblocages
+        if (quest.unlocks?.profession) {
+            this.unlockProfession(quest.unlocks.profession);
+        }
+    
         this.activeQuests.delete(questId);
         this.completedQuests.add(questId);
         this.questProgress.delete(questId);
-
+    
+        // Émettre un événement de complétion avec plus de détails
+        const questCompletedEvent = new CustomEvent('questCompleted', {
+            detail: {
+                questId: questId,
+                quest: quest
+            }
+        });
+        window.dispatchEvent(questCompletedEvent);
+    
+        // Afficher le message de complétion
         combatUI.addQuestLog(`Quête terminée : ${quest.title}`);
+        
+        // Pour les quêtes spécifiques qui débloquent des fonctionnalités
+        if (questId === 'beginnerQuest') {
+            combatUI.addQuestLog('Vous avez débloqué les métiers !');
+        }
     }
 
     isQuestCompleted(questId) {
