@@ -13,7 +13,7 @@
             "id": "dark_forest",
             "requirements": {
               "monstersPerZone": 10,
-              "completedQuests": ["beginnerQuest"]
+              "completedQuests": ["Firstweapon"]
             }
           }
         ]
@@ -87,6 +87,41 @@
         },
         "autoStart": true
     },
+    "Firstprofession": {
+        "id": "Firstprofession",
+        "title": "Hé ho, on rentre du boulot !",
+        "description": "Effectuez vos premières tâches dans les métiers de mineur et de bûcheron",
+        "unlockConditions": {
+            "requiredQuests": ["beginnerQuest"]
+        },
+        "requirements": {
+            "professionLevels": {
+                "miner": 2,
+                "lumberjack": 2
+            }
+        },
+        "unlocks": {
+            "profession": "blacksmith"
+        },
+        "autoStart": true
+    },
+    "Firstweapon": {
+        "id": "Firstweapon",
+        "title": "Avec une épée, c'est mieux",
+        "description": "Fabriquez votre première épée en fer",
+        "unlockConditions": {
+            "requiredQuests": ["Firstprofession"]
+        },
+        "requirements": {
+            "items": {
+                "iron_sword": 1
+            }
+        },
+        "unlocks": {
+            "unlockedZones": ["dark_forest"]
+        },
+        "autoStart": true
+    },
     "masterMinerChallenge": {
       "id": "masterMinerChallenge",
       "title": "Le Défi du Maître Mineur",
@@ -126,8 +161,7 @@
           }
       },
       "autoStart": true
-  }
-},
+  },
       "minerApprentice": {
           "id": "minerApprentice",
           "title": "Apprenti Mineur",
