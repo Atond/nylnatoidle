@@ -1,4 +1,4 @@
-import { initialState } from './state/initialState';
+import { initialState } from './initialState';
 
 class GameStore {
   constructor() {

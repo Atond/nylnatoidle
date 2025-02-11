@@ -115,3 +115,59 @@ export class Blacksmith extends BaseProfession {
         return newState;
       }
     });
+
+    // Animer le crafting
+    this.triggerAnimation('craft-success');
+    return true;
+  }
+
+  // Méthodes utilitaires
+  findRecipe(recipeId) {
+    return BLACKSMITH_RECIPES.weapons[recipeId] || BLACKSMITH_RECIPES.armors[recipeId];
+  }
+
+  calculateCraftingExp(recipeLevel) {
+    // Base XP multiplié par le niveau de la recette
+    return Math.floor(25 * Math.pow(1.2, recipeLevel - 1));
+  }
+
+  getCraftingBonus(characterId) {
+    const stats = this.getStats(characterId);
+    return {
+      qualityChance: Math.min(0.3, stats.resourceQuality * 0.05), // 5% par point de qualité, max 30%
+      extraItemChance: Math.min(0.2, stats.multiCollect * 0.04), // 4% par point de multi, max 20%
+    };
+  }
+
+  // Overrides pour les animations
+  triggerAnimation(type) {
+    const event = new CustomEvent('profession-animation', {
+      detail: { 
+        profession: 'blacksmith', 
+        type,
+      }
+    });
+    window.dispatchEvent(event);
+  }
+
+  // Méthode pour obtenir les stats d'un item crafté
+  getItemStats(recipeId) {
+    const recipe = this.findRecipe(recipeId);
+    if (!recipe) return null;
+    return recipe.stats;
+  }
+
+  // Méthode pour obtenir le coût en matériaux d'une recette
+  getRecipeCost(recipeId) {
+    const recipe = this.findRecipe(recipeId);
+    if (!recipe) return null;
+    return recipe.materials;
+  }
+
+  // Méthode pour obtenir le niveau requis d'une recette
+  getRecipeLevel(recipeId) {
+    const recipe = this.findRecipe(recipeId);
+    if (!recipe) return null;
+    return recipe.level;
+  }
+}
