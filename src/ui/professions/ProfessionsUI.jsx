@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { gameStore } from '../../store/GameStore';
+import { gameStore } from '../../store/state/GameStore';
 import { professionSelectors } from '../../store/actions/professions';
 import { globalTranslationManager } from '../../translations/translationManager';
 
