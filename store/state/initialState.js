@@ -17,16 +17,6 @@ export const initialState = {
           weapon: null,
           armor: null,
           accessory: null
-        },
-        professions: {  // Chaque héros a ses propres niveaux de métiers
-          miner: {
-            level: 1,
-            experience: 0
-          },
-          lumberjack: {
-            level: 1,
-            experience: 0
-          }
         }
       }]
     ]),
@@ -34,7 +24,42 @@ export const initialState = {
     unlockedSlots: 1  // Nombre de slots de héros débloqués
   },
 
-  town: {  // On prépare déjà la structure pour la ville
+  professions: {
+    slots: {
+      perCharacter: 3,  // Nombre de slots de métiers par personnage
+      available: ['miner', 'lumberjack', 'blacksmith', 'herbalist', 'alchemist'],  // Tous les métiers du jeu
+      unlocked: ['miner', 'lumberjack', 'blacksmith']  // Métiers débloqués au début
+    },
+    characters: {
+      'hero-1': {
+        active: ['miner', 'lumberjack'],  // Métiers actifs pour ce héros
+        levels: {  // Niveaux et expérience de chaque métier
+          miner: { level: 1, exp: 0 },
+          lumberjack: { level: 1, exp: 0 }
+        },
+        upgrades: {  // Upgrades débloqués pour chaque métier
+          miner: new Set(),
+          lumberjack: new Set()
+        },
+        stats: {  // Stats spécifiques à chaque métier
+          miner: {
+            miningPower: 1,
+            autoCollectors: 0,
+            resourceQuality: 1,
+            multiCollect: 1
+          },
+          lumberjack: {
+            miningPower: 1,
+            autoCollectors: 0,
+            resourceQuality: 1,
+            multiCollect: 1
+          }
+        }
+      }
+    }
+  },
+
+  town: {  // Structure pour la ville
     level: 1,
     buildings: new Map(),
     resources: new Map(),
@@ -66,6 +91,16 @@ export const initialState = {
       autoCombatEnabled: false,
       autoCombatUnlocked: false,
       currentMonster: null
+    },
+    scaling: {  // Paramètres de scaling des monstres
+      zoneMultiplier: 0.4,
+      scalingPower: 2,
+      levelScaling: 0.1,
+      stats: {
+        hp: { useFullScaling: true },
+        attack: { useFullScaling: false },
+        defense: { useFullScaling: false }
+      }
     }
   },
 
@@ -88,6 +123,12 @@ export const initialState = {
   // Paramètres globaux
   settings: {
     autoSave: true,
-    language: 'fr'
+    language: 'fr',
+    notifications: true,
+    sound: {
+      effects: true,
+      music: true,
+      volume: 0.5
+    }
   }
 };

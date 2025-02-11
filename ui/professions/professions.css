@@ -1,0 +1,85 @@
+/* Styles spécifiques aux métiers */
+.profession-slot {
+  @apply relative border-2 border-dashed border-gray-300 rounded-lg p-4;
+  min-height: 5rem;
+}
+
+.profession-slot.active {
+  @apply border-solid border-indigo-500 bg-indigo-50;
+}
+
+.profession-slot:hover:not(.active) {
+  @apply border-gray-400 bg-gray-50;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+}
+
+.resource-item {
+  @apply p-2 bg-gray-100 rounded-lg text-center;
+  transition: transform 0.2s;
+}
+
+.resource-item:hover {
+  @apply bg-gray-200;
+  transform: translateY(-2px);
+}
+
+.resource-item img {
+  @apply mx-auto mb-1;
+  width: 32px;
+  height: 32px;
+}
+
+.upgrade-list {
+  @apply space-y-2;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.profession-action-btn {
+  @apply btn btn-primary px-8 py-3;
+  min-width: 200px;
+}
+
+.profession-action-btn:active {
+  transform: scale(0.98);
+}
+
+/* Animations */
+@keyframes resourceCollect {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.resource-collect {
+  animation: resourceCollect 0.3s ease-in-out;
+}
+
+/* Progress indicators */
+.profession-progress {
+  @apply relative bg-gray-200 rounded-full overflow-hidden;
+  height: 0.5rem;
+}
+
+.profession-progress-fill {
+  @apply absolute left-0 top-0 bottom-0 bg-indigo-500;
+  transition: width 0.3s ease-in-out;
+}
+
+.profession-progress-text {
+  @apply text-xs text-gray-600 text-center mt-1;
+}

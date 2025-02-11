@@ -18,5 +18,9 @@ export const ActionTypes = {
   // Professions
   PROFESSION_GAIN_XP: 'profession/gainExperience',
   PROFESSION_LEVEL_UP: 'profession/levelUp',
-  PROFESSION_COLLECT: 'profession/collect'
+  PROFESSION_UNLOCK: 'profession/unlock',
+  PROFESSION_ASSIGN: 'profession/assign',
+  PROFESSION_COLLECT_RESOURCE: 'profession/collectResource',
+  PROFESSION_UNLOCK_UPGRADE: 'profession/unlockUpgrade',
+  PROFESSION_BUY_UPGRADE: 'profession/buyUpgrade'
 };
