@@ -1,4 +1,4 @@
-import { gameStore } from '../store/GameStore';
+import { gameStore } from '../store/state/GameStore';
 import * as combatActions from '../store/actions/combat';
 import * as characterActions from '../store/actions/character';
 import { combatSelectors } from '../store/actions/combat';

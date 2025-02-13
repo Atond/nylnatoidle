@@ -1,7 +1,7 @@
 export const initialState = {
   party: {
-    characters: new Map([
-      ['hero-1', {  // Premier héros débloqué par défaut
+    characters: {
+      'hero-1': {  // Changé de Map à objet simple
         id: 'hero-1',
         name: 'Hero',
         unlockDate: Date.now(),
@@ -18,10 +18,10 @@ export const initialState = {
           armor: null,
           accessory: null
         }
-      }]
-    ]),
-    activeCharacterId: 'hero-1',  // Héros actuellement joué
-    unlockedSlots: 1  // Nombre de slots de héros débloqués
+      }
+    },
+    activeCharacterId: 'hero-1',
+    unlockedSlots: 1
   },
 
   professions: {

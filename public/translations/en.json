@@ -1,0 +1,60 @@
+{
+    "title": "Idle Game",
+    "characterTitle": "Character",
+    "characterNameLabel": "Name:",
+    "changeName": "Change Name",
+    "saveName": "Save Name",
+    "characterLevelLabel": "Level:",
+    "professionsTitle": "Professions",
+    "autoIncrementTitle": "Auto-Increment",
+    "inventoryTitle": "Inventory",
+    "professionResources": "Profession Resources",
+    "combatResources": "Combat Resources",
+    "attack": "Attack",
+    "miner": {
+        "title": "Miner",
+        "expLabel": "Experience:",
+        "expRequired": "Experience required for next level:",
+        "levelLabel": "Level:",
+        "resourcesLabel": "Resources:",
+        "miningPower": "Mining Power",
+        "autoMiners": "Auto Miners",
+        "mineButton": "Mine",
+        "upgrades": {
+            "betterPickaxe1": "Meilleure Pioche I",
+            "betterPickaxe2": "Meilleure Pioche II",
+            "autoMiner1": "Mineur Automatique I"
+        },
+        "resources": {
+            "minerai111": "Iron",
+            "minerai112": "Bronze",
+            "minerai113": "Copper",
+            "minerai114": "Silver",
+            "minerai115": "Gold",
+            "minerai116": "Nickel",
+            "minerai117": "Tin",
+            "minerai118": "Platinum",
+            "minerai119": "Emerald",
+            "minerai1110": "Diamond"
+        }
+    },
+    "lumberjack": {
+        "title": "Lumberjack",
+        "expLabel": "Experience:",
+        "expRequired": "Experience required for next level:",
+        "levelLabel": "Level:",
+        "resourcesLabel": "Resources:",
+        "resources": {
+            "bois111": "Oak",
+            "bois112": "Ash",
+            "bois113": "Birch",
+            "bois114": "Chestnut",
+            "bois115": "Cherry",
+            "bois116": "Beech",
+            "bois117": "Maple",
+            "bois118": "Walnut",
+            "bois119": "Acacia",
+            "bois1110": "Elm"
+        }
+    }
+}

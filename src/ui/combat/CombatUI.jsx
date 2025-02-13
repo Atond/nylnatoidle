@@ -1,271 +1,349 @@
-import { gameStore } from '../store/GameStore';
-import { combatSelectors } from '../store/actions/combat';
-import { globalTranslationManager } from '../translations/translationManager.js';
+import React, { useState, useEffect } from 'react';
+import { Camera, Play, Pause } from 'lucide-react';
+import { gameStore } from '../../store/state/GameStore';
+import { combatSelectors } from '../../store/actions/combat';
+import { monsterService } from '../../services/MonsterService';
+import './combat.css';
 
-class CombatUI {
-    constructor() {
-        this.elements = {};
-        this.initializeElements();
-        this.bindEvents();
-        this.setupStoreSubscriptions();
-    }
+const CombatUI = () => {
+  const [combatState, setCombatState] = useState({
+    player: {
+      currentHp: 100,
+      maxHp: 100,
+      attack: 1,
+      defense: 0,
+      level: 1,
+      exp: 0,
+      maxExp: 100
+    },
+    monster: null,
+    inCombat: false,
+    autoCombatEnabled: false,
+    monstersDefeated: 0,
+    currentZone: 'peaceful_meadow',
+    combatLog: []
+  });
 
-    initializeElements() {
-        // Player elements
-        this.elements.player = {
-            health: document.getElementById('player-health'),
-            healthText: document.getElementById('player-health-text'),
-            attack: document.getElementById('player-attack'),
-            defense: document.getElementById('player-defense'),
-            exp: document.getElementById('player-exp'),
-            expBar: document.getElementById('player-exp-bar')
-        };
-
-        // Monster elements
-        this.elements.monster = {
-            health: document.getElementById('monster-health'),
-            healthText: document.getElementById('monster-health-text'),
-            name: document.getElementById('monster-name'),
-            level: document.getElementById('monster-level'),
-            image: document.getElementById('monster-image'),
-            attack: document.getElementById('monster-attack'),
-            defense: document.getElementById('monster-defense')
-        };
-
-        // Combat controls
-        this.elements.controls = {
-            attackButton: document.getElementById('attack-btn'),
-            autoCombatButton: document.getElementById('auto-combat-btn')
-        };
-
-        // Logs
-        this.elements.logs = {
-            combat: document.getElementById('combat-log'),
-            progression: document.getElementById('progression-log')
-        };
-
-        // Zone progress
-        this.elements.zone = {
-            progress: document.getElementById('zone-progress'),
-            progressText: document.getElementById('zone-progress-text'),
-            currentZone: document.getElementById('current-zone')
-        };
-    }
-
-    setupStoreSubscriptions() {
-        // Écouter les changements de combat
-        gameStore.subscribe('combat', (state) => {
-            this.updateCombatUI(state);
+  useEffect(() => {
+    const initCombat = async () => {
+      try {
+        await monsterService.initialize();
+        
+        // Configuration de la zone initiale
+        await gameStore.dispatch({
+          type: 'combat/initZone',
+          paths: ['combat.zones'],
+          reducer: (state) => {
+            const newState = structuredClone(state);
+            newState.combat.zones.currentWorld = 'green_fields';
+            newState.combat.zones.currentZone = 'peaceful_meadow';
+            newState.combat.state.inCombat = false;
+            return newState;
+          }
         });
 
-        // Écouter les changements du personnage actif
-        gameStore.subscribe('party.characters', (state) => {
-            this.updatePlayerUI(state);
+        handleAttack(); // Démarrer le premier combat
+      } catch (error) {
+        console.error('Failed to initialize combat:', error);
+        setCombatState(prev => ({
+          ...prev,
+          combatLog: [...prev.combatLog, 'Erreur lors de l\'initialisation du combat']
+        }));
+      }
+    };
+
+    initCombat();
+
+    // Scroll automatique du log de combat
+    const logContainer = document.querySelector('.combat-log-container');
+    if (logContainer) {
+      const observer = new MutationObserver(() => {
+        logContainer.scrollTop = logContainer.scrollHeight;
+      });
+      observer.observe(logContainer, { childList: true, subtree: true });
+      return () => observer.disconnect();
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = gameStore.subscribe(['combat', 'party'], () => {
+      const state = gameStore.getState();
+      const activeChar = state.party.characters[state.party.activeCharacterId];
+      const monster = state.combat.state.currentMonster;
+      
+      setCombatState(prevState => ({
+        ...prevState,
+        player: {
+          currentHp: activeChar.stats.currentHp,
+          maxHp: activeChar.stats.maxHp,
+          attack: activeChar.stats.attack,
+          defense: activeChar.stats.defense,
+          level: activeChar.level,
+          exp: activeChar.experience,
+          maxExp: 100 * Math.pow(1.5, activeChar.level - 1)
+        },
+        monster,
+        inCombat: state.combat.state.inCombat,
+        autoCombatEnabled: state.combat.state.autoCombatEnabled,
+        monstersDefeated: state.combat.zones.monstersDefeated,
+        currentZone: state.combat.zones.currentZone
+      }));
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleAttack = async () => {
+    const state = gameStore.getState();
+    
+    if (!state.combat.state.inCombat) {
+      const newMonster = monsterService.generateMonsterForZone(combatState.currentZone);
+      
+      if (!newMonster) {
+        console.error('Failed to generate monster');
+        return;
+      }
+      
+      await gameStore.dispatch({
+        type: 'COMBAT_START',
+        paths: ['combat'],
+        reducer: (state) => {
+          const newState = structuredClone(state);
+          newState.combat.state.currentMonster = newMonster;
+          newState.combat.state.inCombat = true;
+          return newState;
+        }
+      });
+
+      setCombatState(prev => ({
+        ...prev,
+        monster: newMonster,
+        inCombat: true,
+        combatLog: [...prev.combatLog, `Un ${newMonster.defaultName} Nv.${newMonster.level} apparaît!`]
+      }));
+    } else {
+      await gameStore.dispatch({
+        type: 'COMBAT_ATTACK',
+        paths: ['combat', 'party'],
+        reducer: (state) => {
+          const newState = structuredClone(state);
+          const activeChar = newState.party.characters[newState.party.activeCharacterId];
+          const monster = newState.combat.state.currentMonster;
+
+          // Calcul des dégâts
+          const playerDamage = Math.max(1, activeChar.stats.attack - monster.stats.defense/2);
+          monster.currentHp -= playerDamage;
+
+          setCombatState(prev => ({
+            ...prev,
+            combatLog: [...prev.combatLog, 
+              `Player deals ${playerDamage} damage to ${monster.defaultName}`
+            ]
+          }));
+
+          // Contre-attaque si le monstre est vivant
+          if (monster.currentHp > 0) {
+            const monsterDamage = Math.max(1, monster.stats.attack - activeChar.stats.defense/2);
+            activeChar.stats.currentHp = Math.max(0, activeChar.stats.currentHp - monsterDamage);
+            
+            setCombatState(prev => ({
+              ...prev,
+              combatLog: [...prev.combatLog, 
+                `${monster.defaultName} deals ${monsterDamage} damage to Player`
+              ]
+            }));
+          }
+
+          return newState;
+        }
+      });
+
+      // Vérifier la victoire
+      const updatedState = gameStore.getState();
+      const monster = updatedState.combat.state.currentMonster;
+      if (monster.currentHp <= 0) {
+        handleVictory(monster);
+      }
+    }
+  };
+
+  const handleVictory = async (monster) => {
+    const experience = monsterService.calculateExperience(monster);
+    const loot = monsterService.generateLoot(monster);
+    
+    await gameStore.dispatch({
+      type: 'COMBAT_VICTORY',
+      paths: ['combat', 'party', 'inventory'],
+      reducer: (state) => {
+        const newState = structuredClone(state);
+        
+        // Mettre à jour l'expérience du joueur
+        const activeChar = newState.party.characters.get(newState.party.activeCharacterId);
+        activeChar.experience += experience;
+        
+        // Ajouter le butin à l'inventaire
+        loot.forEach(item => {
+          const currentQuantity = newState.inventory.items.get(item.id) || 0;
+          newState.inventory.items.set(item.id, currentQuantity + item.quantity);
         });
-
-        // Écouter les changements de zone
-        gameStore.subscribe('combat.zones', (state) => {
-            this.updateZoneUI(state);
-        });
-    }
-
-    bindEvents() {
-        // Combat controls
-        if (this.elements.controls.attackButton) {
-            this.elements.controls.attackButton.addEventListener('click', () => {
-                combatSystem.attack();
-            });
-        }
-
-        if (this.elements.controls.autoCombatButton) {
-            this.elements.controls.autoCombatButton.addEventListener('click', () => {
-                combatSystem.toggleAutoCombat();
-            });
-        }
-    }
-
-    // src/ui/combat/CombatUI.js (suite)
-
-    updateCombatUI(state) {
-        const monster = combatSelectors.getCurrentMonster(state);
-        const inCombat = combatSelectors.isInCombat(state);
-
-        // Mise à jour du monstre
-        if (monster && inCombat) {
-            this.updateMonsterStats(monster);
-        } else {
-            this.resetMonsterDisplay();
-        }
-
-        // Mise à jour des contrôles
-        this.updateCombatControls(state);
-    }
-
-    updateMonsterStats(monster) {
-        const elements = this.elements.monster;
         
-        // Barre de vie
-        const healthPercent = (monster.currentHp / monster.maxHp) * 100;
-        elements.health.style.width = `${healthPercent}%`;
-        elements.healthText.textContent = globalTranslationManager.translate('ui.health')
-            .replace('{current}', Math.round(monster.currentHp))
-            .replace('{max}', monster.maxHp);
-
-        // Informations du monstre
-        elements.name.textContent = globalTranslationManager.translate(`monsters.${monster.id}`);
-        elements.level.textContent = globalTranslationManager.translate('ui.level')
-            .replace('{level}', monster.level);
-        elements.attack.textContent = globalTranslationManager.translate('ui.monster_attack_stat')
-            .replace('{value}', monster.stats.attack);
-        elements.defense.textContent = globalTranslationManager.translate('ui.monster_defense_stat')
-            .replace('{value}', monster.stats.defense);
-
-        // Image
-        elements.image.style.visibility = 'visible';
-        elements.image.src = monster.image || '/api/placeholder/150/150';
-    }
-
-    resetMonsterDisplay() {
-        const elements = this.elements.monster;
+        // Terminer le combat
+        newState.combat.state.inCombat = false;
+        newState.combat.zones.monstersDefeated++;
         
-        elements.health.style.width = '0%';
-        elements.healthText.textContent = '???/???';
-        elements.name.textContent = globalTranslationManager.translate('ui.noMonster');
-        elements.level.textContent = '';
-        elements.attack.textContent = '';
-        elements.defense.textContent = '';
-        elements.image.style.visibility = 'hidden';
+        return newState;
+      }
+    });
+
+    // Ajouter les messages de victoire aux logs
+    setCombatState(prev => ({
+      ...prev,
+      combatLog: [
+        ...prev.combatLog,
+        `Victoire! Le ${monster.defaultName} est vaincu!`,
+        `Vous gagnez ${experience} points d'expérience`,
+        ...loot.map(item => `Vous obtenez ${item.quantity}x ${item.id}`)
+      ]
+    }));
+
+    // Démarrer un nouveau combat après un délai
+    setTimeout(handleAttack, 1000);
+  };
+
+  const toggleAutoCombat = () => {
+    gameStore.dispatch({
+      type: 'COMBAT_TOGGLE_AUTO',
+      paths: ['combat'],
+      reducer: (state) => {
+        const newState = structuredClone(state);
+        newState.combat.state.autoCombatEnabled = !newState.combat.state.autoCombatEnabled;
+        return newState;
+      }
+    });
+
+    if (!combatState.inCombat) {
+      handleAttack();
     }
+  };
 
-    updatePlayerUI(state) {
-        const activeChar = state.party.characters.get(state.party.activeCharacterId);
-        const elements = this.elements.player;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Zone de combat */}
+      <div className="card">
+        <div className="flex justify-between items-start mb-6">
+          {/* Stats du joueur */}
+          <div className="space-y-2">
+            <h3 className="font-medium">Player</h3>
+            <div className="w-48">
+              <div className="h-2 bg-gray-200 rounded-full mb-2">
+                <div 
+                  className="h-2 bg-green-500 rounded-full transition-all duration-300" 
+                  style={{ width: `${(combatState.player.currentHp / combatState.player.maxHp) * 100}%` }}
+                />
+              </div>
+              <div className="text-sm text-gray-600">
+                HP: {Math.round(combatState.player.currentHp)}/{combatState.player.maxHp}
+              </div>
+            </div>
+            <div className="flex gap-4 text-sm">
+              <span>ATK: {combatState.player.attack}</span>
+              <span>DEF: {combatState.player.defense}</span>
+            </div>
+          </div>
 
-        // Barre de vie
-        const healthPercent = (activeChar.stats.currentHp / activeChar.stats.maxHp) * 100;
-        elements.health.style.width = `${healthPercent}%`;
-        elements.healthText.textContent = globalTranslationManager.translate('ui.health')
-            .replace('{current}', Math.round(activeChar.stats.currentHp))
-            .replace('{max}', activeChar.stats.maxHp);
+          {/* Stats du monstre */}
+          {combatState.monster && (
+            <div className="space-y-2">
+              <h3 className="font-medium">{combatState.monster.defaultName} Lvl.{combatState.monster.level}</h3>
+              <div className="w-48">
+                <div className="h-2 bg-gray-200 rounded-full mb-2">
+                  <div 
+                    className="h-2 bg-red-500 rounded-full transition-all duration-300" 
+                    style={{ width: `${(combatState.monster.currentHp / combatState.monster.maxHp) * 100}%` }}
+                  />
+                </div>
+                <div className="text-sm text-gray-600">
+                  HP: {Math.round(combatState.monster.currentHp)}/{combatState.monster.maxHp}
+                </div>
+              </div>
+              <div className="flex gap-4 text-sm">
+                <span>ATK: {combatState.monster.stats.attack}</span>
+                <span>DEF: {combatState.monster.stats.defense}</span>
+              </div>
+            </div>
+          )}
+        </div>
 
-        // Stats
-        elements.attack.textContent = globalTranslationManager.translate('ui.attack_stat')
-            .replace('{value}', activeChar.stats.attack);
-        elements.defense.textContent = globalTranslationManager.translate('ui.defense_stat')
-            .replace('{value}', activeChar.stats.defense);
+        {/* Contrôles de combat */}
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={handleAttack}
+            className="btn btn-primary gap-2"
+          >
+            <Camera className="w-4 h-4" />
+            Attack
+          </button>
+          <button
+            onClick={toggleAutoCombat}
+            className={`btn gap-2 ${combatState.autoCombatEnabled ? 'btn-secondary' : 'btn-primary'}`}
+          >
+            {combatState.autoCombatEnabled ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            Auto Combat
+          </button>
+        </div>
+      </div>
 
-        // Expérience
-        const expForNextLevel = this.calculateExpForNextLevel(activeChar.level);
-        const expPercent = (activeChar.experience / expForNextLevel) * 100;
-        elements.expBar.style.width = `${expPercent}%`;
-        elements.exp.textContent = `${activeChar.experience}/${expForNextLevel}`;
-    }
+      {/* Progression et logs */}
+      <div className="card space-y-4">
+        {/* Progression de zone */}
+        <div>
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Zone: {combatState.currentZone || 'None'}</span>
+            <span>{combatState.monstersDefeated}/10 Monsters</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full">
+            <div 
+              className="h-2 bg-blue-500 rounded-full transition-all duration-300" 
+              style={{ width: `${(combatState.monstersDefeated / 10) * 100}%` }}
+            />
+          </div>
+        </div>
 
-    updateZoneUI(state) {
-        const elements = this.elements.zone;
-        const currentZone = state.combat.zones.currentZone;
-        
-        if (currentZone) {
-            const progress = (state.combat.zones.monstersDefeated / 10) * 100;
-            elements.progress.style.width = `${progress}%`;
-            elements.progressText.textContent = globalTranslationManager.translate('ui.progress')
-                .replace('{current}', state.combat.zones.monstersDefeated)
-                .replace('{max}', 10);
-            elements.currentZone.textContent = globalTranslationManager.translate('ui.zone')
-                .replace('{name}', globalTranslationManager.translate(`zones.${currentZone}`));
-        }
-    }
+        {/* Barre d'expérience */}
+        <div>
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Level {combatState.player.level}</span>
+            <span>{combatState.player.exp}/{combatState.player.maxExp} XP</span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full">
+            <div 
+              className="h-2 bg-purple-500 rounded-full transition-all duration-300" 
+              style={{ width: `${(combatState.player.exp / combatState.player.maxExp) * 100}%` }}
+            />
+          </div>
+        </div>
 
-    updateCombatControls(state) {
-        const elements = this.elements.controls;
-        const activeChar = state.party.characters.get(state.party.activeCharacterId);
-        
-        // Bouton d'attaque
-        const attackDisabled = !combatSelectors.isInCombat(state) || activeChar.stats.currentHp <= 0;
-        elements.attackButton.disabled = attackDisabled;
-        elements.attackButton.classList.toggle('opacity-50', attackDisabled);
-        elements.attackButton.classList.toggle('cursor-not-allowed', attackDisabled);
+        {/* Log de combat */}
+        <div className="mt-4">
+          <h3 className="font-medium mb-2">Combat Log</h3>
+          <div className="combat-log-container bg-gray-50 rounded-lg p-4 h-48 overflow-y-auto text-sm">
+            {combatState.combatLog.map((log, index) => (
+              <div 
+                key={index} 
+                className="combat-message text-gray-600"
+              >
+                {log}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-        // Bouton d'auto-combat
-        if (state.combat.state.autoCombatUnlocked) {
-            elements.autoCombatButton.style.display = 'flex';
-            const autoCombatDisabled = activeChar.stats.currentHp <= 0;
-            elements.autoCombatButton.disabled = autoCombatDisabled;
-            elements.autoCombatButton.classList.toggle('opacity-50', autoCombatDisabled);
-            
-            // Mise à jour de l'icône
-            const isEnabled = combatSelectors.isAutoCombatEnabled(state);
-            elements.autoCombatButton.innerHTML = `
-                <i data-lucide="${isEnabled ? 'pause' : 'play'}" class="w-4 h-4"></i>
-                ${globalTranslationManager.translate('ui.autoCombat').replace(
-                    '{state}', 
-                    globalTranslationManager.translate(isEnabled ? 'ui.autoCombatOn' : 'ui.autoCombatOff')
-                )}
-            `;
-            lucide.createIcons();
-        }
-    }
-
-    addCombatLog(message, type = 'combat') {
-        const logElement = document.createElement('div');
-        logElement.className = `${type}-message`;
-        logElement.textContent = message;
-        
-        const targetLog = this.elements.logs[type === 'combat' ? 'combat' : 'progression'];
-        if (targetLog) {
-            targetLog.appendChild(logElement);
-            while (targetLog.children.length > 50) {
-                targetLog.removeChild(targetLog.firstChild);
-            }
-            targetLog.scrollTop = targetLog.scrollHeight;
-        }
-    }
-
-    addDamageLog(attacker, defender, amount) {
-        const attackerName = attacker === 'player' ? 
-            gameStore.getState().party.characters.get(gameStore.getState().party.activeCharacterId).name : 
-            globalTranslationManager.translate(`monsters.${attacker.id}`);
-            
-        const defenderName = defender === 'player' ? 
-            gameStore.getState().party.characters.get(gameStore.getState().party.activeCharacterId).name : 
-            globalTranslationManager.translate(`monsters.${defender.id}`);
-            
-        this.addCombatLog(
-            globalTranslationManager.translate('combat.damage')
-                .replace('{attacker}', attackerName)
-                .replace('{defender}', defenderName)
-                .replace('{amount}', amount)
-        );
-    }
-
-    addVictoryLog(monster) {
-        this.addCombatLog(
-            globalTranslationManager.translate('combat.victory')
-                .replace('{monster}', globalTranslationManager.translate(`monsters.${monster.id}`)),
-            'progression'
-        );
-    }
-
-    addLootLog(itemId, quantity) {
-        this.addCombatLog(
-            globalTranslationManager.translate('combat.loot')
-                .replace('{quantity}', quantity)
-                .replace('{item}', globalTranslationManager.translate(`items.${itemId}`)),
-            'progression'
-        );
-    }
-
-    addExperienceLog(amount) {
-        this.addCombatLog(
-            globalTranslationManager.translate('combat.experience')
-                .replace('{amount}', amount),
-            'progression'
-        );
-    }
-
-    calculateExpForNextLevel(level) {
-        return Math.floor(100 * Math.pow(1.5, level - 1));
-    }
-}
-
-export const combatUI = new CombatUI();
+export default CombatUI;

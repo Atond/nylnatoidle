@@ -1,0 +1,108 @@
+{
+  "worldProgression": [
+    {
+      "id": "green_fields",
+      "zones": [
+        {
+          "id": "peaceful_meadow",
+          "requirements": {
+            "monstersPerZone": 10
+          }
+        },
+        {
+          "id": "dark_forest",
+          "requirements": {
+            "monstersPerZone": 10,
+            "completedQuests": ["Firstweapon"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "fiery_mountains",
+      "requirements": {
+        "completedQuests": ["minerApprentice"]
+      },
+      "zones": [
+        {
+          "id": "dragon_peak",
+          "requirements": {
+            "monstersPerZone": 10
+          }
+        }
+      ]
+    }
+  ],
+  "defaultUnlocks": {
+    "worlds": ["green_fields"],
+    "zones": ["peaceful_meadow"]
+  },
+  "scaling": {
+    "zoneMultiplier": 0.4,
+    "scalingPower": 2,
+    "levelScaling": 0.1,
+    "stats": {
+        "hp": {
+            "useFullScaling": true
+        },
+        "attack": {
+            "useFullScaling": false
+        },
+        "defense": {
+            "useFullScaling": false
+        }
+    }
+  },
+  "quests": {
+    "beginnerQuest": {
+      "id": "beginnerQuest",
+      "title": "Premiers pas",
+      "description": "Tuez 5 gobelins dans la Prairie Paisible",
+      "requirements": {
+          "monstersKilled": {
+              "goblin": 5,
+              "zone": "peaceful_meadow"
+          }
+      },
+      "unlocks": {
+          "profession": "miner"
+      },
+      "autoStart": true
+    },
+    "Firstprofession": {
+      "id": "Firstprofession",
+      "title": "Hé ho, on rentre du boulot !",
+      "description": "Effectuez vos premières tâches dans les métiers de mineur et de bûcheron",
+      "unlockConditions": {
+          "requiredQuests": ["beginnerQuest"]
+      },
+      "requirements": {
+          "professionLevels": {
+              "miner": 2,
+              "lumberjack": 2
+          }
+      },
+      "unlocks": {
+          "profession": "blacksmith"
+      },
+      "autoStart": true
+    },
+    "Firstweapon": {
+      "id": "Firstweapon",
+      "title": "Avec une épée, c'est mieux",
+      "description": "Fabriquez votre première épée en fer",
+      "unlockConditions": {
+          "requiredQuests": ["Firstprofession"]
+      },
+      "requirements": {
+          "items": {
+              "iron_sword": 1
+          }
+      },
+      "unlocks": {
+          "unlockedZones": ["dark_forest"]
+      },
+      "autoStart": true
+    }
+  }
+}

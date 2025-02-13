@@ -1,0 +1,127 @@
+{
+    "ui": {
+        "title": "Jeu Idle",
+        "characterTitle": "Personnage",
+        "characterNameLabel": "Nom:",
+        "changeName": "Changer le Nom",
+        "saveName": "Enregistrer le Nom",
+        "characterLevelLabel": "Niveau:",
+        "professionsTitle": "Métiers",
+        "autoIncrementTitle": "Auto-Incrément",
+        "inventoryTitle": "Inventaire",
+        "professionResources": "Ressources de Métier",
+        "combatResources": "Ressources de Combat",
+        "autoCombat": "Combat Auto: {state}",
+        "autoCombatOn": "Activé",
+        "autoCombatOff": "Désactivé",
+        "zone": "Zone: {name}",
+        "level": "Niveau: {level}",
+        "levelLabel": "Niveau",
+        "xp": "XP",
+        "levelUp": "Niveau {level} atteint !",
+        "maxHp": "Points de vie maximum",
+        "attack": "Attaque",
+        "defense": "Défense",
+        "levelMilestone": "Niveau {level} : {description}",
+        "experienceText": "Niveau {level} - {current}/{max} XP",
+        "health": "{current}/{max} PV",
+        "attack_stat": "Attaque: {value}",
+        "defense_stat": "Défense: {value}",
+        "monster_attack_stat": "Attaque: {value}",
+        "monster_defense_stat": "Défense: {value}",
+        "progress": "{current}/{max} monstres",
+        "victory": "Victoire ! Vous avez vaincu {monster}",
+        "defeat": "Défaite ! Retour à la zone précédente",
+        "damage": "{attacker} inflige {amount} dégâts à {defender}",
+        "errorLoading": "Erreur lors du chargement des données",
+        "buttonDisabled": "Non disponible",
+        "noMonster": "Pas de monstre",
+        "zoneCompleted": "Zone terminée !",
+        "worldCompleted": "Monde terminé !",
+        "worldUnlocked": "Nouveau monde débloqué : {world}",
+        "zoneUnlocked": "Nouvelle zone débloquée : {zone}",
+        "gameCompleted": "Félicitations ! Vous avez terminé le jeu !"
+    },
+        "combat": {
+            "attack": "Attaquer",
+            "damage": "{attacker} inflige {amount} dégâts à {defender}",
+            "victory": "Victoire ! Vous avez vaincu {monster}",
+            "defeat": "Défaite ! Vous avez été vaincu",
+            "experience": "Vous gagnez {amount} points d'expérience",
+            "loot": "Vous obtenez {quantity}x {item}"
+        },
+    "professions": {
+        "miner": {
+            "title": "Mineur",
+            "expLabel": "Expérience:",
+            "expRequired": "Expérience requise pour le niveau suivant:",
+            "levelLabel": "Niveau:",
+            "resourcesLabel": "Ressources:",
+            "miningPower": "Puissance de Minage",
+            "autoMiners": "Mineurs Automatiques",
+            "mineButton": "Miner",
+            "upgrades": {
+                "betterPickaxe1": {
+                    "name": "Meilleure Pioche I",
+                    "description": "Augmente la puissance de minage de 1"
+                },
+                "betterPickaxe2": {
+                    "name": "Meilleure Pioche II",
+                    "description": "Augmente la puissance de minage de 2"
+                },
+                "betterPickaxe3": {
+                    "name": "Meilleure Pioche III",
+                    "description": "Augmente la puissance de minage de 3"
+                },
+                "autoMiner1": {
+                    "name": "Mineur Automatique I",
+                    "description": "Ajoute 1 mineur automatique"
+                },
+                "autoMiner2": {
+                    "name": "Mineur Automatique II",
+                    "description": "Ajoute 2 mineurs automatiques"
+                }
+            }
+        },
+        "lumberjack": {
+            "title": "Bûcheron",
+            "expLabel": "Expérience:",
+            "expRequired": "Expérience requise pour le niveau suivant:",
+            "levelLabel": "Niveau:",
+            "resourcesLabel": "Ressources:"
+        }
+    },
+    "resources": {
+        "professions": {
+            "miner": {
+                "iron_ore": "Minerai de fer",
+                "copper_ore": "Minerai de cuivre",
+                "gold_ore": "Minerai d'or"
+            },
+            "lumberjack": {
+                "oak_wood": "Bois de chêne",
+                "pine_wood": "Bois de pin",
+                "mahogany_wood": "Bois d'acajou"
+            }
+        },
+        "monsters": {
+            "goblin_ear": "Oreille de gobelin",
+            "wolf_fang": "Croc de loup",
+            "dragon_scale": "Écaille de dragon"
+        }
+    },
+    "worlds": {
+        "green_fields": "Champs Verdoyants",
+        "fiery_mountains": "Montagnes Ardentes"
+    },
+    "zones": {
+        "peaceful_meadow": "Prairie Paisible",
+        "dark_forest": "Forêt Sombre",
+        "dragon_peak": "Pic du Dragon"
+    },
+    "monsters": {
+        "goblin": "Gobelin",
+        "wolf": "Loup",
+        "dragon": "Dragon"
+    }
+}

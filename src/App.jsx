@@ -1,9 +1,54 @@
-import React, { useState } from 'react'
-import { ProfessionsUI } from './ui/professions/ProfessionsUI'
-import { gameStore } from './store/state/GameStore'
+import React, { useState, useEffect } from 'react'
+import ProfessionsUI from './ui/professions/ProfessionsUI'
+import CombatUI from './ui/combat/CombatUI'
+import { gameService } from './services/GameService'
 
 function App() {
   const [activeTab, setActiveTab] = useState('combat')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const initGame = async () => {
+      try {
+        await gameService.initialize();
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to initialize game:', error);
+        setError('Failed to initialize game. Please try refreshing the page.');
+        setIsLoading(false);
+      }
+    };
+
+    initGame();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading game...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 btn btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -63,12 +108,8 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'combat' && (
-          <div>Combat UI ici</div>
-        )}
-        {activeTab === 'professions' && (
-          <ProfessionsUI />
-        )}
+        {activeTab === 'combat' && <CombatUI />}
+        {activeTab === 'professions' && <ProfessionsUI />}
         {activeTab === 'character' && (
           <div>Character UI ici</div>
         )}
