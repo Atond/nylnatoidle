@@ -27,7 +27,7 @@ export const endCombat = (victory = false) => ({
     
     // Réinitialiser les PV du personnage actif si défaite
     if (!victory) {
-      const activeChar = newState.party.characters.get(newState.party.activeCharacterId);
+      const activeChar = newState.party.characters[newState.party.activeCharacterId];
       activeChar.stats.currentHp = activeChar.stats.maxHp;
     }
     
@@ -40,7 +40,7 @@ export const attack = () => ({
   paths: ['combat', 'party.characters'],
   reducer: (state) => {
     const newState = structuredClone(state);
-    const activeChar = newState.party.characters.get(newState.party.activeCharacterId);
+    const activeChar = newState.party.characters[newState.party.activeCharacterId];
     const monster = newState.combat.state.currentMonster;
     
     if (!monster || !newState.combat.state.inCombat) return state;
