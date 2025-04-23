@@ -27,9 +27,32 @@ const CombatUI = () => {
   useEffect(() => {
     const initCombat = async () => {
       try {
+        // 1. Initialiser le monster service
         await monsterService.initialize();
         
-        // Configuration de la zone initiale
+        // 2. S'assurer que l'état initial est correct
+        const initialState = gameStore.getState();
+        const activeChar = initialState.party.characters[initialState.party.activeCharacterId];
+        
+        if (!activeChar) {
+          throw new Error('Character not initialized');
+        }
+  
+        // 3. Mettre à jour l'état local avec les données du personnage
+        setCombatState(prev => ({
+          ...prev,
+          player: {
+            currentHp: activeChar.stats.currentHp,
+            maxHp: activeChar.stats.maxHp,
+            attack: activeChar.stats.attack,
+            defense: activeChar.stats.defense,
+            level: activeChar.level,
+            exp: activeChar.experience || 0,
+            maxExp: 100 * Math.pow(1.5, activeChar.level - 1)
+          }
+        }));
+  
+        // 4. Initialiser la zone de combat
         await gameStore.dispatch({
           type: 'combat/initZone',
           paths: ['combat.zones'],
@@ -41,17 +64,19 @@ const CombatUI = () => {
             return newState;
           }
         });
-
-        handleAttack(); // Démarrer le premier combat
+  
+        // 5. Démarrer le premier combat seulement après l'initialisation complète
+        setTimeout(() => handleAttack(), 100);
+  
       } catch (error) {
-        console.error('Failed to initialize combat:', error);
+        console.error('Combat initialization error:', error);
         setCombatState(prev => ({
           ...prev,
-          combatLog: [...prev.combatLog, 'Erreur lors de l\'initialisation du combat']
+          combatLog: [...prev.combatLog, `Erreur d'initialisation: ${error.message}`]
         }));
       }
     };
-
+  
     initCombat();
 
     // Scroll automatique du log de combat
@@ -66,11 +91,19 @@ const CombatUI = () => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = gameStore.subscribe(['combat', 'party'], () => {
-      const state = gameStore.getState();
+    const unsubscribe = gameStore.subscribe(['combat|party'], (state) => {
+      if (!state || !state.party || !state.party.characters || !state.party.activeCharacterId) {
+        console.error('Invalid state structure:', state);
+        return;
+      }
+  
       const activeChar = state.party.characters[state.party.activeCharacterId];
-      const monster = state.combat.state.currentMonster;
       
+      if (!activeChar) {
+        console.error('Character not found, using previous state');
+        return;
+      }
+  
       setCombatState(prevState => ({
         ...prevState,
         player: {
@@ -79,17 +112,17 @@ const CombatUI = () => {
           attack: activeChar.stats.attack,
           defense: activeChar.stats.defense,
           level: activeChar.level,
-          exp: activeChar.experience,
+          exp: activeChar.experience || 0,
           maxExp: 100 * Math.pow(1.5, activeChar.level - 1)
         },
-        monster,
+        monster: state.combat.state.currentMonster || prevState.monster,
         inCombat: state.combat.state.inCombat,
         autoCombatEnabled: state.combat.state.autoCombatEnabled,
         monstersDefeated: state.combat.zones.monstersDefeated,
         currentZone: state.combat.zones.currentZone
       }));
     });
-
+  
     return () => unsubscribe();
   }, []);
 
@@ -114,55 +147,74 @@ const CombatUI = () => {
           return newState;
         }
       });
-
+  
+      // Mettre à jour l'état local une seule fois après le démarrage du combat
       setCombatState(prev => ({
         ...prev,
         monster: newMonster,
         inCombat: true,
         combatLog: [...prev.combatLog, `Un ${newMonster.defaultName} Nv.${newMonster.level} apparaît!`]
       }));
+  
     } else {
       await gameStore.dispatch({
         type: 'COMBAT_ATTACK',
         paths: ['combat', 'party'],
         reducer: (state) => {
           const newState = structuredClone(state);
-          const activeChar = newState.party.characters[newState.party.activeCharacterId];
+          // Accès direct à l'objet au lieu d'utiliser .get()
+          const activeCharId = newState.party.activeCharacterId;
+          const activeChar = newState.party.characters[activeCharId];
           const monster = newState.combat.state.currentMonster;
-
-          // Calcul des dégâts
-          const playerDamage = Math.max(1, activeChar.stats.attack - monster.stats.defense/2);
-          monster.currentHp -= playerDamage;
-
+      
+          console.log('Combat data:', {
+            activeCharId,
+            activeChar,
+            monster,
+            fullState: newState
+          });
+  
+          // Vérification de l'existence des objets nécessaires
+          if (!activeChar || !monster || !activeChar.stats || !monster.stats) {
+            console.error('Missing required data:', { activeChar, monster });
+            return state;
+          }
+  
+          // Calcul des dégâts du joueur
+          const playerDamage = Math.max(1, activeChar.stats.attack - (monster.stats.defense || 0) / 2);
+          monster.currentHp = Math.max(0, monster.currentHp - playerDamage);
+  
+          // Mettre à jour les logs
           setCombatState(prev => ({
             ...prev,
-            combatLog: [...prev.combatLog, 
-              `Player deals ${playerDamage} damage to ${monster.defaultName}`
-            ]
+            monster: { ...monster },
+            combatLog: [...prev.combatLog, `Player deals ${playerDamage} damage to ${monster.defaultName}`]
           }));
-
+  
           // Contre-attaque si le monstre est vivant
           if (monster.currentHp > 0) {
-            const monsterDamage = Math.max(1, monster.stats.attack - activeChar.stats.defense/2);
+            const monsterDamage = Math.max(1, monster.stats.attack - (activeChar.stats.defense || 0) / 2);
             activeChar.stats.currentHp = Math.max(0, activeChar.stats.currentHp - monsterDamage);
             
             setCombatState(prev => ({
               ...prev,
-              combatLog: [...prev.combatLog, 
-                `${monster.defaultName} deals ${monsterDamage} damage to Player`
-              ]
+              player: {
+                ...prev.player,
+                currentHp: activeChar.stats.currentHp
+              },
+              combatLog: [...prev.combatLog, `${monster.defaultName} deals ${monsterDamage} damage to Player`]
             }));
           }
-
+  
           return newState;
         }
       });
-
+  
       // Vérifier la victoire
       const updatedState = gameStore.getState();
       const monster = updatedState.combat.state.currentMonster;
-      if (monster.currentHp <= 0) {
-        handleVictory(monster);
+      if (monster && monster.currentHp <= 0) {
+        await handleVictory(monster);
       }
     }
   };
@@ -177,9 +229,14 @@ const CombatUI = () => {
       reducer: (state) => {
         const newState = structuredClone(state);
         
+        // Accès direct à l'objet au lieu d'utiliser .get()
+        const activeCharId = newState.party.activeCharacterId;
+        const activeChar = newState.party.characters[activeCharId];
+        
         // Mettre à jour l'expérience du joueur
-        const activeChar = newState.party.characters.get(newState.party.activeCharacterId);
-        activeChar.experience += experience;
+        if (activeChar) {
+          activeChar.experience += experience;
+        }
         
         // Ajouter le butin à l'inventaire
         loot.forEach(item => {
@@ -190,14 +247,17 @@ const CombatUI = () => {
         // Terminer le combat
         newState.combat.state.inCombat = false;
         newState.combat.zones.monstersDefeated++;
+        newState.combat.state.currentMonster = null; // Important: réinitialiser le monstre
         
         return newState;
       }
     });
-
+  
     // Ajouter les messages de victoire aux logs
     setCombatState(prev => ({
       ...prev,
+      inCombat: false,
+      monster: null,
       combatLog: [
         ...prev.combatLog,
         `Victoire! Le ${monster.defaultName} est vaincu!`,
@@ -205,7 +265,7 @@ const CombatUI = () => {
         ...loot.map(item => `Vous obtenez ${item.quantity}x ${item.id}`)
       ]
     }));
-
+  
     // Démarrer un nouveau combat après un délai
     setTimeout(handleAttack, 1000);
   };

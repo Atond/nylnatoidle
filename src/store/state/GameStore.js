@@ -15,12 +15,29 @@ class GameStore {
   }
 
   // S'abonner aux changements
-  subscribe(path, callback) {
-    if (!this.listeners.has(path)) {
-      this.listeners.set(path, new Set());
+  subscribe(paths, callback) {
+    // Convertir en tableau si un seul path est fourni
+    const pathArray = Array.isArray(paths) ? paths : [paths];
+    // Créer une clé unique pour ce set de paths
+    const pathKey = pathArray.sort().join('|');
+    
+    if (!this.listeners.has(pathKey)) {
+      this.listeners.set(pathKey, new Set());
     }
-    this.listeners.get(path).add(callback);
-    return () => this.listeners.get(path).delete(callback);
+    this.listeners.get(pathKey).add(callback);
+    
+    // Appeler immédiatement le callback avec l'état actuel
+    callback(this.getState());
+    
+    return () => {
+      const listeners = this.listeners.get(pathKey);
+      if (listeners) {
+        listeners.delete(callback);
+        if (listeners.size === 0) {
+          this.listeners.delete(pathKey);
+        }
+      }
+    };
   }
 
   // Obtenir un état immutable
@@ -85,10 +102,17 @@ class GameStore {
 
   // Notifier les listeners
   notifyListeners(paths) {
-    for (const [listenerPath, listeners] of this.listeners) {
-      if (paths.includes('*') || paths.includes(listenerPath)) {
+    const allPaths = Array.isArray(paths) ? paths : [paths];
+    
+    for (const [pathKey, listeners] of this.listeners) {
+      const pathsToCheck = pathKey.split('|');
+      const shouldNotify = allPaths.includes('*') || 
+        pathsToCheck.some(path => allPaths.includes(path));
+      
+      if (shouldNotify) {
         for (const listener of listeners) {
-          listener(this.getState());
+          const state = this.getState();
+          listener(state);
         }
       }
     }

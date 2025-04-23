@@ -1,17 +1,23 @@
+const characterStats = {
+  maxHp: 100,
+  currentHp: 100,
+  attack: 10,  // Augmenté pour des combats plus rapides
+  defense: 5
+};
+
 export const initialState = {
   party: {
     characters: {
-      'hero-1': {  // Changé de Map à objet simple
+      'hero-1': {
         id: 'hero-1',
         name: 'Hero',
-        unlockDate: Date.now(),
         level: 1,
         experience: 0,
         stats: {
           maxHp: 100,
           currentHp: 100,
-          attack: 1,
-          defense: 0
+          attack: 10,
+          defense: 5
         },
         equipment: {
           weapon: null,
@@ -20,8 +26,32 @@ export const initialState = {
         }
       }
     },
-    activeCharacterId: 'hero-1',
-    unlockedSlots: 1
+    activeCharacterId: 'hero-1'
+  },
+
+  combat: {
+    zones: {
+      currentWorld: 'green_fields',
+      currentZone: 'peaceful_meadow',
+      monstersDefeated: 0,
+      unlockedWorlds: { 'green_fields': true },
+      unlockedZones: { 'peaceful_meadow': true }
+    },
+    state: {
+      inCombat: false,
+      autoCombatEnabled: false,
+      currentMonster: null
+    },
+    scaling: {
+      zoneMultiplier: 0.4,
+      scalingPower: 2,
+      levelScaling: 0.1,
+      stats: {
+        hp: { useFullScaling: true },
+        attack: { useFullScaling: false },
+        defense: { useFullScaling: false }
+      }
+    }
   },
 
   professions: {
@@ -76,37 +106,6 @@ export const initialState = {
     available: new Map(),
     completed: new Set(),
     unlocked: false
-  },
-
-  combat: {
-    zones: {  // Organisation par zones accessibles individuellement
-      currentWorld: null,
-      currentZone: null,
-      monstersDefeated: 0,
-      unlockedWorlds: { 'green_fields': true },
-      unlockedZones: { 'peaceful_meadow': true }
-    },
-    state: {
-      inCombat: false,
-      autoCombatEnabled: false,
-      autoCombatUnlocked: false,
-      currentMonster: null
-    },
-    scaling: {  // Paramètres de scaling des monstres
-      zoneMultiplier: 0.4,
-      scalingPower: 2,
-      levelScaling: 0.1,
-      stats: {
-        hp: { useFullScaling: true },
-        attack: { useFullScaling: false },
-        defense: { useFullScaling: false }
-      }
-    }
-  },
-
-  inventory: {  // Inventaire global partagé
-    items: new Map(),
-    capacity: 50
   },
 
   quests: {
