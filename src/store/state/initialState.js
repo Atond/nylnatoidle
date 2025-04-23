@@ -29,6 +29,11 @@ export const initialState = {
     activeCharacterId: 'hero-1'
   },
 
+  inventory: {
+    items: new Map(),
+    capacity: 100
+  },
+
   combat: {
     zones: {
       currentWorld: 'green_fields',

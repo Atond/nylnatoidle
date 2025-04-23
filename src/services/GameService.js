@@ -71,7 +71,35 @@ export class GameService {
               return result;
             };
             
-            return mergeState(currentState, state);
+            const mergedState = mergeState(currentState, state);
+
+            // Ensure inventory structure always exists
+            if (!mergedState.inventory) {
+              mergedState.inventory = {
+                items: new Map(),
+                capacity: 100  // Default capacity
+              };
+            } else if (!mergedState.inventory.items) {
+              mergedState.inventory.items = new Map();
+            }
+            
+            return mergedState;
+          }
+        });
+      } else {
+        // Initialize with default inventory if no save exists
+        gameStore.dispatch({
+          type: 'INIT_INVENTORY',
+          paths: ['inventory'],
+          reducer: (state) => {
+            const newState = structuredClone(state);
+            if (!newState.inventory) {
+              newState.inventory = {
+                items: new Map(),
+                capacity: 100  // Default capacity
+              };
+            }
+            return newState;
           }
         });
       }

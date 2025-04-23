@@ -157,6 +157,9 @@ const CombatUI = () => {
       }));
   
     } else {
+      // Store the monster health before attack to check if it dies
+      const monsterBeforeAttack = { ...state.combat.state.currentMonster };
+      
       await gameStore.dispatch({
         type: 'COMBAT_ATTACK',
         paths: ['combat', 'party'],
@@ -167,13 +170,6 @@ const CombatUI = () => {
           const activeChar = newState.party.characters[activeCharId];
           const monster = newState.combat.state.currentMonster;
       
-          console.log('Combat data:', {
-            activeCharId,
-            activeChar,
-            monster,
-            fullState: newState
-          });
-  
           // Vérification de l'existence des objets nécessaires
           if (!activeChar || !monster || !activeChar.stats || !monster.stats) {
             console.error('Missing required data:', { activeChar, monster });
@@ -184,12 +180,20 @@ const CombatUI = () => {
           const playerDamage = Math.max(1, activeChar.stats.attack - (monster.stats.defense || 0) / 2);
           monster.currentHp = Math.max(0, monster.currentHp - playerDamage);
   
-          // Mettre à jour les logs
-          setCombatState(prev => ({
-            ...prev,
-            monster: { ...monster },
-            combatLog: [...prev.combatLog, `Player deals ${playerDamage} damage to ${monster.defaultName}`]
-          }));
+          // Only update combat log for damage here, not for monster death
+          if (monster.currentHp > 0) {
+            setCombatState(prev => ({
+              ...prev,
+              monster: { ...monster },
+              combatLog: [...prev.combatLog, `Player deals ${playerDamage} damage to ${monster.defaultName}`]
+            }));
+          } else {
+            // Just update the monster state but don't add victory messages yet
+            setCombatState(prev => ({
+              ...prev,
+              monster: { ...monster }
+            }));
+          }
   
           // Contre-attaque si le monstre est vivant
           if (monster.currentHp > 0) {
