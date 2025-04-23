@@ -5,6 +5,17 @@ export const startCombat = (monster) => ({
   paths: ['combat'],
   reducer: (state) => {
     const newState = structuredClone(state);
+    // Check if combat property exists
+    if (!newState.combat) {
+      newState.combat = {
+        state: { 
+          currentMonster: null,
+          inCombat: false,
+          autoCombatEnabled: false
+        },
+        zones: { monstersDefeated: 0 }
+      };
+    }
     newState.combat.state.currentMonster = monster;
     newState.combat.state.inCombat = true;
     return newState;
@@ -16,9 +27,17 @@ export const endCombat = (victory = false) => ({
   paths: ['combat', 'party.characters'],
   reducer: (state) => {
     const newState = structuredClone(state);
+    // Ensure combat property exists
+    if (!newState.combat) {
+      return state;
+    }
     const combat = newState.combat;
     
     if (victory) {
+      // Ensure zones property exists
+      if (!combat.zones) {
+        combat.zones = { monstersDefeated: 0 };
+      }
       combat.zones.monstersDefeated++;
     }
     
@@ -26,9 +45,14 @@ export const endCombat = (victory = false) => ({
     combat.state.currentMonster = null;
     
     // Réinitialiser les PV du personnage actif si défaite
-    if (!victory) {
-      const activeChar = newState.party.characters[newState.party.activeCharacterId];
-      activeChar.stats.currentHp = activeChar.stats.maxHp;
+    if (!victory && newState.party && newState.party.characters) {
+      const activeCharId = newState.party.activeCharacterId;
+      if (activeCharId && newState.party.characters[activeCharId]) {
+        const activeChar = newState.party.characters[activeCharId];
+        if (activeChar.stats) {
+          activeChar.stats.currentHp = activeChar.stats.maxHp;
+        }
+      }
     }
     
     return newState;
@@ -40,7 +64,17 @@ export const attack = () => ({
   paths: ['combat', 'party.characters'],
   reducer: (state) => {
     const newState = structuredClone(state);
-    const activeChar = newState.party.characters[newState.party.activeCharacterId];
+    // Ensure party and combat properties exist
+    if (!newState.party || !newState.combat || !newState.combat.state) {
+      return state;
+    }
+    
+    const activeCharId = newState.party.activeCharacterId;
+    if (!activeCharId || !newState.party.characters[activeCharId]) {
+      return state;
+    }
+    
+    const activeChar = newState.party.characters[activeCharId];
     const monster = newState.combat.state.currentMonster;
     
     if (!monster || !newState.combat.state.inCombat) return state;
@@ -70,6 +104,16 @@ export const toggleAutoCombat = () => ({
   paths: ['combat'],
   reducer: (state) => {
     const newState = structuredClone(state);
+    // Ensure combat property and state exist
+    if (!newState.combat) {
+      newState.combat = { 
+        state: { autoCombatEnabled: false },
+        zones: { monstersDefeated: 0 }
+      };
+    }
+    if (!newState.combat.state) {
+      newState.combat.state = { autoCombatEnabled: false };
+    }
     newState.combat.state.autoCombatEnabled = !newState.combat.state.autoCombatEnabled;
     return newState;
   }
@@ -77,10 +121,10 @@ export const toggleAutoCombat = () => ({
 
 // Sélecteurs pour le combat
 export const combatSelectors = {
-  getCurrentMonster: (state) => state.combat.state.currentMonster,
-  isInCombat: (state) => state.combat.state.inCombat,
-  getMonstersDefeated: (state) => state.combat.zones.monstersDefeated,
-  isAutoCombatEnabled: (state) => state.combat.state.autoCombatEnabled
+  getCurrentMonster: (state) => state.combat?.state?.currentMonster || null,
+  isInCombat: (state) => state.combat?.state?.inCombat || false,
+  getMonstersDefeated: (state) => state.combat?.zones?.monstersDefeated || 0,
+  isAutoCombatEnabled: (state) => state.combat?.state?.autoCombatEnabled || false
 };
 
 // Fonctions utilitaires

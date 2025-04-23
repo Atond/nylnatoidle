@@ -5,47 +5,73 @@ import { combatSelectors } from '../store/actions/combat';
 
 class CombatSystem {
   constructor() {
-    this.initialize();
-    this.setupAutoCombat();
+    try {
+      this.initialize();
+      this.setupAutoCombat();
+    } catch (error) {
+      console.error('Combat initialization error:', error);
+    }
   }
   
   initialize() {
-    // Écouter les changements d'état pertinents
-    gameStore.subscribe('combat', (state) => {
-      if (combatSelectors.isAutoCombatEnabled(state) && 
-          !combatSelectors.isInCombat(state)) {
-        this.startCombat();
-      }
-    });
+    try {
+      // Écouter les changements d'état pertinents
+      gameStore.subscribe('combat', (state) => {
+        if (combatSelectors.isAutoCombatEnabled(state) && 
+            !combatSelectors.isInCombat(state)) {
+          this.startCombat();
+        }
+      });
+    } catch (error) {
+      console.error('Combat initialization error:', error);
+    }
   }
   
   setupAutoCombat() {
     setInterval(() => {
-      const state = gameStore.getState();
-      if (combatSelectors.isAutoCombatEnabled(state) && 
-          combatSelectors.isInCombat(state)) {
-        this.attack();
+      try {
+        const state = gameStore.getState();
+        if (combatSelectors.isAutoCombatEnabled(state) && 
+            combatSelectors.isInCombat(state)) {
+          this.attack();
+        }
+      } catch (error) {
+        console.error('Auto combat error:', error);
       }
     }, 1000);
   }
   
   async startCombat() {
-    const monster = await this.generateMonster();
-    if (monster) {
-      gameStore.dispatch(combatActions.startCombat(monster));
+    try {
+      const monster = await this.generateMonster();
+      if (monster) {
+        gameStore.dispatch(combatActions.startCombat(monster));
+      }
+    } catch (error) {
+      console.error('Start combat error:', error);
     }
   }
   
   attack() {
-    gameStore.dispatch(combatActions.attack());
-    
-    const state = gameStore.getState();
-    const monster = combatSelectors.getCurrentMonster(state);
-    
-    if (monster.currentHp <= 0) {
-      this.handleVictory();
-    } else if (state.party.characters.get(state.party.activeCharacterId).stats.currentHp <= 0) {
-      this.handleDefeat();
+    try {
+      gameStore.dispatch(combatActions.attack());
+      
+      const state = gameStore.getState();
+      const monster = combatSelectors.getCurrentMonster(state);
+      
+      if (!monster) return;
+      
+      if (monster.currentHp <= 0) {
+        this.handleVictory();
+      } else if (state.party && state.party.characters && 
+                state.party.activeCharacterId && 
+                state.party.characters[state.party.activeCharacterId] &&
+                state.party.characters[state.party.activeCharacterId].stats &&
+                state.party.characters[state.party.activeCharacterId].stats.currentHp <= 0) {
+        this.handleDefeat();
+      }
+    } catch (error) {
+      console.error('Attack error:', error);
     }
   }
   

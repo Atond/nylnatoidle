@@ -43,12 +43,36 @@ export class GameService {
     try {
       const savedState = localStorage.getItem('idleRPGSave');
       if (savedState) {
-        const state = JSON.parse(savedState);
-        // Restaurer l'état dans le store
+        let state = JSON.parse(savedState);
+        
+        // Ensure required properties exist by merging with initial state
         gameStore.dispatch({
           type: 'LOAD_SAVE',
           paths: ['*'],
-          reducer: () => state
+          reducer: (currentState) => {
+            // Deep merge the saved state with the initial state to ensure all required properties exist
+            const mergeState = (initialObj, savedObj) => {
+              if (!savedObj) return initialObj;
+              
+              const result = structuredClone(initialObj);
+              
+              // Copy over all saved properties, but ensure required structures exist
+              for (const key in savedObj) {
+                if (typeof savedObj[key] === 'object' && savedObj[key] !== null && 
+                    !Array.isArray(savedObj[key]) && !(savedObj[key] instanceof Map) && 
+                    !(savedObj[key] instanceof Set)) {
+                  // For nested objects, recursively merge
+                  result[key] = mergeState(result[key] || {}, savedObj[key]);
+                } else {
+                  // For primitive values, Maps, Sets, or Arrays, use the saved value
+                  result[key] = savedObj[key];
+                }
+              }
+              return result;
+            };
+            
+            return mergeState(currentState, state);
+          }
         });
       }
     } catch (error) {
