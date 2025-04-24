@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ProfessionsUI from './ui/professions/ProfessionsUI'
 import CombatUI from './ui/combat/CombatUI'
+import InventoryComponent from './ui/inventory/InventoryComponent'
 import { gameService } from './services/GameService'
 
 function App() {
@@ -84,6 +85,16 @@ function App() {
                 Métiers
               </button>
               <button
+                onClick={() => setActiveTab('inventory')}
+                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md
+                  ${activeTab === 'inventory' 
+                    ? 'text-white bg-indigo-600 hover:bg-indigo-700' 
+                    : 'text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                Inventaire
+              </button>
+              <button
                 onClick={() => setActiveTab('character')}
                 className={`inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md
                   ${activeTab === 'character' 
@@ -110,6 +121,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === 'combat' && <CombatUI />}
         {activeTab === 'professions' && <ProfessionsUI />}
+        {activeTab === 'inventory' && <InventoryComponent />}
         {activeTab === 'character' && (
           <div>Character UI ici</div>
         )}
