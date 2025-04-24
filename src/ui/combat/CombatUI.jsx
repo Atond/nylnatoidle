@@ -34,7 +34,59 @@ const CombatUI = () => {
         
         // 2. S'assurer que l'état initial est correct
         const initialState = gameStore.getState();
-        const activeChar = initialState.party.characters[initialState.party.activeCharacterId];
+        
+        // Check if party structure exists and initialize it if needed
+        if (!initialState.party || !initialState.party.characters || !initialState.party.activeCharacterId) {
+          console.log('Party structure missing, initializing with default data');
+          await gameStore.dispatch({
+            type: 'INIT_PARTY',
+            paths: ['party'],
+            reducer: (state) => {
+              const newState = structuredClone(state);
+              if (!newState.party) {
+                newState.party = {
+                  characters: {},
+                  activeCharacterId: 'hero-1'
+                };
+              }
+              
+              if (!newState.party.characters) {
+                newState.party.characters = {};
+              }
+              
+              if (!newState.party.activeCharacterId) {
+                newState.party.activeCharacterId = 'hero-1';
+              }
+              
+              // Ensure hero-1 character exists
+              if (!newState.party.characters['hero-1']) {
+                newState.party.characters['hero-1'] = {
+                  id: 'hero-1',
+                  name: 'Hero',
+                  level: 1,
+                  experience: 0,
+                  stats: {
+                    maxHp: 100,
+                    currentHp: 100,
+                    attack: 10,
+                    defense: 5
+                  },
+                  equipment: {
+                    weapon: null,
+                    armor: null,
+                    accessory: null
+                  }
+                };
+              }
+              
+              return newState;
+            }
+          });
+        }
+        
+        // Get the updated state after possible initialization
+        const updatedState = gameStore.getState();
+        const activeChar = updatedState.party.characters[updatedState.party.activeCharacterId];
         
         if (!activeChar) {
           throw new Error('Character not initialized');
@@ -60,6 +112,23 @@ const CombatUI = () => {
           paths: ['combat.zones'],
           reducer: (state) => {
             const newState = structuredClone(state);
+            
+            // Initialize combat structure if needed
+            if (!newState.combat) {
+              newState.combat = {
+                state: { inCombat: false },
+                zones: { currentWorld: 'green_fields', currentZone: 'peaceful_meadow' }
+              };
+            }
+            
+            if (!newState.combat.zones) {
+              newState.combat.zones = { currentWorld: 'green_fields', currentZone: 'peaceful_meadow' };
+            }
+            
+            if (!newState.combat.state) {
+              newState.combat.state = { inCombat: false };
+            }
+            
             newState.combat.zones.currentWorld = 'green_fields';
             newState.combat.zones.currentZone = 'peaceful_meadow';
             newState.combat.state.inCombat = false;
@@ -132,8 +201,18 @@ const CombatUI = () => {
 
   useEffect(() => {
     const unsubscribe = gameStore.subscribe(['combat|party'], (state) => {
-      if (!state || !state.party || !state.party.characters || !state.party.activeCharacterId) {
-        console.error('Invalid state structure:', state);
+      if (!state) {
+        console.error('State is undefined');
+        return;
+      }
+      
+      if (!state.party) {
+        console.error('Party is undefined');
+        return;
+      }
+      
+      if (!state.party.characters || !state.party.activeCharacterId) {
+        console.error('Invalid party structure:', state.party);
         return;
       }
   
@@ -155,11 +234,11 @@ const CombatUI = () => {
           exp: activeChar.experience || 0,
           maxExp: 100 * Math.pow(1.5, activeChar.level - 1)
         },
-        monster: state.combat.state.currentMonster || prevState.monster,
-        inCombat: state.combat.state.inCombat,
-        autoCombatEnabled: state.combat.state.autoCombatEnabled,
-        monstersDefeated: state.combat.zones.monstersDefeated,
-        currentZone: state.combat.zones.currentZone
+        monster: state.combat?.state?.currentMonster || prevState.monster,
+        inCombat: state.combat?.state?.inCombat || false,
+        autoCombatEnabled: state.combat?.state?.autoCombatEnabled || false,
+        monstersDefeated: state.combat?.zones?.monstersDefeated || 0,
+        currentZone: state.combat?.zones?.currentZone || 'peaceful_meadow'
       }));
     });
   

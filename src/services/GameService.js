@@ -1,6 +1,7 @@
 import { gameStore } from '../store/state/GameStore';
 import { monsterService } from './MonsterService';
 import { translationService } from './TranslationService';
+import { initialState } from '../store/state/initialState';
 
 export class GameService {
   constructor() {
@@ -55,13 +56,20 @@ export class GameService {
       if (savedData) {
         const { state: savedState } = JSON.parse(savedData);
         
-        // Deserialize the state, converting arrays back to Maps and Sets
+        // Start with a fresh copy of initialState to ensure proper structure
+        const baseState = structuredClone(initialState);
+        
+        // Deserialize the saved state
         const deserializedState = this.deserializeState(savedState);
         
+        // Merge the deserialized state with initial state to ensure all required properties exist
+        const mergedState = this.mergeStates(baseState, deserializedState);
+        
+        // Dispatch the merged state to the store
         gameStore.dispatch({
           type: 'LOAD_SAVE',
           paths: ['*'],
-          reducer: () => deserializedState
+          reducer: () => mergedState
         });
         
         console.log('Game loaded successfully');
@@ -70,7 +78,47 @@ export class GameService {
       }
     } catch (error) {
       console.error('Failed to load save:', error);
+      // Fall back to initial state
+      gameStore.dispatch({
+        type: 'RESET',
+        paths: ['*'],
+        reducer: () => structuredClone(initialState)
+      });
     }
+  }
+  
+  // Helper to merge states while preserving Maps and Sets
+  mergeStates(baseState, savedState) {
+    const result = structuredClone(baseState);
+    
+    for (const key in savedState) {
+      if (savedState[key] === null || savedState[key] === undefined) continue;
+      
+      if (savedState[key] instanceof Map) {
+        // Use the saved Map
+        if (result[key] instanceof Map) {
+          result[key] = savedState[key];
+        }
+      } else if (savedState[key] instanceof Set) {
+        // Use the saved Set
+        if (result[key] instanceof Set) {
+          result[key] = savedState[key];
+        }
+      } else if (typeof savedState[key] === 'object') {
+        // For objects, recursively merge
+        if (typeof result[key] === 'object' && result[key] !== null) {
+          result[key] = this.mergeStates(result[key], savedState[key]);
+        } else {
+          // If base doesn't have this property as an object, use saved value
+          result[key] = savedState[key];
+        }
+      } else {
+        // For primitives, use saved value
+        result[key] = savedState[key];
+      }
+    }
+    
+    return result;
   }
   
   // Helper to convert Maps and Sets to serializable arrays
