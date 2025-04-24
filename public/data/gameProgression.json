@@ -103,6 +103,124 @@
           "unlockedZones": ["dark_forest"]
       },
       "autoStart": true
+    },
+    "forestExplorer": {
+      "id": "forestExplorer",
+      "title": "Explorateur de la forêt sombre",
+      "description": "Éliminez 10 loups dans la Forêt Sombre",
+      "unlockConditions": {
+          "requiredQuests": ["Firstweapon"]
+      },
+      "requirements": {
+          "monstersKilled": {
+              "wolf": 10,
+              "zone": "dark_forest"
+          }
+      },
+      "rewards": {
+          "experience": 250,
+          "items": [
+              {"id": "leather_armor", "quantity": 1}
+          ]
+      },
+      "autoStart": true
+    },
+    "resourceCollector": {
+      "id": "resourceCollector",
+      "title": "Collectionneur de ressources",
+      "description": "Collectez 20 oreilles de gobelin et 10 dents de gobelin",
+      "unlockConditions": {
+          "requiredQuests": ["beginnerQuest"]
+      },
+      "requirements": {
+          "items": {
+              "goblin_ear": 20,
+              "goblin_tooth": 10
+          }
+      },
+      "rewards": {
+          "experience": 200,
+          "items": [
+              {"id": "small_health_potion", "quantity": 5}
+          ]
+      },
+      "autoStart": true
+    },
+    "minerApprentice": {
+      "id": "minerApprentice",
+      "title": "Apprenti Mineur",
+      "description": "Atteignez le niveau 5 en minage et collectez 50 minerais de fer",
+      "unlockConditions": {
+          "requiredQuests": ["Firstprofession"]
+      },
+      "requirements": {
+          "professionLevels": {
+              "miner": 5
+          },
+          "items": {
+              "iron_ore": 50
+          }
+      },
+      "unlocks": {
+          "unlockedZones": ["fiery_mountains"]
+      },
+      "rewards": {
+          "experience": 300,
+          "items": [
+              {"id": "mining_pickaxe", "quantity": 1}
+          ]
+      },
+      "autoStart": true
+    },
+    "dragonHunter": {
+      "id": "dragonHunter",
+      "title": "Chasseur de dragon",
+      "description": "Éliminez le dragon du Pic du Dragon et récupérez une écaille de dragon",
+      "unlockConditions": {
+          "requiredQuests": ["minerApprentice"]
+      },
+      "requirements": {
+          "monstersKilled": {
+              "dragon": 1,
+              "zone": "dragon_peak"
+          },
+          "items": {
+              "dragon_scale": 1
+          }
+      },
+      "rewards": {
+          "experience": 1000,
+          "items": [
+              {"id": "dragon_sword", "quantity": 1},
+              {"id": "gold_coin", "quantity": 50}
+          ]
+      },
+      "autoStart": false
+    },
+    "masterCrafter": {
+      "id": "masterCrafter",
+      "title": "Maître Artisan",
+      "description": "Atteignez le niveau 10 en forge et créez une armure en écailles de dragon",
+      "unlockConditions": {
+          "requiredQuests": ["dragonHunter"]
+      },
+      "requirements": {
+          "professionLevels": {
+              "blacksmith": 10
+          },
+          "items": {
+              "dragon_scale_armor": 1
+          }
+      },
+      "rewards": {
+          "experience": 2000,
+          "items": [
+              {"id": "master_blacksmith_hammer", "quantity": 1},
+              {"id": "rare_crafting_material", "quantity": 5}
+          ],
+          "title": "Master Blacksmith"
+      },
+      "autoStart": true
     }
   }
 }
