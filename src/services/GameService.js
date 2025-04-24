@@ -33,7 +33,17 @@ export class GameService {
   saveGame() {
     try {
       const state = gameStore.getState();
-      localStorage.setItem('idleRPGSave', JSON.stringify(state));
+      
+      // Convert Maps and Sets to arrays for serialization
+      const serializedState = this.serializeState(state);
+      
+      localStorage.setItem('idleRPGSave', JSON.stringify({
+        state: serializedState,
+        timestamp: Date.now(),
+        version: '1.0.0'
+      }));
+      
+      console.log('Game saved successfully');
     } catch (error) {
       console.error('Failed to save game:', error);
     }
@@ -41,71 +51,84 @@ export class GameService {
 
   loadSave() {
     try {
-      const savedState = localStorage.getItem('idleRPGSave');
-      if (savedState) {
-        let state = JSON.parse(savedState);
+      const savedData = localStorage.getItem('idleRPGSave');
+      if (savedData) {
+        const { state: savedState } = JSON.parse(savedData);
         
-        // Ensure required properties exist by merging with initial state
+        // Deserialize the state, converting arrays back to Maps and Sets
+        const deserializedState = this.deserializeState(savedState);
+        
         gameStore.dispatch({
           type: 'LOAD_SAVE',
           paths: ['*'],
-          reducer: (currentState) => {
-            // Deep merge the saved state with the initial state to ensure all required properties exist
-            const mergeState = (initialObj, savedObj) => {
-              if (!savedObj) return initialObj;
-              
-              const result = structuredClone(initialObj);
-              
-              // Copy over all saved properties, but ensure required structures exist
-              for (const key in savedObj) {
-                if (typeof savedObj[key] === 'object' && savedObj[key] !== null && 
-                    !Array.isArray(savedObj[key]) && !(savedObj[key] instanceof Map) && 
-                    !(savedObj[key] instanceof Set)) {
-                  // For nested objects, recursively merge
-                  result[key] = mergeState(result[key] || {}, savedObj[key]);
-                } else {
-                  // For primitive values, Maps, Sets, or Arrays, use the saved value
-                  result[key] = savedObj[key];
-                }
-              }
-              return result;
-            };
-            
-            const mergedState = mergeState(currentState, state);
-
-            // Ensure inventory structure always exists
-            if (!mergedState.inventory) {
-              mergedState.inventory = {
-                items: new Map(),
-                capacity: 100  // Default capacity
-              };
-            } else if (!mergedState.inventory.items) {
-              mergedState.inventory.items = new Map();
-            }
-            
-            return mergedState;
-          }
+          reducer: () => deserializedState
         });
+        
+        console.log('Game loaded successfully');
       } else {
-        // Initialize with default inventory if no save exists
-        gameStore.dispatch({
-          type: 'INIT_INVENTORY',
-          paths: ['inventory'],
-          reducer: (state) => {
-            const newState = structuredClone(state);
-            if (!newState.inventory) {
-              newState.inventory = {
-                items: new Map(),
-                capacity: 100  // Default capacity
-              };
-            }
-            return newState;
-          }
-        });
+        console.log('No saved game found, starting new game');
       }
     } catch (error) {
       console.error('Failed to load save:', error);
     }
+  }
+  
+  // Helper to convert Maps and Sets to serializable arrays
+  serializeState(state) {
+    const result = {};
+    
+    for (const key in state) {
+      const value = state[key];
+      
+      if (value instanceof Map) {
+        // Convert Map to array of entries
+        result[key] = {
+          __type: 'Map',
+          entries: Array.from(value.entries())
+        };
+      } else if (value instanceof Set) {
+        // Convert Set to array
+        result[key] = {
+          __type: 'Set',
+          values: Array.from(value)
+        };
+      } else if (typeof value === 'object' && value !== null) {
+        // Recursively handle nested objects
+        result[key] = this.serializeState(value);
+      } else {
+        // Handle primitive values
+        result[key] = value;
+      }
+    }
+    
+    return result;
+  }
+  
+  // Helper to convert serialized arrays back to Maps and Sets
+  deserializeState(state) {
+    const result = {};
+    
+    for (const key in state) {
+      const value = state[key];
+      
+      if (value && typeof value === 'object') {
+        if (value.__type === 'Map') {
+          // Convert array back to Map
+          result[key] = new Map(value.entries);
+        } else if (value.__type === 'Set') {
+          // Convert array back to Set
+          result[key] = new Set(value.values);
+        } else {
+          // Recursively handle nested objects
+          result[key] = this.deserializeState(value);
+        }
+      } else {
+        // Handle primitive values
+        result[key] = value;
+      }
+    }
+    
+    return result;
   }
 
   resetGame() {

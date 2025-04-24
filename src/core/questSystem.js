@@ -11,12 +11,12 @@ class QuestSystem {
         this.questProgress = new Map();
         this.progression = null;
         
-            // Initialiser immédiatement les données des quêtes
-    this.loadQuestData().then(() => {
-        console.log('Quest data loaded:', this.progression);
-        // Démarrer les quêtes automatiques après le chargement
-        this.checkAutoStartQuests();
-    });
+        // Initialiser immédiatement les données des quêtes
+        this.loadQuestData().then(() => {
+            console.log('Quest data loaded:', this.progression);
+            // Démarrer les quêtes automatiques après le chargement
+            this.checkAutoStartQuests();
+        });
     }
 
     async loadQuestData() {
@@ -41,24 +41,33 @@ class QuestSystem {
 
     canStartQuest(questId) {
         const quest = this.progression?.quests[questId];
-        if (!quest) return false;
-
-        // Vérifier si la quête n'est pas déjà active ou complétée
-        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+        if (!quest) {
+            console.log(`Quest ${questId} not found in progression data`);
             return false;
         }
 
-        const conditions = quest.unlockConditions || { minLevel: 1, requiredQuests: [] };
+        // Vérifier si la quête n'est pas déjà active ou complétée
+        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+            console.log(`Quest ${questId} is already active or completed`);
+            return false;
+        }
 
-        // Vérifier le niveau minimum
-        if (character.level < conditions.minLevel) {
+        // Pas de conditions de déblocage spécifiées, la quête peut démarrer
+        if (!quest.unlockConditions) {
+            return true;
+        }
+
+        // Vérifier le niveau minimum si spécifié
+        if (quest.unlockConditions.minLevel && character.level < quest.unlockConditions.minLevel) {
+            console.log(`Character level ${character.level} too low for quest ${questId}, needs ${quest.unlockConditions.minLevel}`);
             return false;
         }
 
         // Vérifier les quêtes requises
-        if (conditions.requiredQuests) {
-            for (const requiredQuest of conditions.requiredQuests) {
+        if (quest.unlockConditions.requiredQuests && quest.unlockConditions.requiredQuests.length > 0) {
+            for (const requiredQuest of quest.unlockConditions.requiredQuests) {
                 if (!this.isQuestCompleted(requiredQuest)) {
+                    console.log(`Required quest ${requiredQuest} not completed for ${questId}`);
                     return false;
                 }
             }
@@ -74,20 +83,27 @@ class QuestSystem {
         }
 
         const quest = this.progression.quests[questId];
-        if (!quest || this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+        if (!quest) {
+            console.error(`Quest ${questId} not found in progression data`);
+            return false;
+        }
+        
+        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+            console.log(`Quest ${questId} is already active or completed`);
             return false;
         }
 
+        // Initialize proper structure for quest progress
         this.activeQuests.set(questId, quest);
         this.questProgress.set(questId, {
-            monstersKilled: 0,
-            items: {}
+            monstersKilled: {}, // Object to track different monster types
+            items: {}          // Object to track different item types
         });
 
         combatUI.addQuestLog(`Nouvelle quête : ${quest.title}`);
+        console.log(`Started quest: ${questId} - ${quest.title}`);
         return true;
     }
-
 
     updateQuestDisplay() {
         const questsContainer = document.getElementById('active-quests');
@@ -316,9 +332,16 @@ class QuestSystem {
         console.log('Checking auto-start quests');
         Object.entries(this.progression.quests)
             .filter(([id, quest]) => {
+                // Should auto-start if:
+                // 1. It has autoStart: true
+                // 2. It's not already active
+                // 3. It's not already completed
+                // 4. It meets all unlock conditions (canStartQuest checks this)
                 const shouldStart = quest.autoStart && 
-                                  !this.activeQuests.has(id) && 
-                                  !this.completedQuests.has(id);
+                                   !this.activeQuests.has(id) && 
+                                   !this.completedQuests.has(id) &&
+                                   this.canStartQuest(id);
+                                   
                 console.log(`Quest ${id} should auto-start:`, shouldStart);
                 return shouldStart;
             })
@@ -338,6 +361,14 @@ class QuestSystem {
                 break;
             // Ajouter d'autres types de déblocages selon les besoins
         }
+    }
+    
+    // Method to manually trigger quest check (useful for debugging)
+    triggerQuestCheck() {
+        console.log("Manually triggering quest check");
+        console.log("Active quests:", Array.from(this.activeQuests.keys()));
+        console.log("Completed quests:", Array.from(this.completedQuests));
+        this.checkAutoStartQuests();
     }
 }
 
