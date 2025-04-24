@@ -3,7 +3,7 @@
     {
       "id": "goblin_ear",
       "defaultName": "Goblin Ear",
-      "image": "images/enemies/tooth.png",
+      "image": "images/resources/goblin_ear.png",
       "rarity": "common",
       "value": 5
     },
@@ -17,14 +17,14 @@
     {
       "id": "dragon_scale",
       "defaultName": "Dragon Scale",
-      "image": "images/enemies/tooth.png",
+      "image": "images/resources/dragon_scale.png",
       "rarity": "rare",
       "value": 100
     },
     {
       "id": "dragon_heart",
       "defaultName": "Dragon Heart",
-      "image": "images/enemies/tooth.png",
+      "image": "images/resources/dragon_heart.png",
       "rarity": "epic",
       "value": 500
     }

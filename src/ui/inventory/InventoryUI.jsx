@@ -7,7 +7,12 @@ export class InventoryUI {
         this.currentPage = 1;
         this.itemsPerPage = 10;
         this.rowSize = 5;
+        this.resourceData = {
+            monster: null,
+            profession: null
+        };
         this.initializeElements();
+        this.loadResourceData();
         this.setupStoreSubscriptions();
     }
 
@@ -29,6 +34,35 @@ export class InventoryUI {
             this.elements.grid.style.gridTemplateColumns = `repeat(${this.rowSize}, 1fr)`;
             this.elements.grid.style.gap = '10px';
             this.elements.container.appendChild(this.elements.grid);
+        }
+    }
+
+    async loadResourceData() {
+        try {
+            // Load monster resources data
+            const monsterResponse = await fetch('/data/monsterResources.json');
+            const monsterData = await monsterResponse.json();
+            this.resourceData.monster = monsterData.resources.reduce((acc, resource) => {
+                acc[resource.id] = resource;
+                return acc;
+            }, {});
+
+            // Load profession resources data
+            const professionResponse = await fetch('/data/professionResources.json');
+            const professionData = await professionResponse.json();
+            
+            // Flatten profession resources into a single object
+            this.resourceData.profession = {};
+            for (const profession in professionData) {
+                professionData[profession].forEach(resource => {
+                    this.resourceData.profession[resource.id] = resource;
+                });
+            }
+
+            // Update display after data is loaded
+            this.updateDisplay();
+        } catch (error) {
+            console.error('Error loading resource data:', error);
         }
     }
 
@@ -125,15 +159,39 @@ export class InventoryUI {
     }
 
     getItemData(itemId) {
-        const state = gameStore.getState();
-        // Logic to retrieve item data (image, rarity, etc.)
-        // For now, return default values
-        const image = itemId.includes('ore') ? '/images/resources/minerai.png' : 
-                     itemId.includes('tooth') ? '/images/enemies/tooth.png' : 
-                     '/api/placeholder/64/64';
-                     
+        // Check if resource data has been loaded
+        if (!this.resourceData.monster && !this.resourceData.profession) {
+            return {
+                image: '/api/placeholder/64/64',
+                name: this.getItemName(itemId),
+                rarity: 'common'
+            };
+        }
+
+        // Check monster resources
+        if (this.resourceData.monster && this.resourceData.monster[itemId]) {
+            const resource = this.resourceData.monster[itemId];
+            return {
+                image: resource.image,
+                name: resource.defaultName,
+                rarity: resource.rarity || 'common'
+            };
+        }
+        
+        // Check profession resources
+        if (this.resourceData.profession && this.resourceData.profession[itemId]) {
+            const resource = this.resourceData.profession[itemId];
+            return {
+                image: resource.image,
+                name: resource.defaultName,
+                rarity: 'common',
+                tier: resource.tier
+            };
+        }
+
+        // Fallback for resources not found
         return {
-            image: image,
+            image: '/api/placeholder/64/64',
             name: this.getItemName(itemId),
             rarity: 'common'
         };
