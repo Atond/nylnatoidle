@@ -2,6 +2,7 @@ import { gameStore } from '../store/state/GameStore';
 import * as combatActions from '../store/actions/combat';
 import * as characterActions from '../store/actions/character';
 import { combatSelectors } from '../store/actions/combat';
+import { questSystem } from './questSystem.js'; // Import the quest system
 
 class CombatSystem {
   constructor() {
@@ -76,9 +77,22 @@ class CombatSystem {
   }
   
   handleVictory() {
+    const state = gameStore.getState();
+    const monster = combatSelectors.getCurrentMonster(state);
+    
     gameStore.dispatch(combatActions.endCombat(true));
     // Ajouter l'expérience et le butin
     this.grantRewards();
+    
+    // Update quest progress for the killed monster
+    if (monster && monster.id) {
+      const currentZone = state.combat.zones.currentZone;
+      const zoneId = currentZone?.id || '';
+      questSystem.updateQuestProgress('all', 'monsterKill', { 
+        monsterId: monster.id, 
+        zoneId: zoneId
+      });
+    }
     
     // Démarrer un nouveau combat après un délai
     setTimeout(() => this.startCombat(), 1000);

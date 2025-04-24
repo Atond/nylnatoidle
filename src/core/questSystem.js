@@ -163,6 +163,14 @@ class QuestSystem {
     }
 
     updateQuestProgress(questId, type, data) {
+        // Special case for updating all active quests
+        if (questId === 'all') {
+            this.activeQuests.forEach((quest, id) => {
+                this.updateQuestProgress(id, type, data);
+            });
+            return;
+        }
+    
         if (!this.activeQuests.has(questId)) return;
     
         const quest = this.activeQuests.get(questId);
