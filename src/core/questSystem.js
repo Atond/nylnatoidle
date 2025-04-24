@@ -3,6 +3,7 @@ import { character } from '../character.js';
 import { professions } from '../main.js';
 import { globalInventory } from '../inventory.js';
 import { globalTranslationManager } from '../translations/translationManager.js';
+import { gameStore } from '../store/state/GameStore';
 
 class QuestSystem {
     constructor() {
@@ -14,6 +15,24 @@ class QuestSystem {
         // Initialiser immédiatement les données des quêtes
         this.loadQuestData().then(() => {
             console.log('Quest data loaded:', this.progression);
+            
+            // Initialize quest data in the game state
+            gameStore.dispatch({
+                type: 'quests/initialize',
+                paths: ['quests'],
+                reducer: (state) => {
+                    const newState = structuredClone(state);
+                    if (!newState.quests) {
+                        newState.quests = {
+                            activeQuests: this.activeQuests,
+                            completedQuests: this.completedQuests,
+                            questProgress: this.questProgress
+                        };
+                    }
+                    return newState;
+                }
+            });
+            
             // Démarrer les quêtes automatiques après le chargement
             this.checkAutoStartQuests();
         });
@@ -99,9 +118,32 @@ class QuestSystem {
             monstersKilled: {}, // Object to track different monster types
             items: {}          // Object to track different item types
         });
+        
+        // Sync with game store
+        gameStore.dispatch({
+            type: 'quests/startQuest',
+            paths: ['quests'],
+            reducer: (state) => {
+                const newState = structuredClone(state);
+                if (!newState.quests) {
+                    newState.quests = {
+                        activeQuests: new Map(),
+                        completedQuests: new Set(),
+                        questProgress: new Map()
+                    };
+                }
+                
+                // Update the state with the current quest data
+                newState.quests.activeQuests = new Map(this.activeQuests);
+                newState.quests.questProgress = new Map(this.questProgress);
+                
+                return newState;
+            }
+        });
 
         combatUI.addQuestLog(`Nouvelle quête : ${quest.title}`);
         console.log(`Started quest: ${questId} - ${quest.title}`);
+        this.updateQuestDisplay();
         return true;
     }
 
@@ -190,6 +232,8 @@ class QuestSystem {
             progress.monstersKilled = {};
         }
     
+        let updated = false;
+        
         switch (type) {
             case 'monsterKill':
                 const { monsterId, zoneId } = data;
@@ -198,8 +242,7 @@ class QuestSystem {
                     if (!requiredZone || requiredZone === zoneId) {
                         progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
                         console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}`);
-                        this.updateQuestDisplay();
-                        this.checkQuestCompletion(questId);
+                        updated = true;
                     }
                 }
                 break;
@@ -208,10 +251,39 @@ class QuestSystem {
                 const { itemId, quantity } = data;
                 if (quest.requirements.items) {
                     progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
-                    this.updateQuestDisplay();
-                    this.checkQuestCompletion(questId);
+                    updated = true;
                 }
                 break;
+        }
+        
+        if (updated) {
+            // Sync with game store
+            gameStore.dispatch({
+                type: 'quests/updateProgress',
+                paths: ['quests'],
+                reducer: (state) => {
+                    const newState = structuredClone(state);
+                    if (!newState.quests) {
+                        newState.quests = {
+                            activeQuests: new Map(),
+                            completedQuests: new Set(),
+                            questProgress: new Map()
+                        };
+                    }
+                    
+                    // Update the progress for this specific quest
+                    if (!newState.quests.questProgress) {
+                        newState.quests.questProgress = new Map();
+                    }
+                    
+                    newState.quests.questProgress.set(questId, structuredClone(progress));
+                    
+                    return newState;
+                }
+            });
+            
+            this.updateQuestDisplay();
+            this.checkQuestCompletion(questId);
         }
     }
 
@@ -303,6 +375,29 @@ class QuestSystem {
             this.activeQuests.delete(questId);
             this.completedQuests.add(questId);
             this.questProgress.delete(questId);
+            
+            // Sync with game store
+            gameStore.dispatch({
+                type: 'quests/completeQuest',
+                paths: ['quests'],
+                reducer: (state) => {
+                    const newState = structuredClone(state);
+                    if (!newState.quests) {
+                        newState.quests = {
+                            activeQuests: new Map(),
+                            completedQuests: new Set(),
+                            questProgress: new Map()
+                        };
+                    }
+                    
+                    // Update with current quest system state
+                    newState.quests.activeQuests = new Map(this.activeQuests);
+                    newState.quests.completedQuests = new Set(this.completedQuests);
+                    newState.quests.questProgress = new Map(this.questProgress);
+                    
+                    return newState;
+                }
+            });
     
             // Émettre l'événement de complétion
             const questCompletedEvent = new CustomEvent('questCompleted', {
