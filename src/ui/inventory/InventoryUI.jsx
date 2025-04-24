@@ -1,4 +1,4 @@
-import { gameStore } from '../../store/GameStore';
+import { gameStore } from '../../store/state/GameStore';
 import { inventorySelectors } from '../../store/actions/inventory';
 import { globalTranslationManager } from '../../translations/translationManager';
 
