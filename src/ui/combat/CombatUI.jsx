@@ -22,7 +22,8 @@ const CombatUI = () => {
     autoCombatEnabled: false,
     monstersDefeated: 0,
     currentZone: 'peaceful_meadow',
-    combatLog: []
+    combatLog: [],
+    activeQuests: [] // Add activeQuests to track quests
   });
 
   useEffect(() => {
@@ -89,6 +90,44 @@ const CombatUI = () => {
       observer.observe(logContainer, { childList: true, subtree: true });
       return () => observer.disconnect();
     }
+  }, []);
+
+  // Add effect to fetch active quests
+  useEffect(() => {
+    // Create a function to fetch quest data from the store and update state
+    const updateQuestsFromStore = () => {
+      const state = gameStore.getState();
+      if (state.quests && state.quests.activeQuests) {
+        const activeQuestsData = [];
+        
+        // Convert Map to array for React rendering
+        state.quests.activeQuests.forEach((quest, questId) => {
+          const progress = state.quests.questProgress.get(questId);
+          if (quest && progress) {
+            activeQuestsData.push({
+              id: questId,
+              title: quest.title,
+              description: quest.description,
+              progress: progress,
+              requirements: quest.requirements
+            });
+          }
+        });
+        
+        setCombatState(prev => ({
+          ...prev,
+          activeQuests: activeQuestsData
+        }));
+      }
+    };
+    
+    // Initial update
+    updateQuestsFromStore();
+    
+    // Subscribe to quest changes
+    const unsubscribe = gameStore.subscribe(['quests'], updateQuestsFromStore);
+    
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -291,6 +330,56 @@ const CombatUI = () => {
     }
   };
 
+  // Helper function to calculate quest progress percentage
+  const calculateQuestProgress = (quest) => {
+    if (!quest.requirements || !quest.progress) return 0;
+    
+    let totalRequired = 0;
+    let totalCompleted = 0;
+    
+    if (quest.requirements.monstersKilled) {
+      Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
+        if (monsterId !== 'zone') {
+          totalRequired += required;
+          totalCompleted += (quest.progress.monstersKilled?.[monsterId] || 0);
+        }
+      });
+    }
+    
+    if (quest.requirements.items) {
+      Object.entries(quest.requirements.items).forEach(([itemId, required]) => {
+        totalRequired += required;
+        totalCompleted += (quest.progress.items?.[itemId] || 0);
+      });
+    }
+    
+    return totalRequired > 0 ? (totalCompleted / totalRequired) * 100 : 0;
+  };
+  
+  // Helper function to get quest progress text
+  const getQuestProgressText = (quest) => {
+    if (!quest.requirements || !quest.progress) return '';
+    
+    if (quest.requirements.monstersKilled) {
+      const [monsterId, required] = Object.entries(quest.requirements.monstersKilled).find(([key]) => key !== 'zone') || [];
+      if (monsterId) {
+        const current = quest.progress.monstersKilled?.[monsterId] || 0;
+        return `${current}/${required}`;
+      }
+    }
+    
+    if (quest.requirements.items) {
+      const entries = Object.entries(quest.requirements.items);
+      if (entries.length > 0) {
+        const [itemId, required] = entries[0];
+        const current = quest.progress.items?.[itemId] || 0;
+        return `${current}/${required}`;
+      }
+    }
+    
+    return '';
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Zone de combat */}
@@ -405,6 +494,33 @@ const CombatUI = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      
+      {/* Quests section */}
+      <div className="md:col-span-2 quests-section">
+        <h2 className="font-bold mb-4">Quêtes Actives</h2>
+        <div id="active-quests" className="space-y-3">
+          {combatState.activeQuests.length > 0 ? (
+            combatState.activeQuests.map(quest => (
+              <div key={quest.id} className="quest-item">
+                <h3>{quest.title}</h3>
+                <p className="text-gray-600 text-sm mb-2">{quest.description}</p>
+                <div className="progress-bar">
+                  <div 
+                    style={{ width: `${calculateQuestProgress(quest)}%` }} 
+                    className="bg-indigo-500 transition-all duration-300">
+                  </div>
+                </div>
+                <div className="progress-text">
+                  <span>Progression</span>
+                  <span>{getQuestProgressText(quest)}</span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">Aucune quête active en ce moment.</p>
+          )}
         </div>
       </div>
       
