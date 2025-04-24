@@ -3,6 +3,7 @@ import { Camera, Play, Pause } from 'lucide-react';
 import { gameStore } from '../../store/state/GameStore';
 import { combatSelectors } from '../../store/actions/combat';
 import { monsterService } from '../../services/MonsterService';
+import CombatInventoryComponent from '../inventory/CombatInventoryComponent';
 import './combat.css';
 
 const CombatUI = () => {
@@ -405,6 +406,11 @@ const CombatUI = () => {
             ))}
           </div>
         </div>
+      </div>
+      
+      {/* Inventory section below combat area */}
+      <div className="md:col-span-2">
+        <CombatInventoryComponent />
       </div>
     </div>
   );

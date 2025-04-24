@@ -33,7 +33,8 @@ export class InventoryUI {
     }
 
     setupStoreSubscriptions() {
-        gameStore.subscribe('inventory', () => this.updateDisplay());
+        // Update the display whenever the inventory changes
+        gameStore.subscribe(['inventory'], () => this.updateDisplay());
     }
 
     updateDisplay() {
@@ -42,24 +43,50 @@ export class InventoryUI {
         const state = gameStore.getState();
         const allItems = inventorySelectors.getAllItems(state);
         const totalItems = allItems.length;
-        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        const totalPages = Math.max(1, Math.ceil(totalItems / this.itemsPerPage));
 
-        // Vider la grille
+        // Ensure current page is within valid range
+        if (this.currentPage > totalPages) {
+            this.currentPage = 1;
+        }
+
+        // Clear the grid
         this.elements.grid.innerHTML = '';
 
-        // Calculer les items pour la page actuelle
+        // Calculate items for the current page
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, totalItems);
         const itemsToDisplay = allItems.slice(startIndex, endIndex);
 
-        // Créer les slots d'inventaire
+        // Create inventory slots
         for (let i = 0; i < this.itemsPerPage; i++) {
-            const slot = this.createInventorySlot(itemsToDisplay[i]);
+            const slot = this.createInventorySlot(i < itemsToDisplay.length ? itemsToDisplay[i] : null);
             this.elements.grid.appendChild(slot);
         }
 
-        // Mettre à jour la pagination
+        // Update pagination
         this.updatePagination(totalPages);
+
+        // Setup tab event listeners
+        this.setupTabListeners();
+    }
+
+    setupTabListeners() {
+        if (this.elements.tabs?.profession && !this.professionTabInitialized) {
+            this.elements.tabs.profession.addEventListener('click', () => {
+                // Filter profession resources
+                this.updateDisplay();
+            });
+            this.professionTabInitialized = true;
+        }
+
+        if (this.elements.tabs?.combat && !this.combatTabInitialized) {
+            this.elements.tabs.combat.addEventListener('click', () => {
+                // Filter combat resources
+                this.updateDisplay();
+            });
+            this.combatTabInitialized = true;
+        }
     }
 
     createInventorySlot(itemData) {
@@ -71,12 +98,12 @@ export class InventoryUI {
             const item = this.getItemData(itemId);
             if (item) {
                 slot.innerHTML = `
-                    <img src="/${item.image}" alt="${item.name}" />
+                    <img src="${item.image}" alt="${item.name}" width="32" height="32" />
                     <div class="item-count">${quantity}</div>
                     <div class="tooltip">${this.getItemName(itemId)}</div>
                 `;
                 
-                // Ajouter les événements de survol
+                // Add hover events
                 slot.addEventListener('mouseenter', () => this.showItemTooltip(slot, item));
                 slot.addEventListener('mouseleave', () => this.hideItemTooltip(slot));
             }
@@ -88,21 +115,25 @@ export class InventoryUI {
     }
 
     getItemName(itemId) {
-        // Déterminer la catégorie de l'item
+        // Determine item category
         if (itemId.includes('ore') || itemId.includes('wood')) {
             const professionType = itemId.includes('ore') ? 'miner' : 'lumberjack';
             return globalTranslationManager.translate(`resources.professions.${professionType}.${itemId}`);
         } else {
-            return globalTranslationManager.translate(`resources.monsters.${itemId}`);
+            return globalTranslationManager.translate(`resources.monsters.${itemId}`) || itemId;
         }
     }
 
     getItemData(itemId) {
         const state = gameStore.getState();
-        // Logique pour récupérer les données de l'item (image, rareté, etc.)
-        // À implémenter selon votre structure de données
+        // Logic to retrieve item data (image, rarity, etc.)
+        // For now, return default values
+        const image = itemId.includes('ore') ? '/images/resources/minerai.png' : 
+                     itemId.includes('tooth') ? '/images/enemies/tooth.png' : 
+                     '/api/placeholder/64/64';
+                     
         return {
-            image: '/api/placeholder/64/64', // Image par défaut
+            image: image,
             name: this.getItemName(itemId),
             rarity: 'common'
         };
