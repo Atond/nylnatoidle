@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { inventoryUI } from './InventoryUI';
 import './inventory.css';
 
+
 const InventoryComponent = () => {
   const inventoryContainerRef = useRef(null);
   const paginationRef = useRef(null);
