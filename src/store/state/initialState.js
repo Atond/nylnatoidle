@@ -30,7 +30,7 @@ export const initialState = {
   },
 
   inventory: {
-    items: new Map(),
+    items: new Map(),  // Explicitly initialized as a Map
     capacity: 100
   },
 
