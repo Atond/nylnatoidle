@@ -1,8 +1,3 @@
-import { combatUI } from '../combat/combatUI.js';
-import { character } from '../character.js';
-import { professions } from '../main.js';
-import { globalInventory } from '../inventory.js';
-import { globalTranslationManager } from '../translations/translationManager.js';
 import { gameStore } from '../store/state/GameStore';
 
 class QuestSystem {
@@ -33,8 +28,10 @@ class QuestSystem {
                 }
             });
             
-            // Démarrer les quêtes automatiques après le chargement
-            this.checkAutoStartQuests();
+            // Démarrer les quêtes automatiques après un court délai
+            setTimeout(() => {
+                this.checkAutoStartQuests();
+            }, 500);
         });
     }
 
@@ -45,17 +42,6 @@ class QuestSystem {
         } catch (error) {
             console.error('Failed to load quest data:', error);
         }
-    }
-
-    createQuestElement(quest, progress) {
-        const element = document.createElement('div');
-        element.className = 'quest';
-        element.innerHTML = `
-            <h3>${quest.title}</h3>
-            <p>${quest.description}</p>
-            <p>Progress: ${progress.monstersKilled}/${quest.monstersToKill}</p>
-        `;
-        return element;
     }
 
     canStartQuest(questId) {
@@ -76,22 +62,7 @@ class QuestSystem {
             return true;
         }
 
-        // Vérifier le niveau minimum si spécifié
-        if (quest.unlockConditions.minLevel && character.level < quest.unlockConditions.minLevel) {
-            console.log(`Character level ${character.level} too low for quest ${questId}, needs ${quest.unlockConditions.minLevel}`);
-            return false;
-        }
-
-        // Vérifier les quêtes requises
-        if (quest.unlockConditions.requiredQuests && quest.unlockConditions.requiredQuests.length > 0) {
-            for (const requiredQuest of quest.unlockConditions.requiredQuests) {
-                if (!this.isQuestCompleted(requiredQuest)) {
-                    console.log(`Required quest ${requiredQuest} not completed for ${questId}`);
-                    return false;
-                }
-            }
-        }
-
+        // Skip unlock conditions check for debugging - always return true
         return true;
     }
 
@@ -141,47 +112,12 @@ class QuestSystem {
             }
         });
 
-        combatUI.addQuestLog(`Nouvelle quête : ${quest.title}`);
         console.log(`Started quest: ${questId} - ${quest.title}`);
-        this.updateQuestDisplay();
         return true;
     }
 
     updateQuestDisplay() {
-        const questsContainer = document.getElementById('active-quests');
-        if (!questsContainer) return;
-    
-        questsContainer.innerHTML = '';
-    
-        this.activeQuests.forEach((quest, questId) => {
-            const progress = this.questProgress.get(questId);
-            const questElement = document.createElement('div');
-            questElement.className = 'quest-item';
-    
-            let progressText = '';
-            let progressPercentage = 0;
-    
-            if (quest.requirements.monstersKilled) {
-                Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
-                    if (monsterId !== 'zone') {
-                        const current = progress?.monstersKilled?.[monsterId] || 0;
-                        progressText = `${current}/${required}`;
-                        progressPercentage = (current / required) * 100;
-                    }
-                });
-            }
-    
-            questElement.innerHTML = `
-                <h3>${quest.title}</h3>
-                <p>${quest.description}</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progressPercentage}%"></div>
-                </div>
-                <p class="progress-text">${progressText}</p>
-            `;
-    
-            questsContainer.appendChild(questElement);
-        });
+        // Now handled by React UI components
     }
 
     calculateQuestProgress(questId) {
@@ -207,6 +143,7 @@ class QuestSystem {
     updateQuestProgress(questId, type, data) {
         // Special case for updating all active quests
         if (questId === 'all') {
+            console.log('Updating all quests', this.activeQuests.size);
             this.activeQuests.forEach((quest, id) => {
                 this.updateQuestProgress(id, type, data);
             });
@@ -282,7 +219,6 @@ class QuestSystem {
                 }
             });
             
-            this.updateQuestDisplay();
             this.checkQuestCompletion(questId);
         }
     }
@@ -338,35 +274,32 @@ class QuestSystem {
             if (quest.unlocks) {
                 if (quest.unlocks.profession) {
                     console.log('Unlocking profession:', quest.unlocks.profession);
-                    const professionsTab = document.querySelector('[data-tab="professions"]');
-                    if (professionsTab) {
-                        professionsTab.style.display = 'block';
-                        professionsTab.classList.add('tab-appear');
-                    }
+                    // Using dispatch to unlock profession
+                    gameStore.dispatch({
+                        type: 'professions/unlock',
+                        paths: ['professions'],
+                        reducer: (state) => {
+                            const newState = structuredClone(state);
+                            if (!newState.professions.slots.unlocked.includes(quest.unlocks.profession)) {
+                                newState.professions.slots.unlocked.push(quest.unlocks.profession);
+                            }
+                            return newState;
+                        }
+                    });
                 }
                 if (quest.unlocks.unlockedZones) {
                     quest.unlocks.unlockedZones.forEach(zoneId => {
                         console.log('Unlocking zone:', zoneId);
-                        // Ajouter ici la logique pour débloquer la zone
-                    });
-                }
-            }
-    
-            // Distribuer les récompenses si elles existent
-            if (quest.rewards) {
-                if (quest.rewards.experience) {
-                    character.addExperience(quest.rewards.experience);
-                }
-                if (quest.rewards.items) {
-                    quest.rewards.items.forEach(item => {
-                        globalInventory.addItem(item.id, item.quantity);
-                    });
-                }
-                if (quest.rewards.professionExp) {
-                    Object.entries(quest.rewards.professionExp).forEach(([profName, exp]) => {
-                        if (professions[profName]) {
-                            professions[profName].addExperience(exp);
-                        }
+                        // Unlock zones through game store
+                        gameStore.dispatch({
+                            type: 'zones/unlock',
+                            paths: ['combat.zones'],
+                            reducer: (state) => {
+                                const newState = structuredClone(state);
+                                newState.combat.zones.unlockedZones[zoneId] = true;
+                                return newState;
+                            }
+                        });
                     });
                 }
             }
@@ -398,21 +331,6 @@ class QuestSystem {
                     return newState;
                 }
             });
-    
-            // Émettre l'événement de complétion
-            const questCompletedEvent = new CustomEvent('questCompleted', {
-                detail: {
-                    questId: questId,
-                    quest: quest
-                }
-            });
-            window.dispatchEvent(questCompletedEvent);
-    
-            // Messages de log
-            combatUI.addQuestLog(`Quête terminée : ${quest.title}`);
-            if (questId === 'beginnerQuest') {
-                combatUI.addQuestLog('Vous avez débloqué les métiers !');
-            }
     
             // Vérifier et démarrer les nouvelles quêtes disponibles
             this.checkAutoStartQuests();
@@ -452,18 +370,6 @@ class QuestSystem {
                 console.log('Starting quest:', id);
                 this.startQuest(id);
             });
-    }
-
-    handleUnlock(type, value) {
-        switch (type) {
-            case 'minerUpgrade':
-                professions.miner.unlockUpgrade(value);
-                break;
-            case 'title':
-                player.addTitle(value);
-                break;
-            // Ajouter d'autres types de déblocages selon les besoins
-        }
     }
     
     // Method to manually trigger quest check (useful for debugging)

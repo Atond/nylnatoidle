@@ -1,5 +1,7 @@
 import { gameStore } from '../store/state/GameStore';
-import { monsterService } from './MonsterService';
+import { MonsterService } from './MonsterService';
+import { questSystem } from '../core/questSystem';
+import { combatSystem } from '../core/CombatSystem';
 import { translationService } from './TranslationService';
 import { initialState } from '../store/state/initialState';
 
@@ -12,12 +14,25 @@ export class GameService {
   async initialize() {
     if (this.initialized) return;
 
+    console.log("Initializing game service");
+
     try {
+      // Initialize the monster service
+      const monsterService = new MonsterService();
+      await monsterService.initialize();
+
       // Initialiser tous les services nécessaires
       await Promise.all([
-        monsterService.initialize(),
         translationService.initialize()
       ]);
+
+      // Force-check quests to make sure they're properly initialized
+      setTimeout(() => {
+        if (questSystem) {
+          console.log("Manually triggering quest system check");
+          questSystem.triggerQuestCheck();
+        }
+      }, 1000);
 
       // Charger la sauvegarde
       this.loadSave();
