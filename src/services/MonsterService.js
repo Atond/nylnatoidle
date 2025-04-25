@@ -31,51 +31,102 @@ export class MonsterService {
     return this.monsters.monsters.find(m => m.id === monsterId);
   }
 
-  generateMonsterForZone(zoneId) {
-    const zoneMonsters = this.getZoneMonsters(zoneId);
-    if (!zoneMonsters.length) return null;
-
-    // Sélection basée sur le spawnRate
-    const totalSpawnRate = zoneMonsters.reduce((sum, m) => sum + m.spawnRate, 0);
-    let random = Math.random() * totalSpawnRate;
-    let selectedMonsterRef = null;
-
-    for (const monsterRef of zoneMonsters) {
-      random -= monsterRef.spawnRate;
-      if (random <= 0) {
-        selectedMonsterRef = monsterRef;
-        break;
+  getZoneData(zoneId) {
+    // Find zone data across all worlds
+    for (const world of this.worldMap.worlds) {
+      const zone = world.zones.find(z => z.id === zoneId);
+      if (zone) {
+        return zone;
       }
     }
+    return null;
+  }
 
-    if (!selectedMonsterRef) {
-      selectedMonsterRef = zoneMonsters[0];
+  generateMonsterForZone(zoneId) {
+    try {
+      // Find the zone data first
+      const zone = this.getZoneData(zoneId);
+      if (!zone) {
+        console.error(`Zone ${zoneId} not found`);
+        return null;
+      }
+      
+      // Select a monster from the available monsters in this zone
+      if (!zone.monsters || zone.monsters.length === 0) {
+        console.error(`No monsters available for zone ${zoneId}`);
+        return null;
+      }
+      
+      // Use spawn rates to select a random monster
+      const totalSpawnRate = zone.monsters.reduce((sum, monster) => sum + monster.spawnRate, 0);
+      let random = Math.random() * totalSpawnRate;
+      
+      let selectedMonster = null;
+      for (const monster of zone.monsters) {
+        random -= monster.spawnRate;
+        if (random <= 0) {
+          selectedMonster = monster;
+          break;
+        }
+      }
+      
+      if (!selectedMonster) {
+        console.error('Failed to select a monster');
+        return null;
+      }
+      
+      // Get the full monster data based on the ID
+      const monsterTemplate = this.getMonsterData(selectedMonster.id);
+      if (!monsterTemplate) {
+        console.error(`Monster data for ${selectedMonster.id} not found`);
+        return null;
+      }
+      
+      // Calculate level based on monster settings
+      const level = monsterTemplate.levelRange ? 
+          Math.floor(monsterTemplate.levelRange[0] + Math.random() * (monsterTemplate.levelRange[1] - monsterTemplate.levelRange[0])) : 
+          1;
+          
+      // Calculate scaled stats based on level and zone
+      const baseStats = monsterTemplate.baseStats || { hp: 10, attack: 1, defense: 0 };
+      const scaledStats = this.scaleMonsterStats(baseStats, level, zone.index || 0);
+      
+      // Create the final monster instance
+      const monsterInstance = {
+        ...monsterTemplate,
+        level: level,
+        maxHp: scaledStats.hp,
+        currentHp: scaledStats.hp,
+        stats: scaledStats
+      };
+      
+      // Log the monster ID for debugging
+      console.log(`Generated monster: ${monsterInstance.id}, defaultName: ${monsterInstance.defaultName}`);
+      
+      return monsterInstance;
+    } catch (error) {
+      console.error('Error generating monster:', error);
+      return null;
     }
+  }
 
-    const monsterData = this.getMonsterData(selectedMonsterRef.id);
-    if (!monsterData) return null;
-
-    // Calcul du niveau
-    const level = selectedMonsterRef.levelRange 
-      ? Math.floor(selectedMonsterRef.levelRange[0] + Math.random() * (selectedMonsterRef.levelRange[1] - selectedMonsterRef.levelRange[0] + 1))
-      : 1;
-
-    // Application du scaling
-    const scalingFactor = 1 + (level - 1) * 0.1;
-    const stats = {
-      ...monsterData.baseStats,
-      hp: Math.floor(monsterData.baseStats.hp * scalingFactor),
-      attack: Math.floor(monsterData.baseStats.attack * scalingFactor),
-      defense: Math.floor(monsterData.baseStats.defense * scalingFactor)
-    };
-
-    return {
-      ...monsterData,
-      level,
-      currentHp: stats.hp,
-      maxHp: stats.hp,
-      stats
-    };
+  scaleMonsterStats(baseStats, level, zoneIndex) {
+    // Basic scaling factors
+    const levelFactor = 1 + (level - 1) * 0.1; 
+    const zoneFactor = 1 + zoneIndex * 0.2;
+    
+    // Apply scaling to each stat
+    const scaledStats = {};
+    for (const [stat, value] of Object.entries(baseStats)) {
+      // HP gets more aggressive scaling than other stats
+      if (stat === 'hp') {
+        scaledStats[stat] = Math.floor(value * levelFactor * zoneFactor);
+      } else {
+        scaledStats[stat] = Math.floor(value * Math.sqrt(levelFactor * zoneFactor));
+      }
+    }
+    
+    return scaledStats;
   }
 
   // Méthodes pour calculer les récompenses

@@ -85,7 +85,7 @@ class CombatSystem {
     this.grantRewards();
     
     // Update quest progress for the killed monster
-    if (monster && monster.id) {
+    if (monster) {
       const currentZone = state.combat.zones.currentZone;
       let zoneId = '';
       
@@ -99,12 +99,15 @@ class CombatSystem {
         zoneId = 'peaceful_meadow';
       }
       
-      console.log(`Monster killed: ${monster.id} in zone: ${zoneId} - Updating quest progress`);
+      // Make sure we have the correct monster ID
+      const monsterId = monster.id || (monster.defaultName && monster.defaultName.toLowerCase());
+      
+      console.log(`Monster killed: ${monsterId} (name: ${monster.defaultName}) in zone: ${zoneId} - Updating quest progress`);
       
       // Force update through direct method call instead of using the proxy
       if (questSystem && typeof questSystem.updateQuestProgress === 'function') {
         questSystem.updateQuestProgress('all', 'monsterKill', { 
-          monsterId: monster.id, 
+          monsterId: monsterId, 
           zoneId: zoneId
         });
       } else {

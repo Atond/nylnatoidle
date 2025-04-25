@@ -218,21 +218,40 @@ class QuestSystem {
                     console.log(`Required monsters for quest ${questId}:`, requiredMonsterTypes);
                     console.log(`Current monster: ${monsterId}, zone matches: ${zoneMatches}`);
                     
+                    // Convert monster names for comparison (to handle format differences)
+                    const normalizedMonsterId = monsterId.toLowerCase();
+                    
+                    // Check each required monster type to see if it matches
+                    let monsterMatches = false;
+                    let matchedMonsterId = '';
+                    
+                    for (const reqMonsterId of requiredMonsterTypes) {
+                        const normalizedReqMonsterId = reqMonsterId.toLowerCase();
+                        
+                        // Check if the monster IDs match or if the monster name contains the required ID
+                        if (normalizedMonsterId === normalizedReqMonsterId || 
+                            normalizedMonsterId.includes(normalizedReqMonsterId)) {
+                            monsterMatches = true;
+                            matchedMonsterId = reqMonsterId;
+                            break;
+                        }
+                    }
+                    
                     // If the monster type is required and zone matches
-                    if (requiredMonsterTypes.includes(monsterId) && zoneMatches) {
+                    if (monsterMatches && zoneMatches) {
                         // Increment kill count for this monster type
-                        progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
-                        console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}/${quest.requirements.monstersKilled[monsterId]}`);
+                        progress.monstersKilled[matchedMonsterId] = (progress.monstersKilled[matchedMonsterId] || 0) + 1;
+                        console.log(`Quest progress for ${questId}: ${matchedMonsterId} killed in ${zoneId}, count: ${progress.monstersKilled[matchedMonsterId]}/${quest.requirements.monstersKilled[matchedMonsterId]}`);
                         updated = true;
                         
                         // Immediately add to combat log
-                        this.addToCombatLog(`Quête "${quest.title}": ${progress.monstersKilled[monsterId]}/${quest.requirements.monstersKilled[monsterId]} ${monsterId}s`);
+                        this.addToCombatLog(`Quête "${quest.title}": ${progress.monstersKilled[matchedMonsterId]}/${quest.requirements.monstersKilled[matchedMonsterId]} ${matchedMonsterId}`);
                     } else {
-                        console.log(`Monster ${monsterId} in zone ${zoneId} not required for quest ${questId}`);
+                        console.log(`Monster ${monsterId} in zone ${zoneId} not required for quest ${questId}. Monster match: ${monsterMatches}, zone match: ${zoneMatches}`);
                     }
                 }
                 break;
-    
+            
             case 'itemCollect':
                 const { itemId, quantity } = data;
                 if (quest.requirements && quest.requirements.items) {
@@ -245,7 +264,7 @@ class QuestSystem {
                         updated = true;
                         
                         // Immediately add to combat log
-                        this.addToCombatLog(`Quête "${quest.title}": ${progress.items[itemId]}/${quest.requirements.items[itemId]} ${itemId}s`);
+                        this.addToCombatLog(`Quête "${quest.title}": ${progress.items[itemId]}/${quest.requirements.items[itemId]} ${itemId}`);
                     }
                 }
                 break;
