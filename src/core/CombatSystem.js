@@ -94,6 +94,9 @@ class CombatSystem {
         zoneId = currentZone;
       } else if (currentZone && currentZone.id) {
         zoneId = currentZone.id;
+      } else {
+        // Default to peaceful_meadow if no zone is specified
+        zoneId = 'peaceful_meadow';
       }
       
       console.log(`Monster killed: ${monster.id} in zone: ${zoneId}`);

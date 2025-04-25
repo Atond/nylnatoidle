@@ -166,6 +166,7 @@ const CombatUI = () => {
     // Create a function to fetch quest data from the store and update state
     const updateQuestsFromStore = () => {
       const state = gameStore.getState();
+      
       if (state.quests && state.quests.activeQuests) {
         const activeQuestsData = [];
         
@@ -190,15 +191,26 @@ const CombatUI = () => {
           activeQuests: activeQuestsData
         }));
         
-        console.log('Active quests updated:', activeQuestsData);
+        console.log('Active quests updated:', activeQuestsData.length);
+      }
+      
+      // Also check for any combat logs to display
+      if (state.combat && state.combat.logs && state.combat.logs.length > 0) {
+        const newLogs = [...state.combat.logs];
+        state.combat.logs = []; // Clear logs after reading
+        
+        setCombatState(prev => ({
+          ...prev,
+          combatLog: [...prev.combatLog, ...newLogs]
+        }));
       }
     };
     
     // Initial update
     updateQuestsFromStore();
     
-    // Subscribe to quest changes
-    const unsubscribe = gameStore.subscribe(['quests'], updateQuestsFromStore);
+    // Subscribe to quest and combat changes
+    const unsubscribe = gameStore.subscribe(['quests', 'combat'], updateQuestsFromStore);
     
     return () => unsubscribe();
   }, []);

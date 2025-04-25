@@ -9,9 +9,9 @@ class QuestSystem {
         
         // Initialiser immédiatement les données des quêtes
         this.loadQuestData().then(() => {
-            console.log('Quest data loaded:', this.progression);
+            console.log('Quest data loaded successfully');
             
-            // Initialize quest data in the game state
+            // Initialize quest data in the game store
             gameStore.dispatch({
                 type: 'quests/initialize',
                 paths: ['quests'],
@@ -39,9 +39,11 @@ class QuestSystem {
         try {
             const response = await fetch('/data/gameProgression.json');
             this.progression = await response.json();
-            console.log('Quest data loaded successfully:', Object.keys(this.progression.quests));
+            console.log('Quest data loaded successfully, available quests:', Object.keys(this.progression.quests));
+            return this.progression;
         } catch (error) {
             console.error('Failed to load quest data:', error);
+            return null;
         }
     }
 
@@ -123,27 +125,27 @@ class QuestSystem {
         });
 
         console.log(`Started quest: ${questId} - ${quest.title}`);
+        
+        // Add to combat log
+        this.addToCombatLog(`Nouvelle quête : ${quest.title}`);
+        
         return true;
     }
 
-    calculateQuestProgress(questId) {
-        const quest = this.activeQuests.get(questId);
-        const progress = this.questProgress.get(questId);
-        if (!quest || !progress) return 0;
-
-        let totalRequired = 0;
-        let totalCompleted = 0;
-
-        if (quest.requirements.monstersKilled) {
-            Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
-                if (monsterId !== 'zone') {
-                    totalRequired += required;
-                    totalCompleted += (progress.monstersKilled?.[monsterId] || 0);
+    addToCombatLog(message) {
+        // Send message to combat log through store
+        gameStore.dispatch({
+            type: 'COMBAT_LOG_ADD',
+            paths: ['combat'],
+            reducer: (state) => {
+                const newState = structuredClone(state);
+                if (!newState.combat.logs) {
+                    newState.combat.logs = [];
                 }
-            });
-        }
-
-        return totalRequired > 0 ? (totalCompleted / totalRequired) * 100 : 0;
+                newState.combat.logs.push(message);
+                return newState;
+            }
+        });
     }
 
     updateQuestProgress(questId, type, data) {
@@ -183,7 +185,7 @@ class QuestSystem {
         switch (type) {
             case 'monsterKill':
                 const { monsterId, zoneId } = data;
-                if (quest.requirements.monstersKilled) {
+                if (quest.requirements && quest.requirements.monstersKilled) {
                     const requiredZone = quest.requirements.monstersKilled.zone;
                     const requiredMonsterId = Object.keys(quest.requirements.monstersKilled)
                         .find(key => key !== 'zone' && key === monsterId);
@@ -200,12 +202,13 @@ class QuestSystem {
     
             case 'itemCollect':
                 const { itemId, quantity } = data;
-                if (quest.requirements.items) {
+                if (quest.requirements && quest.requirements.items) {
                     const requiredItem = Object.keys(quest.requirements.items)
                         .find(key => key === itemId);
                         
                     if (requiredItem) {
                         progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
+                        console.log(`Quest progress for ${questId}: collected ${quantity} ${itemId}, total: ${progress.items[itemId]}`);
                         updated = true;
                     }
                 }
@@ -251,7 +254,7 @@ class QuestSystem {
         let completed = true;
     
         // Vérifier les monstres tués
-        if (quest.requirements.monstersKilled) {
+        if (quest.requirements && quest.requirements.monstersKilled) {
             Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
                 if (monsterId !== 'zone') {
                     const currentKills = progress.monstersKilled[monsterId] || 0;
@@ -264,7 +267,7 @@ class QuestSystem {
         }
     
         // Vérifier les objets collectés
-        if (quest.requirements.items) {
+        if (quest.requirements && quest.requirements.items) {
             Object.entries(quest.requirements.items).forEach(([itemId, required]) => {
                 const currentAmount = progress.items[itemId] || 0;
                 if (currentAmount < required) {
@@ -301,8 +304,10 @@ class QuestSystem {
                         paths: ['professions'],
                         reducer: (state) => {
                             const newState = structuredClone(state);
-                            if (!newState.professions.slots.unlocked.includes(quest.unlocks.profession)) {
-                                newState.professions.slots.unlocked.push(quest.unlocks.profession);
+                            if (newState.professions && newState.professions.slots) {
+                                if (!newState.professions.slots.unlocked.includes(quest.unlocks.profession)) {
+                                    newState.professions.slots.unlocked.push(quest.unlocks.profession);
+                                }
                             }
                             return newState;
                         }
@@ -325,7 +330,9 @@ class QuestSystem {
                             paths: ['combat.zones'],
                             reducer: (state) => {
                                 const newState = structuredClone(state);
-                                newState.combat.zones.unlockedZones[zoneId] = true;
+                                if (newState.combat && newState.combat.zones) {
+                                    newState.combat.zones.unlockedZones[zoneId] = true;
+                                }
                                 return newState;
                             }
                         });
@@ -338,19 +345,14 @@ class QuestSystem {
             this.completedQuests.add(questId);
             this.questProgress.delete(questId);
             
-            // Add quest completion message to combat log
-            gameStore.dispatch({
-                type: 'combat/addLog',
-                paths: ['combat.logs'],
-                reducer: (state) => {
-                    const newState = structuredClone(state);
-                    if (!newState.combat.logs) {
-                        newState.combat.logs = [];
-                    }
-                    newState.combat.logs.push(`Quête terminée : ${quest.title}`);
-                    return newState;
-                }
-            });
+            // Add quest completion message
+            const completionMessage = `Quête terminée : ${quest.title}`;
+            this.addToCombatLog(completionMessage);
+            
+            // Special messages for specific quests
+            if (questId === 'beginnerQuest') {
+                this.addToCombatLog('Vous avez débloqué les métiers !');
+            }
             
             // Sync with game store
             gameStore.dispatch({
@@ -396,7 +398,7 @@ class QuestSystem {
         }
         
         console.log('Checking auto-start quests');
-        Object.entries(this.progression.quests)
+        const autoStartable = Object.entries(this.progression.quests)
             .filter(([id, quest]) => {
                 // Should auto-start if:
                 // 1. It has autoStart: true
@@ -410,11 +412,13 @@ class QuestSystem {
                                    
                 console.log(`Quest ${id} should auto-start:`, shouldStart);
                 return shouldStart;
-            })
-            .forEach(([id, quest]) => {
-                console.log('Starting quest:', id);
-                this.startQuest(id);
             });
+            
+        console.log(`Found ${autoStartable.length} quests to auto-start`);
+        autoStartable.forEach(([id, quest]) => {
+            console.log(`Starting quest: ${id} - ${quest.title}`);
+            this.startQuest(id);
+        });
     }
     
     // Method to manually trigger quest check (useful for debugging)
