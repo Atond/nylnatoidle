@@ -26,16 +26,28 @@ export class GameService {
         translationService.initialize()
       ]);
 
+      // Force initialize quest system before loading save
+      if (questSystem) {
+        const questData = await questSystem.loadQuestData();
+        console.log("Quest data loaded:", questData ? "success" : "failed");
+      }
+
+      // Charger la sauvegarde
+      this.loadSave();
+
       // Force-check quests to make sure they're properly initialized
       setTimeout(() => {
         if (questSystem) {
           console.log("Manually triggering quest system check");
           questSystem.triggerQuestCheck();
+          
+          // Force start beginnerQuest if no quests are active
+          if (questSystem.activeQuests.size === 0) {
+            console.log("No active quests found, forcing beginnerQuest to start");
+            questSystem.startQuest("beginnerQuest");
+          }
         }
       }, 1000);
-
-      // Charger la sauvegarde
-      this.loadSave();
 
       // Activer l'auto-save
       if (this.saveInterval) clearInterval(this.saveInterval);

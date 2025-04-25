@@ -99,11 +99,23 @@ class CombatSystem {
         zoneId = 'peaceful_meadow';
       }
       
-      console.log(`Monster killed: ${monster.id} in zone: ${zoneId}`);
-      questSystem.updateQuestProgress('all', 'monsterKill', { 
-        monsterId: monster.id, 
-        zoneId: zoneId
-      });
+      console.log(`Monster killed: ${monster.id} in zone: ${zoneId} - Updating quest progress`);
+      
+      // Force update through direct method call instead of using the proxy
+      if (questSystem && typeof questSystem.updateQuestProgress === 'function') {
+        questSystem.updateQuestProgress('all', 'monsterKill', { 
+          monsterId: monster.id, 
+          zoneId: zoneId
+        });
+      } else {
+        console.error("Quest system or updateQuestProgress method not available");
+      }
+      
+      // Log active quests for debugging
+      if (questSystem && questSystem.activeQuests) {
+        console.log("Active quests after monster kill:", 
+          Array.from(questSystem.activeQuests.keys()).join(", "));
+      }
     }
     
     // Démarrer un nouveau combat après un délai

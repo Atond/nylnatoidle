@@ -174,6 +174,7 @@ const CombatUI = () => {
         if (state.quests.activeQuests instanceof Map) {
           state.quests.activeQuests.forEach((quest, questId) => {
             const progress = state.quests.questProgress?.get(questId);
+            console.log(`Quest ${questId} progress:`, progress);
             if (quest && progress) {
               activeQuestsData.push({
                 id: questId,
@@ -184,6 +185,8 @@ const CombatUI = () => {
               });
             }
           });
+        } else {
+          console.log('activeQuests is not a Map, it is:', typeof state.quests.activeQuests);
         }
         
         setCombatState(prev => ({
@@ -191,13 +194,24 @@ const CombatUI = () => {
           activeQuests: activeQuestsData
         }));
         
-        console.log('Active quests updated:', activeQuestsData.length);
+        console.log('Active quests updated:', activeQuestsData.length, activeQuestsData);
       }
       
       // Also check for any combat logs to display
       if (state.combat && state.combat.logs && state.combat.logs.length > 0) {
         const newLogs = [...state.combat.logs];
-        state.combat.logs = []; // Clear logs after reading
+        
+        // Clear logs after reading
+        gameStore.dispatch({
+          type: 'COMBAT_LOGS_CLEAR',
+          paths: ['combat'],
+          reducer: (state) => {
+            const newState = structuredClone(state);
+            if (!newState.combat) newState.combat = {};
+            newState.combat.logs = [];
+            return newState;
+          }
+        });
         
         setCombatState(prev => ({
           ...prev,
