@@ -202,14 +202,27 @@ class QuestSystem {
         switch (type) {
             case 'monsterKill':
                 const { monsterId, zoneId } = data;
+                console.log(`Processing monster kill: ${monsterId} in ${zoneId} for quest ${questId}`);
+                
                 if (quest.requirements && quest.requirements.monstersKilled) {
+                    // Get the required zone from quest
                     const requiredZone = quest.requirements.monstersKilled.zone;
-                    const requiredMonsterId = Object.keys(quest.requirements.monstersKilled)
-                        .find(key => key !== 'zone' && key === monsterId);
                     
-                    if (requiredMonsterId && (!requiredZone || requiredZone === zoneId)) {
+                    // Check if zone matches
+                    const zoneMatches = !requiredZone || requiredZone === zoneId;
+                    
+                    // Get all monster types required for this quest (excluding 'zone')
+                    const requiredMonsterTypes = Object.keys(quest.requirements.monstersKilled)
+                        .filter(key => key !== 'zone');
+                    
+                    console.log(`Required monsters for quest ${questId}:`, requiredMonsterTypes);
+                    console.log(`Current monster: ${monsterId}, zone matches: ${zoneMatches}`);
+                    
+                    // If the monster type is required and zone matches
+                    if (requiredMonsterTypes.includes(monsterId) && zoneMatches) {
+                        // Increment kill count for this monster type
                         progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
-                        console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}`);
+                        console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}/${quest.requirements.monstersKilled[monsterId]}`);
                         updated = true;
                         
                         // Immediately add to combat log

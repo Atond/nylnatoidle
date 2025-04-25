@@ -450,7 +450,8 @@ const CombatUI = () => {
       Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
         if (monsterId !== 'zone') {
           totalRequired += required;
-          totalCompleted += (quest.progress.monstersKilled?.[monsterId] || 0);
+          const kills = quest.progress.monstersKilled?.[monsterId] || 0;
+          totalCompleted += kills;
         }
       });
     }
@@ -470,8 +471,12 @@ const CombatUI = () => {
     if (!quest.requirements || !quest.progress) return '';
     
     if (quest.requirements.monstersKilled) {
-      const [monsterId, required] = Object.entries(quest.requirements.monstersKilled).find(([key]) => key !== 'zone') || [];
-      if (monsterId) {
+      // Find the first monster requirement (excluding 'zone')
+      const monsterEntry = Object.entries(quest.requirements.monstersKilled)
+        .find(([key]) => key !== 'zone');
+        
+      if (monsterEntry) {
+        const [monsterId, required] = monsterEntry;
         const current = quest.progress.monstersKilled?.[monsterId] || 0;
         return `${current}/${required}`;
       }
