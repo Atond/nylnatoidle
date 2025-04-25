@@ -87,7 +87,16 @@ class CombatSystem {
     // Update quest progress for the killed monster
     if (monster && monster.id) {
       const currentZone = state.combat.zones.currentZone;
-      const zoneId = currentZone?.id || '';
+      let zoneId = '';
+      
+      // Make sure we get the zone ID correctly
+      if (typeof currentZone === 'string') {
+        zoneId = currentZone;
+      } else if (currentZone && currentZone.id) {
+        zoneId = currentZone.id;
+      }
+      
+      console.log(`Monster killed: ${monster.id} in zone: ${zoneId}`);
       questSystem.updateQuestProgress('all', 'monsterKill', { 
         monsterId: monster.id, 
         zoneId: zoneId

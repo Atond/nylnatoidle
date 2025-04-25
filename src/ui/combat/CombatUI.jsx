@@ -170,23 +170,27 @@ const CombatUI = () => {
         const activeQuestsData = [];
         
         // Convert Map to array for React rendering
-        state.quests.activeQuests.forEach((quest, questId) => {
-          const progress = state.quests.questProgress.get(questId);
-          if (quest && progress) {
-            activeQuestsData.push({
-              id: questId,
-              title: quest.title,
-              description: quest.description,
-              progress: progress,
-              requirements: quest.requirements
-            });
-          }
-        });
+        if (state.quests.activeQuests instanceof Map) {
+          state.quests.activeQuests.forEach((quest, questId) => {
+            const progress = state.quests.questProgress?.get(questId);
+            if (quest && progress) {
+              activeQuestsData.push({
+                id: questId,
+                title: quest.title,
+                description: quest.description,
+                progress: progress,
+                requirements: quest.requirements
+              });
+            }
+          });
+        }
         
         setCombatState(prev => ({
           ...prev,
           activeQuests: activeQuestsData
         }));
+        
+        console.log('Active quests updated:', activeQuestsData);
       }
     };
     

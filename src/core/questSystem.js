@@ -39,6 +39,7 @@ class QuestSystem {
         try {
             const response = await fetch('/data/gameProgression.json');
             this.progression = await response.json();
+            console.log('Quest data loaded successfully:', Object.keys(this.progression.quests));
         } catch (error) {
             console.error('Failed to load quest data:', error);
         }
@@ -62,7 +63,16 @@ class QuestSystem {
             return true;
         }
 
-        // Skip unlock conditions check for debugging - always return true
+        // Vérifier les quêtes requises
+        if (quest.unlockConditions.requiredQuests && quest.unlockConditions.requiredQuests.length > 0) {
+            for (const requiredQuest of quest.unlockConditions.requiredQuests) {
+                if (!this.isQuestCompleted(requiredQuest)) {
+                    console.log(`Required quest ${requiredQuest} not completed for ${questId}`);
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -116,10 +126,6 @@ class QuestSystem {
         return true;
     }
 
-    updateQuestDisplay() {
-        // Now handled by React UI components
-    }
-
     calculateQuestProgress(questId) {
         const quest = this.activeQuests.get(questId);
         const progress = this.questProgress.get(questId);
@@ -143,14 +149,17 @@ class QuestSystem {
     updateQuestProgress(questId, type, data) {
         // Special case for updating all active quests
         if (questId === 'all') {
-            console.log('Updating all quests', this.activeQuests.size);
+            console.log('Updating all quests, active quests count:', this.activeQuests.size);
             this.activeQuests.forEach((quest, id) => {
                 this.updateQuestProgress(id, type, data);
             });
             return;
         }
     
-        if (!this.activeQuests.has(questId)) return;
+        if (!this.activeQuests.has(questId)) {
+            console.log(`Quest ${questId} not active, cannot update progress`);
+            return;
+        }
     
         const quest = this.activeQuests.get(questId);
         let progress = this.questProgress.get(questId);
@@ -176,10 +185,15 @@ class QuestSystem {
                 const { monsterId, zoneId } = data;
                 if (quest.requirements.monstersKilled) {
                     const requiredZone = quest.requirements.monstersKilled.zone;
-                    if (!requiredZone || requiredZone === zoneId) {
+                    const requiredMonsterId = Object.keys(quest.requirements.monstersKilled)
+                        .find(key => key !== 'zone' && key === monsterId);
+                    
+                    if (requiredMonsterId && (!requiredZone || requiredZone === zoneId)) {
                         progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
                         console.log(`Quest progress for ${questId}: ${monsterId} killed in ${zoneId}, count: ${progress.monstersKilled[monsterId]}`);
                         updated = true;
+                    } else {
+                        console.log(`Monster ${monsterId} in zone ${zoneId} not required for quest ${questId}`);
                     }
                 }
                 break;
@@ -187,8 +201,13 @@ class QuestSystem {
             case 'itemCollect':
                 const { itemId, quantity } = data;
                 if (quest.requirements.items) {
-                    progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
-                    updated = true;
+                    const requiredItem = Object.keys(quest.requirements.items)
+                        .find(key => key === itemId);
+                        
+                    if (requiredItem) {
+                        progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
+                        updated = true;
+                    }
                 }
                 break;
         }
@@ -236,6 +255,7 @@ class QuestSystem {
             Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
                 if (monsterId !== 'zone') {
                     const currentKills = progress.monstersKilled[monsterId] || 0;
+                    console.log(`Checking completion for ${questId}: ${monsterId} - ${currentKills}/${required}`);
                     if (currentKills < required) {
                         completed = false;
                     }
@@ -254,6 +274,7 @@ class QuestSystem {
         }
     
         if (completed) {
+            console.log(`Quest ${questId} is completed!`);
             this.completeQuest(questId);
         }
     }
@@ -286,7 +307,15 @@ class QuestSystem {
                             return newState;
                         }
                     });
+                    
+                    // Show professions tab
+                    const professionsTab = document.querySelector('[data-tab="professions"]');
+                    if (professionsTab) {
+                        professionsTab.style.display = 'block';
+                        professionsTab.classList.add('tab-appear');
+                    }
                 }
+                
                 if (quest.unlocks.unlockedZones) {
                     quest.unlocks.unlockedZones.forEach(zoneId => {
                         console.log('Unlocking zone:', zoneId);
@@ -308,6 +337,20 @@ class QuestSystem {
             this.activeQuests.delete(questId);
             this.completedQuests.add(questId);
             this.questProgress.delete(questId);
+            
+            // Add quest completion message to combat log
+            gameStore.dispatch({
+                type: 'combat/addLog',
+                paths: ['combat.logs'],
+                reducer: (state) => {
+                    const newState = structuredClone(state);
+                    if (!newState.combat.logs) {
+                        newState.combat.logs = [];
+                    }
+                    newState.combat.logs.push(`Quête terminée : ${quest.title}`);
+                    return newState;
+                }
+            });
             
             // Sync with game store
             gameStore.dispatch({
@@ -333,7 +376,9 @@ class QuestSystem {
             });
     
             // Vérifier et démarrer les nouvelles quêtes disponibles
-            this.checkAutoStartQuests();
+            setTimeout(() => {
+                this.checkAutoStartQuests();
+            }, 500);
     
         } catch (error) {
             console.error('Error completing quest:', questId, error);
@@ -374,10 +419,19 @@ class QuestSystem {
     
     // Method to manually trigger quest check (useful for debugging)
     triggerQuestCheck() {
-        console.log("Manually triggering quest check");
+        console.log("Manually triggering quest system check");
         console.log("Active quests:", Array.from(this.activeQuests.keys()));
         console.log("Completed quests:", Array.from(this.completedQuests));
         this.checkAutoStartQuests();
+        
+        // Log if beginnerQuest is active
+        if (this.activeQuests.has('beginnerQuest')) {
+            console.log('beginnerQuest is active');
+            const progress = this.questProgress.get('beginnerQuest');
+            console.log('beginnerQuest progress:', progress);
+        } else {
+            console.log('beginnerQuest is not active');
+        }
     }
 }
 
