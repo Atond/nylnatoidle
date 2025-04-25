@@ -281,6 +281,48 @@ class QuestSystem {
             console.log('beginnerQuest progress:', progress);
         }
     }
+    
+    // Method to manually trigger quest check
+    triggerQuestCheck() {
+        console.log('Manually triggering quest check...');
+        
+        // Make sure quest data is initialized
+        if (!this.progression || !this.progression.quests) {
+            console.log('Quest data not loaded yet, cannot trigger check');
+            return;
+        }
+        
+        // Start beginnerQuest if not already active or completed
+        if (this.progression.quests.beginnerQuest && 
+            !this.activeQuests.has('beginnerQuest') && 
+            !this.completedQuests.has('beginnerQuest')) {
+            
+            console.log('Starting beginnerQuest in triggerQuestCheck');
+            const beginnerQuest = this.progression.quests.beginnerQuest;
+            
+            // Set the quest as active
+            this.activeQuests.set('beginnerQuest', beginnerQuest);
+            
+            // Initialize progress tracking
+            this.questProgress.set('beginnerQuest', {
+                monstersKilled: {
+                    goblin: 0  // Initialize explicitly with goblin: 0
+                },
+                items: {}
+            });
+            
+            // Add to game log
+            this.addToGameLog(`Nouvelle quête: ${beginnerQuest.title}`);
+            
+            // Update the store with our quest state
+            this.syncQuestsToStore();
+        } else {
+            // Check for any quests that should auto-start
+            this.checkForAutoStartQuests();
+        }
+        
+        this.debugQuestState();
+    }
 }
 
 // Create and export the quest system
