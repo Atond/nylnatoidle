@@ -7,41 +7,77 @@ class QuestSystem {
         this.questProgress = new Map();
         this.progression = null;
         
-        // Initialiser immédiatement les données des quêtes
-        this.loadQuestData().then(() => {
-            console.log('Quest data loaded successfully');
-            
-            // Initialize quest data in the game store
-            this.initializeQuestStateInStore();
-        });
+        // Load quest data when the system is created
+        this.loadQuestData();
     }
 
     async loadQuestData() {
         try {
             const response = await fetch('/data/gameProgression.json');
             this.progression = await response.json();
-            console.log('Quest data loaded successfully, available quests:', Object.keys(this.progression.quests).join(", "));
-            return this.progression;
+            console.log('Quest data loaded successfully');
+            
+            // Initialize quest state and start beginnerQuest
+            this.initializeQuestSystem();
         } catch (error) {
             console.error('Failed to load quest data:', error);
-            return null;
         }
     }
-
-    initializeQuestStateInStore() {
+    
+    initializeQuestSystem() {
+        // Initialize beginnerQuest directly - this guarantees it's active
+        if (this.progression && this.progression.quests && this.progression.quests.beginnerQuest) {
+            const beginnerQuest = this.progression.quests.beginnerQuest;
+            
+            // Only start if not already active or completed
+            if (!this.activeQuests.has('beginnerQuest') && !this.completedQuests.has('beginnerQuest')) {
+                console.log('Starting beginnerQuest directly');
+                
+                // Set the quest as active
+                this.activeQuests.set('beginnerQuest', beginnerQuest);
+                
+                // Initialize progress tracking
+                this.questProgress.set('beginnerQuest', {
+                    monstersKilled: {
+                        goblin: 0  // Initialize explicitly with goblin: 0
+                    },
+                    items: {}
+                });
+                
+                // Add to game log
+                this.addToGameLog(`Nouvelle quête: ${beginnerQuest.title}`);
+            }
+        }
+        
+        // Update the store with our quest state
+        this.syncQuestsToStore();
+    }
+    
+    addToGameLog(message) {
+        // Add message to combat log
         gameStore.dispatch({
-            type: 'quests/initialize',
+            type: 'COMBAT_LOG_ADD',
+            paths: ['combat'],
+            reducer: (state) => {
+                const newState = structuredClone(state);
+                if (!newState.combat) newState.combat = {};
+                if (!newState.combat.logs) newState.combat.logs = [];
+                newState.combat.logs.push(message);
+                return newState;
+            }
+        });
+    }
+    
+    // Sync quest data to the game store
+    syncQuestsToStore() {
+        gameStore.dispatch({
+            type: 'quests/update',
             paths: ['quests'],
             reducer: (state) => {
                 const newState = structuredClone(state);
-                if (!newState.quests) {
-                    newState.quests = {
-                        activeQuests: new Map(),
-                        completedQuests: new Set(),
-                        questProgress: new Map()
-                    };
-                }
+                if (!newState.quests) newState.quests = {};
                 
+                // Store active quests, completedQuests and questProgress in the store
                 newState.quests.activeQuests = this.activeQuests;
                 newState.quests.completedQuests = this.completedQuests;
                 newState.quests.questProgress = this.questProgress;
@@ -50,414 +86,202 @@ class QuestSystem {
             }
         });
         
-        // Start checking for auto-start quests
-        setTimeout(() => {
-            this.checkAutoStartQuests();
-        }, 500);
+        console.log('Quest state updated in store:', 
+            Array.from(this.activeQuests.keys()),
+            'Progress:', 
+            this.questProgress.get('beginnerQuest')?.monstersKilled?.goblin || 0);
     }
-
-    canStartQuest(questId) {
-        const quest = this.progression?.quests[questId];
-        if (!quest) {
-            console.log(`Quest ${questId} not found in progression data`);
-            return false;
-        }
-
-        // Vérifier si la quête n'est pas déjà active ou complétée
-        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
-            console.log(`Quest ${questId} is already active or completed`);
-            return false;
-        }
-
-        // Pas de conditions de déblocage spécifiées, la quête peut démarrer
-        if (!quest.unlockConditions) {
-            return true;
-        }
-
-        // Vérifier les quêtes requises
-        if (quest.unlockConditions.requiredQuests && quest.unlockConditions.requiredQuests.length > 0) {
-            for (const requiredQuest of quest.unlockConditions.requiredQuests) {
-                if (!this.isQuestCompleted(requiredQuest)) {
-                    console.log(`Required quest ${requiredQuest} not completed for ${questId}`);
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    startQuest(questId) {
-        if (!this.progression || !this.progression.quests) {
-            console.error('Quest progression data not loaded.');
-            return false;
-        }
-
-        const quest = this.progression.quests[questId];
-        if (!quest) {
-            console.error(`Quest ${questId} not found in progression data`);
-            return false;
-        }
+    
+    // Called when a monster is killed
+    handleMonsterKill(monsterId, zoneId) {
+        console.log(`Quest system handling monster kill: ${monsterId} in zone ${zoneId}`);
         
-        if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
-            console.log(`Quest ${questId} is already active or completed`);
-            return false;
-        }
-
-        // Initialize proper structure for quest progress
-        this.activeQuests.set(questId, quest);
-        this.questProgress.set(questId, {
-            monstersKilled: {}, // Object to track different monster types
-            items: {}          // Object to track different item types
-        });
-        
-        console.log(`Started quest: ${questId} - ${quest.title}, active quests: ${this.activeQuests.size}`);
-        
-        // Update store with new quest data
-        this.syncQuestDataToStore();
-        
-        // Add to combat log
-        this.addToCombatLog(`Nouvelle quête : ${quest.title}`);
-        
-        return true;
-    }
-
-    syncQuestDataToStore() {
-        gameStore.dispatch({
-            type: 'quests/update',
-            paths: ['quests'],
-            reducer: (state) => {
-                const newState = structuredClone(state);
-                if (!newState.quests) {
-                    newState.quests = {};
+        // Process all active quests
+        this.activeQuests.forEach((quest, questId) => {
+            // Check if this quest tracks monster kills
+            if (quest.requirements && quest.requirements.monstersKilled) {
+                const requiredMonsters = quest.requirements.monstersKilled;
+                const requiredZone = requiredMonsters.zone;
+                
+                // Skip if zone doesn't match
+                if (requiredZone && requiredZone !== zoneId) {
+                    console.log(`Zone mismatch for quest ${questId}: Required ${requiredZone}, got ${zoneId}`);
+                    return;
                 }
                 
-                // Properly assign Map objects directly
-                newState.quests.activeQuests = this.activeQuests; 
-                newState.quests.completedQuests = this.completedQuests;
-                newState.quests.questProgress = this.questProgress;
-                
-                return newState;
-            }
-        });
-        
-        // Force sync active quests
-        const activeQuestArray = Array.from(this.activeQuests.keys());
-        console.log('Synced quests to store, active quests:', activeQuestArray.join(', '));
-    }
-
-    addToCombatLog(message) {
-        // Send message to combat log through store
-        gameStore.dispatch({
-            type: 'COMBAT_LOG_ADD',
-            paths: ['combat'],
-            reducer: (state) => {
-                const newState = structuredClone(state);
-                if (!newState.combat) {
-                    newState.combat = {};
-                }
-                if (!newState.combat.logs) {
-                    newState.combat.logs = [];
-                }
-                newState.combat.logs.push(message);
-                return newState;
-            }
-        });
-    }
-
-    updateQuestProgress(questId, type, data) {
-        // Special case for updating all active quests
-        if (questId === 'all') {
-            console.log('Updating all quests, active quests count:', this.activeQuests.size);
-            this.activeQuests.forEach((quest, id) => {
-                this.updateQuestProgress(id, type, data);
-            });
-            return;
-        }
-    
-        if (!this.activeQuests.has(questId)) {
-            console.log(`Quest ${questId} not active, cannot update progress`);
-            return;
-        }
-    
-        const quest = this.activeQuests.get(questId);
-        let progress = this.questProgress.get(questId);
-    
-        // Initialiser la progression si elle n'existe pas
-        if (!progress) {
-            progress = {
-                monstersKilled: {},
-                items: {}
-            };
-            this.questProgress.set(questId, progress);
-        }
-    
-        // S'assurer que monstersKilled existe
-        if (!progress.monstersKilled) {
-            progress.monstersKilled = {};
-        }
-    
-        let updated = false;
-        
-        switch (type) {
-            case 'monsterKill':
-                const { monsterId, zoneId } = data;
-                console.log(`Processing monster kill: ${monsterId} in ${zoneId} for quest ${questId}`);
-                
-                if (quest.requirements && quest.requirements.monstersKilled) {
-                    // Get the required zone from quest
-                    const requiredZone = quest.requirements.monstersKilled.zone;
-                    
-                    // Check if zone matches
-                    const zoneMatches = !requiredZone || requiredZone === zoneId;
-                    
-                    // Get all monster types required for this quest (excluding 'zone')
-                    const requiredMonsterTypes = Object.keys(quest.requirements.monstersKilled)
-                        .filter(key => key !== 'zone');
-                    
-                    console.log(`Required monsters for quest ${questId}:`, requiredMonsterTypes);
-                    console.log(`Current monster: ${monsterId}, zone matches: ${zoneMatches}`);
-                    
-                    // Convert monster names for comparison (to handle format differences)
-                    const normalizedMonsterId = monsterId.toLowerCase();
-                    
-                    // Check each required monster type to see if it matches
-                    let monsterMatches = false;
-                    let matchedMonsterId = '';
-                    
-                    for (const reqMonsterId of requiredMonsterTypes) {
-                        const normalizedReqMonsterId = reqMonsterId.toLowerCase();
+                // Check if this monster type counts for the quest
+                Object.keys(requiredMonsters).forEach(requiredMonsterId => {
+                    if (requiredMonsterId !== 'zone' && requiredMonsterId === monsterId) {
+                        // This monster counts! Update progress
+                        const progress = this.questProgress.get(questId);
                         
-                        // Check if the monster IDs match or if the monster name contains the required ID
-                        if (normalizedMonsterId === normalizedReqMonsterId || 
-                            normalizedMonsterId.includes(normalizedReqMonsterId)) {
-                            monsterMatches = true;
-                            matchedMonsterId = reqMonsterId;
-                            break;
+                        if (!progress.monstersKilled) {
+                            progress.monstersKilled = {};
+                        }
+                        
+                        // Increment monster kill count
+                        progress.monstersKilled[monsterId] = (progress.monstersKilled[monsterId] || 0) + 1;
+                        
+                        const currentKills = progress.monstersKilled[monsterId];
+                        const requiredKills = requiredMonsters[monsterId];
+                        
+                        console.log(`Updated quest ${questId}: ${currentKills}/${requiredKills} ${monsterId}s killed`);
+                        
+                        // Add progress message to game log
+                        this.addToGameLog(`${quest.title}: ${currentKills}/${requiredKills} ${monsterId}s`);
+                        
+                        // Check if quest is complete
+                        if (currentKills >= requiredKills) {
+                            console.log(`Quest ${questId} requirements met!`);
+                            this.completeQuest(questId);
+                        } else {
+                            // Just update the store with new progress
+                            this.syncQuestsToStore();
                         }
                     }
-                    
-                    // If the monster type is required and zone matches
-                    if (monsterMatches && zoneMatches) {
-                        // Increment kill count for this monster type
-                        progress.monstersKilled[matchedMonsterId] = (progress.monstersKilled[matchedMonsterId] || 0) + 1;
-                        console.log(`Quest progress for ${questId}: ${matchedMonsterId} killed in ${zoneId}, count: ${progress.monstersKilled[matchedMonsterId]}/${quest.requirements.monstersKilled[matchedMonsterId]}`);
-                        updated = true;
-                        
-                        // Immediately add to combat log
-                        this.addToCombatLog(`Quête "${quest.title}": ${progress.monstersKilled[matchedMonsterId]}/${quest.requirements.monstersKilled[matchedMonsterId]} ${matchedMonsterId}`);
-                    } else {
-                        console.log(`Monster ${monsterId} in zone ${zoneId} not required for quest ${questId}. Monster match: ${monsterMatches}, zone match: ${zoneMatches}`);
-                    }
-                }
-                break;
-            
-            case 'itemCollect':
-                const { itemId, quantity } = data;
-                if (quest.requirements && quest.requirements.items) {
-                    const requiredItem = Object.keys(quest.requirements.items)
-                        .find(key => key === itemId);
-                        
-                    if (requiredItem) {
-                        progress.items[itemId] = (progress.items[itemId] || 0) + quantity;
-                        console.log(`Quest progress for ${questId}: collected ${quantity} ${itemId}, total: ${progress.items[itemId]}`);
-                        updated = true;
-                        
-                        // Immediately add to combat log
-                        this.addToCombatLog(`Quête "${quest.title}": ${progress.items[itemId]}/${quest.requirements.items[itemId]} ${itemId}`);
-                    }
-                }
-                break;
-        }
-        
-        if (updated) {
-            // Sync with game store
-            this.syncQuestDataToStore();
-            
-            // Check if the quest is complete
-            this.checkQuestCompletion(questId);
-        }
-    }
-
-    checkQuestCompletion(questId) {
-        const quest = this.activeQuests.get(questId);
-        const progress = this.questProgress.get(questId);
-    
-        if (!quest || !progress) return;
-    
-        let completed = true;
-    
-        // Vérifier les monstres tués
-        if (quest.requirements && quest.requirements.monstersKilled) {
-            Object.entries(quest.requirements.monstersKilled).forEach(([monsterId, required]) => {
-                if (monsterId !== 'zone') {
-                    const currentKills = progress.monstersKilled[monsterId] || 0;
-                    console.log(`Checking completion for ${questId}: ${monsterId} - ${currentKills}/${required}`);
-                    if (currentKills < required) {
-                        completed = false;
-                    }
-                }
-            });
-        }
-    
-        // Vérifier les objets collectés
-        if (quest.requirements && quest.requirements.items) {
-            Object.entries(quest.requirements.items).forEach(([itemId, required]) => {
-                const currentAmount = progress.items[itemId] || 0;
-                if (currentAmount < required) {
-                    completed = false;
-                }
-            });
-        }
-    
-        if (completed) {
-            console.log(`Quest ${questId} is completed!`);
-            this.completeQuest(questId);
-        }
-    }
-
-    completeQuest(questId) {
-        try {
-            const quest = this.activeQuests.get(questId);
-            if (!quest) {
-                console.error('Quest not found:', questId);
-                return;
+                });
             }
+        });
+    }
     
-            // Logs pour le débogage
-            console.log('Completing quest:', quest);
-            console.log('Quest unlocks:', quest.unlocks);
-    
-            // Gérer les déblocages avant les récompenses
-            if (quest.unlocks) {
-                if (quest.unlocks.profession) {
-                    console.log('Unlocking profession:', quest.unlocks.profession);
-                    // Using dispatch to unlock profession
+    // Complete a quest
+    completeQuest(questId) {
+        const quest = this.activeQuests.get(questId);
+        if (!quest) return;
+        
+        console.log(`Completing quest: ${questId}`);
+        
+        // Handle quest rewards/unlocks
+        if (quest.unlocks) {
+            // Handle profession unlock
+            if (quest.unlocks.profession) {
+                const profession = quest.unlocks.profession;
+                console.log(`Unlocking profession: ${profession}`);
+                
+                // Update professions in store
+                gameStore.dispatch({
+                    type: 'professions/unlock',
+                    paths: ['professions'],
+                    reducer: (state) => {
+                        const newState = structuredClone(state);
+                        if (!newState.professions) newState.professions = {};
+                        if (!newState.professions.slots) newState.professions.slots = {};
+                        if (!newState.professions.slots.unlocked) newState.professions.slots.unlocked = [];
+                        
+                        if (!newState.professions.slots.unlocked.includes(profession)) {
+                            newState.professions.slots.unlocked.push(profession);
+                        }
+                        
+                        return newState;
+                    }
+                });
+                
+                // Show professions tab if it exists
+                const profTab = document.querySelector('[data-tab="professions"]');
+                if (profTab) profTab.style.display = 'block';
+            }
+            
+            // Handle zone unlocks
+            if (quest.unlocks.unlockedZones) {
+                quest.unlocks.unlockedZones.forEach(zoneId => {
+                    console.log(`Unlocking zone: ${zoneId}`);
+                    
                     gameStore.dispatch({
-                        type: 'professions/unlock',
-                        paths: ['professions'],
+                        type: 'zones/unlock',
+                        paths: ['combat.zones'],
                         reducer: (state) => {
                             const newState = structuredClone(state);
-                            if (newState.professions && newState.professions.slots) {
-                                if (!newState.professions.slots.unlocked.includes(quest.unlocks.profession)) {
-                                    newState.professions.slots.unlocked.push(quest.unlocks.profession);
-                                }
-                            }
+                            if (!newState.combat) newState.combat = {};
+                            if (!newState.combat.zones) newState.combat.zones = {};
+                            if (!newState.combat.zones.unlockedZones) newState.combat.zones.unlockedZones = {};
+                            
+                            newState.combat.zones.unlockedZones[zoneId] = true;
                             return newState;
                         }
                     });
-                    
-                    // Show professions tab
-                    const professionsTab = document.querySelector('[data-tab="professions"]');
-                    if (professionsTab) {
-                        professionsTab.style.display = 'block';
-                        professionsTab.classList.add('tab-appear');
-                    }
-                    
-                    // Also enable professions tab
-                    const profBtn = document.querySelector('[data-tab-target="professions"]');
-                    if (profBtn) {
-                        profBtn.classList.remove('disabled');
-                        profBtn.removeAttribute('disabled');
+                });
+            }
+        }
+        
+        // Mark quest as completed and remove from active
+        this.completedQuests.add(questId);
+        this.activeQuests.delete(questId);
+        this.questProgress.delete(questId);
+        
+        // Add completion message
+        this.addToGameLog(`Quête terminée: ${quest.title}`);
+        
+        if (questId === 'beginnerQuest') {
+            this.addToGameLog('Vous avez débloqué le métier de mineur !');
+        }
+        
+        // Update store with quest state
+        this.syncQuestsToStore();
+        
+        // Start any new quests that should auto-start
+        this.checkForAutoStartQuests();
+    }
+    
+    // Check for quests that should auto-start
+    checkForAutoStartQuests() {
+        if (!this.progression || !this.progression.quests) return;
+        
+        Object.entries(this.progression.quests).forEach(([questId, quest]) => {
+            // Skip if already active or completed
+            if (this.activeQuests.has(questId) || this.completedQuests.has(questId)) {
+                return;
+            }
+            
+            // Check if quest should auto-start
+            if (quest.autoStart) {
+                // Check unlock conditions
+                let canStart = true;
+                
+                if (quest.unlockConditions && quest.unlockConditions.requiredQuests) {
+                    // Check if all required quests are completed
+                    for (const reqQuest of quest.unlockConditions.requiredQuests) {
+                        if (!this.completedQuests.has(reqQuest)) {
+                            canStart = false;
+                            break;
+                        }
                     }
                 }
                 
-                if (quest.unlocks.unlockedZones) {
-                    quest.unlocks.unlockedZones.forEach(zoneId => {
-                        console.log('Unlocking zone:', zoneId);
-                        // Unlock zones through game store
-                        gameStore.dispatch({
-                            type: 'zones/unlock',
-                            paths: ['combat.zones'],
-                            reducer: (state) => {
-                                const newState = structuredClone(state);
-                                if (newState.combat && newState.combat.zones) {
-                                    newState.combat.zones.unlockedZones[zoneId] = true;
-                                }
-                                return newState;
-                            }
-                        });
+                // Start quest if conditions are met
+                if (canStart) {
+                    console.log(`Auto-starting quest: ${questId}`);
+                    
+                    // Add quest to active quests
+                    this.activeQuests.set(questId, quest);
+                    
+                    // Initialize progress
+                    this.questProgress.set(questId, {
+                        monstersKilled: {},
+                        items: {}
                     });
+                    
+                    // Add message to log
+                    this.addToGameLog(`Nouvelle quête: ${quest.title}`);
                 }
             }
-    
-            // Mettre à jour l'état des quêtes
-            this.activeQuests.delete(questId);
-            this.completedQuests.add(questId);
-            this.questProgress.delete(questId);
-            
-            // Add quest completion message
-            const completionMessage = `Quête terminée : ${quest.title}`;
-            this.addToCombatLog(completionMessage);
-            
-            // Special messages for specific quests
-            if (questId === 'beginnerQuest') {
-                this.addToCombatLog('Vous avez débloqué les métiers !');
-            }
-            
-            // Sync with game store
-            this.syncQuestDataToStore();
-    
-            // Vérifier et démarrer les nouvelles quêtes disponibles
-            setTimeout(() => {
-                this.checkAutoStartQuests();
-            }, 500);
-    
-        } catch (error) {
-            console.error('Error completing quest:', questId, error);
-        }
-    }
-
-    isQuestCompleted(questId) {
-        return this.completedQuests.has(questId);
-    }
-
-    checkAutoStartQuests() {
-        if (!this.progression?.quests) {
-            console.log('No quest data available');
-            return;
-        }
-        
-        console.log('Checking auto-start quests');
-        const autoStartable = Object.entries(this.progression.quests)
-            .filter(([id, quest]) => {
-                // Should auto-start if:
-                // 1. It has autoStart: true
-                // 2. It's not already active
-                // 3. It's not already completed
-                // 4. It meets all unlock conditions (canStartQuest checks this)
-                const shouldStart = quest.autoStart && 
-                                   !this.activeQuests.has(id) && 
-                                   !this.completedQuests.has(id) &&
-                                   this.canStartQuest(id);
-                                   
-                console.log(`Quest ${id} should auto-start:`, shouldStart);
-                return shouldStart;
-            });
-            
-        console.log(`Found ${autoStartable.length} quests to auto-start`);
-        autoStartable.forEach(([id, quest]) => {
-            console.log(`Starting quest: ${id} - ${quest.title}`);
-            this.startQuest(id);
         });
+        
+        // Update store with new quests
+        this.syncQuestsToStore();
     }
     
-    // Method to manually trigger quest check (useful for debugging)
-    triggerQuestCheck() {
-        console.log("Manually triggering quest system check");
-        console.log("Active quests:", Array.from(this.activeQuests.keys()));
-        console.log("Completed quests:", Array.from(this.completedQuests));
+    // Debug method to check quest state
+    debugQuestState() {
+        console.log('--- Quest System Debug ---');
+        console.log('Active quests:', Array.from(this.activeQuests.keys()));
+        console.log('Completed quests:', Array.from(this.completedQuests));
         
-        if (this.activeQuests.size === 0) {
-            console.log("No active quests! Trying to start beginnerQuest...");
-            this.startQuest("beginnerQuest");
-        } else {
-            this.checkAutoStartQuests();
+        if (this.activeQuests.has('beginnerQuest')) {
+            const progress = this.questProgress.get('beginnerQuest');
+            console.log('beginnerQuest progress:', progress);
         }
-        
-        // Force sync to store
-        this.syncQuestDataToStore();
     }
 }
 
+// Create and export the quest system
 export const questSystem = new QuestSystem();

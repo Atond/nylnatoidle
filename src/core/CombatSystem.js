@@ -100,24 +100,13 @@ class CombatSystem {
       }
       
       // Make sure we have the correct monster ID
-      const monsterId = monster.id || (monster.defaultName && monster.defaultName.toLowerCase());
+      const monsterId = monster.id;
       
-      console.log(`Monster killed: ${monsterId} (name: ${monster.defaultName}) in zone: ${zoneId} - Updating quest progress`);
+      console.log(`Monster killed: ${monsterId} in zone: ${zoneId}`);
       
-      // Force update through direct method call instead of using the proxy
-      if (questSystem && typeof questSystem.updateQuestProgress === 'function') {
-        questSystem.updateQuestProgress('all', 'monsterKill', { 
-          monsterId: monsterId, 
-          zoneId: zoneId
-        });
-      } else {
-        console.error("Quest system or updateQuestProgress method not available");
-      }
-      
-      // Log active quests for debugging
-      if (questSystem && questSystem.activeQuests) {
-        console.log("Active quests after monster kill:", 
-          Array.from(questSystem.activeQuests.keys()).join(", "));
+      // Call the new handleMonsterKill method in questSystem
+      if (questSystem && typeof questSystem.handleMonsterKill === 'function') {
+        questSystem.handleMonsterKill(monsterId, zoneId);
       }
     }
     
